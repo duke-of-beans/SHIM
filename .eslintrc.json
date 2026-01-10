@@ -78,5 +78,14 @@
     // Enforce proper async patterns
     "no-async-promise-executor": "error",
     "no-promise-executor-return": "error"
-  }
+  },
+  "overrides": [
+    {
+      "files": ["**/*.test.ts"],
+      "rules": {
+        // Test setup code often requires sequential operations
+        "no-await-in-loop": "off"
+      }
+    }
+  ]
 }
