@@ -42,11 +42,11 @@ $recentCommits = git log -5 --format="- %h: %s (%cr)" 2>$null | Out-String
 
 # Check TypeScript status
 npx tsc --noEmit 2>&1 | Out-Null
-$tscStatus = if ($LASTEXITCODE -eq 0) { "✓ 0 errors" } else { "✗ Has errors" }
+$tscStatus = if ($LASTEXITCODE -eq 0) { "OK - 0 errors" } else { "ERROR - Has errors" }
 
 # Check test status
 npm test -- --passWithNoTests 2>&1 | Out-Null
-$testStatus = if ($LASTEXITCODE -eq 0) { "✓ Passing" } else { "✗ Failing" }
+$testStatus = if ($LASTEXITCODE -eq 0) { "OK - Passing" } else { "ERROR - Failing" }
 
 # Check coverage if available
 $coverageStatus = "Not available"
@@ -285,8 +285,8 @@ $(if ($activeFiles.Count -gt 0) {
 
 - **Total commits:** $commitCount
 - **Active files:** $($activeFiles.Count)
-- **Build health:** $(if($tscStatus -match "✓"){"Passing"}else{"Failing"})
-- **Test health:** $(if($testStatus -match "✓"){"Passing"}else{"Failing"})
+- **Build health:** $(if($tscStatus -match "OK"){"Passing"}else{"Failing"})
+- **Test health:** $(if($testStatus -match "OK"){"Passing"}else{"Failing"})
 - **Coverage:** $coverageStatus
 
 ---
