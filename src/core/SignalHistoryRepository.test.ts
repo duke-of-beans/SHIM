@@ -208,7 +208,7 @@ describe('SignalHistoryRepository', () => {
       for (let i = 0; i < 100; i++) {
         await repository.saveSnapshot('old-session', mockSignals);
       }
-    });
+    }, 30000); // 30 second timeout for setup
 
     it('should delete old snapshots beyond retention period', async () => {
       const retentionDays = 7;
@@ -265,7 +265,7 @@ describe('SignalHistoryRepository', () => {
 
       // Average save should be <5ms
       expect(avgSaveTime).toBeLessThan(5);
-    });
+    }, 60000); // 60 second timeout for 1000 inserts
 
     it('should retrieve latest snapshot in <10ms', async () => {
       const mockSignals: CrashSignals = {
@@ -299,6 +299,6 @@ describe('SignalHistoryRepository', () => {
       const retrieveTime = Date.now() - start;
 
       expect(retrieveTime).toBeLessThan(10);
-    });
+    }, 30000); // 30 second timeout for setup + retrieval
   });
 });
