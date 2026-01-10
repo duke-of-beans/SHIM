@@ -67,6 +67,16 @@
         "selector": "class",
         "format": ["PascalCase"]
       }
-    ]
+    ],
+
+    // LESSON LEARNED: Fail loudly, never silently
+    "no-empty": ["error", { "allowEmptyCatch": false }],
+    
+    // LESSON LEARNED: No unused variables (technical debt)
+    "no-unused-vars": "off", // Use TypeScript version instead
+    
+    // Enforce proper async patterns
+    "no-async-promise-executor": "error",
+    "no-promise-executor-return": "error"
   }
 }
