@@ -9,6 +9,9 @@
 import { encoding_for_model } from 'tiktoken';
 import type { CrashSignals, CrashRisk } from '../models/Checkpoint';
 
+// Re-export for convenience
+export type { CrashSignals, CrashRisk };
+
 interface RiskThresholds {
   warningZone: {
     contextWindowUsage: number;
