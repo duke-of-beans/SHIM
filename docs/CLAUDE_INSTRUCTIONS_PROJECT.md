@@ -74,13 +74,13 @@ What should we work on today?
 1. **RED Phase:** Write failing test first
 2. **GREEN Phase:** Write minimum code to pass
 3. **REFACTOR Phase:** Improve implementation
-4. **COMMIT:** After GREEN phase
+4. **COMMIT:** After GREEN phase (automated via Desktop Commander)
 
 **NEVER:**
 ❌ Write implementation before test
 ❌ Skip tests for "simple" code
 ❌ Write tests after implementation
-❌ Commit with failing tests
+❌ Commit with failing tests (automated workflow only runs after GREEN)
 ❌ Defer test writing
 
 **Test File Structure:**
@@ -333,7 +333,52 @@ Desktop Commander:search_files({
 
 ### Git Operations
 
-**Status:**
+**IMPORTANT: Claude CAN and SHOULD commit automatically using Desktop Commander.**
+
+**Automated Workflow (GREEN Phase Complete):**
+```powershell
+Desktop Commander:start_process({
+  command: "cd D:\\SHIM; git add -A; git commit -m \"feat: implement CheckpointManager
+
+Implements CheckpointManager - the decision engine for checkpointing.
+
+Features:
+- Multi-trigger detection
+- Priority-based triggering
+- Auto-checkpoint workflow
+
+Tests: 19/19 passing
+Performance: <10ms trigger, <150ms create\"",
+  timeout_ms: 10000
+})
+```
+
+**Then automatically update documentation:**
+```powershell
+# 1. Update CURRENT_STATUS.md
+Desktop Commander:edit_block({
+  file_path: "D:\\SHIM\\CURRENT_STATUS.md",
+  old_string: "Tests: 95/95 passing",
+  new_string: "Tests: 114/114 passing",
+  expected_replacements: 1
+})
+
+# 2. Commit documentation
+Desktop Commander:start_process({
+  command: "cd D:\\SHIM; git add CURRENT_STATUS.md; git commit -m \"docs: update status for component completion\"",
+  timeout_ms: 8000
+})
+```
+
+**Conventional Commit Format:**
+- `feat:` - New feature
+- `fix:` - Bug fix
+- `test:` - Test additions/changes
+- `refactor:` - Code refactoring
+- `docs:` - Documentation only
+- `perf:` - Performance improvement
+
+**Status Check:**
 ```powershell
 Desktop Commander:start_process({
   command: "cd D:\\SHIM; git status",
@@ -341,11 +386,11 @@ Desktop Commander:start_process({
 })
 ```
 
-**Commit:**
+**Commit History:**
 ```powershell
 Desktop Commander:start_process({
-  command: "cd D:\\SHIM; git add -A && git commit -m \"feat: description\"",
-  timeout_ms: 10000
+  command: "cd D:\\SHIM; git log --oneline -5",
+  timeout_ms: 5000
 })
 ```
 
