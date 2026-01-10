@@ -84,12 +84,13 @@ SHIM implementation follows a dependency-ordered approach where each phase enabl
 - [x] Design checkpoint schema (Day 8)
 - [x] Implement checkpoint serialization with gzip compression (Day 8)
 - [x] Create SQLite storage layer - CheckpointRepository (Day 8)
-- [ ] Build checkpoint trigger system
-- [ ] Implement auto-checkpoint logic
+- [x] Build checkpoint trigger system - CheckpointManager (Day 9)
+- [ ] Implement auto-checkpoint integration with live signals
+- [ ] E2E checkpoint workflow testing
 
-**Status:** 🚧 IN PROGRESS (Day 8)  
-**Test Coverage:** 100% (24/24 tests passing)  
-**Performance:** Save <100ms, Retrieve <50ms, Compression <100KB
+**Status:** 🚧 IN PROGRESS (Day 9)  
+**Test Coverage:** 100% (114/114 tests passing)  
+**Performance:** All benchmarks met
 
 **Components Delivered:**
 1. **CheckpointRepository** (600+ LOC, 24 tests)
@@ -102,13 +103,32 @@ SHIM implementation follows a dependency-ordered approach where each phase enabl
    - Composite sorting (timestamp + checkpoint_number)
    - WAL mode for concurrent access
 
+2. **CheckpointManager** (218 LOC, 19 tests)
+   - Multi-trigger detection (danger zone, warning zone, tool call interval, time interval)
+   - Priority-based triggering (danger > warning > intervals)
+   - Automatic checkpoint creation with full state capture
+   - Counter/timer resets after checkpointing
+   - Auto-checkpoint workflow API (single method call)
+   - Checkpoint statistics API
+   - Performance: Trigger checks <10ms, Creation <150ms
+
 **Key Implementation Details:**
+
+**CheckpointRepository:**
 - Serializes 6 state categories separately (conversation, task, file, tool, signals, preferences)
 - Each category compressed independently for optimal compression
 - Supports both explicit checkpoint numbers and auto-increment
 - UNIQUE constraint on (session_id, checkpoint_number)
 - Resume events stored separately with foreign key to checkpoints
 - Cleanup by retention period (configurable days)
+
+**CheckpointManager:**
+- Four trigger types: danger_zone (risk='danger'), warning_zone (risk='warning'), tool_call_interval (default 5 calls), time_interval (default 10 minutes)
+- Priority system ensures critical triggers override routine intervals
+- Integrates with SignalCollector for risk assessment
+- Full state capture includes conversation, task, file, tool states plus signals and preferences
+- Automatic counter/timer resets prevent duplicate triggering
+- Auto-checkpoint workflow combines trigger check + creation in single API call
 
 ### Week 5-6: Resume Protocol
 
