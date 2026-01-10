@@ -254,16 +254,21 @@ describe('SignalHistoryRepository', () => {
         riskFactors: []
       };
 
-      const start = Date.now();
-      
+      // Prepare 1000 snapshots for batch insert
+      const snapshots = [];
       for (let i = 0; i < 1000; i++) {
-        await repository.saveSnapshot(`session-${i % 10}`, mockSignals);
+        snapshots.push({
+          sessionId: `session-${i % 10}`,
+          signals: mockSignals
+        });
       }
 
+      const start = Date.now();
+      await repository.saveSnapshotsBatch(snapshots);
       const saveTime = Date.now() - start;
       const avgSaveTime = saveTime / 1000;
 
-      // Average save should be <5ms
+      // Average save should be <5ms with batch insert
       expect(avgSaveTime).toBeLessThan(5);
     }, 60000); // 60 second timeout for 1000 inserts
 

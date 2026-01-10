@@ -156,6 +156,89 @@ export class SignalHistoryRepository {
     });
   }
 
+  async saveSnapshotsBatch(snapshots: Array<{ sessionId: string; signals: CrashSignals }>): Promise<string[]> {
+    return new Promise((resolve, reject) => {
+      if (!this.db) {
+        reject(new Error('Database not initialized'));
+        return;
+      }
+
+      const ids: string[] = [];
+
+      this.db.serialize(() => {
+        // Start transaction for batch insert
+        this.db!.run('BEGIN TRANSACTION', (err) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+
+          // Process snapshots sequentially to avoid race conditions
+          const processNext = (index: number) => {
+            if (index >= snapshots.length) {
+              // All processed - commit transaction
+              this.db!.run('COMMIT', (err) => {
+                if (err) reject(err);
+                else resolve(ids);
+              });
+              return;
+            }
+
+            const { sessionId, signals } = snapshots[index];
+
+            // Get next snapshot number for this session
+            const nextNumberSQL = `
+              SELECT COALESCE(MAX(snapshot_number), 0) + 1 AS next_number
+              FROM signal_history
+              WHERE session_id = ?
+            `;
+
+            this.db!.get(nextNumberSQL, [sessionId], (err, row: any) => {
+              if (err) {
+                this.db!.run('ROLLBACK');
+                reject(err);
+                return;
+              }
+
+              const snapshotNumber = row?.next_number || 1;
+              const id = uuidv4();
+              const timestamp = new Date().toISOString();
+              ids[index] = id;
+
+              // Insert snapshot
+              const insertSQL = `
+                INSERT INTO signal_history (
+                  id, session_id, snapshot_number, timestamp, crash_risk, signals_json
+                ) VALUES (?, ?, ?, ?, ?, ?)
+              `;
+
+              this.db!.run(insertSQL, [
+                id,
+                sessionId,
+                snapshotNumber,
+                timestamp,
+                signals.crashRisk,
+                JSON.stringify(signals)
+              ], (err) => {
+                if (err) {
+                  this.db!.run('ROLLBACK');
+                  reject(err);
+                  return;
+                }
+
+                // Process next snapshot
+                processNext(index + 1);
+              });
+            });
+          };
+
+          // Start processing from index 0
+          processNext(0);
+        });
+      });
+    });
+  }
+
   async getSessionSnapshots(sessionId: string): Promise<SignalSnapshot[]> {
     const sql = `
       SELECT * FROM signal_history
