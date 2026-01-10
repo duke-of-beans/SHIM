@@ -244,8 +244,8 @@ describe('ResumeDetector', () => {
       });
       
       const detection = await resumeDetector.checkResume(sessionId);
-      expect(detection.confidence).toBeGreaterThan(0.7);
-      expect(detection.confidence).toBeLessThanOrEqual(0.9);
+      expect(detection.confidence).toBeGreaterThan(0.8); // Warning + recent = high confidence
+      expect(detection.confidence).toBeLessThan(1.0);
     });
 
     it('should have low confidence for ambiguous cases', async () => {

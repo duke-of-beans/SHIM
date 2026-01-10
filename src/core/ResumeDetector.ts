@@ -148,13 +148,13 @@ export class ResumeDetector {
     // Base confidence from interruption reason
     switch (reason) {
       case 'crash':
-        baseConfidence = checkpoint.signals.crashRisk === 'danger' ? 0.95 : 0.80;
+        baseConfidence = checkpoint.signals.crashRisk === 'danger' ? 0.95 : 0.85;
         break;
       case 'timeout':
-        baseConfidence = 0.6;
+        baseConfidence = 0.85;
         break;
       case 'manual_exit':
-        baseConfidence = 0.8;
+        baseConfidence = 0.9;
         break;
       case 'unknown':
         baseConfidence = 0.3;
