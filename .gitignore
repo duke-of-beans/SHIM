@@ -1,3 +1,6 @@
-﻿node_modules/
+node_modules/
 dist/
+coverage/
 .DS_Store
+test_tokens.js
+*.backup
