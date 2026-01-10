@@ -57,7 +57,7 @@ export interface ToolSession {
   id: string;
   purpose: string;
   startedAt: string;
-  state: Record<string, any>;
+  state: Record<string, unknown>;
 }
 
 export interface PendingOp {

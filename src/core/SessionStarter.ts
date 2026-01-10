@@ -7,7 +7,7 @@
 import { ResumeDetector } from './ResumeDetector';
 import { SessionRestorer, RestoredState } from './SessionRestorer';
 import { CheckpointRepository } from './CheckpointRepository';
-import { ResumeDetection } from '../models/Checkpoint';
+import { ResumeDetection, ResumePrompt } from '../models/Checkpoint';
 
 /**
  * Session start result
@@ -53,7 +53,7 @@ export class SessionStarter {
     }
     
     // Generate resume prompt
-    const resumePrompt = await this.resumeDetector.generateResumePrompt(
+    const resumePrompt = this.resumeDetector.generateResumePrompt(
       detection.lastCheckpoint
     );
     
@@ -105,7 +105,7 @@ export class SessionStarter {
   /**
    * Format resume prompt for user display
    */
-  private formatPromptForUser(prompt: any): string {
+  private formatPromptForUser(prompt: ResumePrompt): string {
     const sections = prompt.sections;
     
     return `
@@ -120,7 +120,7 @@ ${sections.progress}
 ${sections.context}
 
 **Next steps planned:**
-${sections.nextSteps}
+${sections.next}
 
 **Files you were editing:**
 ${sections.files}

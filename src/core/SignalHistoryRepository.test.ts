@@ -25,7 +25,7 @@ describe('SignalHistoryRepository', () => {
   });
 
   describe('Initialization', () => {
-    it('should create database file', async () => {
+    it('should create database file', () => {
       expect(fs.existsSync(testDbPath)).toBe(true);
     });
 

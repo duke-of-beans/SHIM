@@ -171,7 +171,7 @@ describe('Resume Protocol E2E', () => {
       });
 
       // Wait a bit
-      await new Promise(resolve => setTimeout(resolve, 10));
+      await new Promise(resolve => { setTimeout(resolve, 10); });
 
       // Second checkpoint - danger level (25% error rate)
       for (let i = 0; i < 100; i++) {

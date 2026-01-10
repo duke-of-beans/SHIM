@@ -10,7 +10,8 @@ import {
   ResumeDetection,
   ResumePrompt,
   InterruptionReason,
-  CrashRisk
+  TaskState,
+  ToolCallRecord
 } from '../models/Checkpoint';
 
 export class ResumeDetector {
@@ -48,19 +49,19 @@ export class ResumeDetector {
     // Calculate time since interruption
     const checkpointTime = new Date(lastCheckpoint.createdAt).getTime();
     const now = Date.now();
-    const timeSince = now - checkpointTime;
+    const _timeSince = now - checkpointTime;
     
     // Classify interruption reason
-    const reason = this.classifyInterruption(lastCheckpoint, timeSince);
+    const reason = this.classifyInterruption(lastCheckpoint, _timeSince);
     
     // Calculate confidence
-    const confidence = this.calculateConfidence(lastCheckpoint, timeSince, reason);
+    const confidence = this.calculateConfidence(lastCheckpoint, _timeSince, reason);
     
     return {
       shouldResume: true,
       lastCheckpoint,
       interruptionReason: reason,
-      timeSinceInterruption: timeSince,
+      timeSinceInterruption: _timeSince,
       confidence
     };
   }
@@ -68,7 +69,7 @@ export class ResumeDetector {
   /**
    * Generate resume prompt from checkpoint
    */
-  async generateResumePrompt(checkpoint: Checkpoint): Promise<ResumePrompt> {
+  generateResumePrompt(checkpoint: Checkpoint): ResumePrompt {
     const checkpointTime = new Date(checkpoint.createdAt).getTime();
     const timeSince = Date.now() - checkpointTime;
     const reason = this.classifyInterruption(checkpoint, timeSince);
@@ -107,7 +108,7 @@ export class ResumeDetector {
   /**
    * Classify interruption reason based on signals
    */
-  private classifyInterruption(checkpoint: Checkpoint, timeSince: number): InterruptionReason {
+  private classifyInterruption(checkpoint: Checkpoint, _timeSince: number): InterruptionReason {
     const risk = checkpoint.signals.crashRisk;
     const progress = checkpoint.taskState.progress;
     const sessionDuration = checkpoint.signals.sessionDuration;
@@ -191,7 +192,7 @@ export class ResumeDetector {
   /**
    * Format progress message
    */
-  private formatProgress(taskState: any): string {
+  private formatProgress(taskState: TaskState): string {
     const percent = Math.round(taskState.progress * 100);
     return `Operation: ${taskState.operation} (${percent}% complete)`;
   }
@@ -219,7 +220,7 @@ export class ResumeDetector {
   /**
    * Format recent tool calls
    */
-  private formatTools(toolCalls: any[]): string {
+  private formatTools(toolCalls: ToolCallRecord[]): string {
     if (toolCalls.length === 0) {
       return 'No recent tool calls';
     }

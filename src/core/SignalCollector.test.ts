@@ -13,7 +13,6 @@
  */
 
 import { SignalCollector } from './SignalCollector';
-import type { CrashSignals, CrashRisk } from '../models/Checkpoint';
 
 describe('SignalCollector', () => {
   let collector: SignalCollector;
@@ -188,7 +187,7 @@ describe('SignalCollector', () => {
 
     it('should calculate messages per minute', () => {
       // Simulate rapid message exchange
-      const start = Date.now();
+      const _start = Date.now();
       
       for (let i = 0; i < 10; i++) {
         collector.onMessage(`Message ${i}`, 'user');

@@ -174,7 +174,7 @@ describe('ResumeDetector', () => {
         recentToolCalls: ['read_file', 'write_file']
       });
       
-      const prompt = await resumeDetector.generateResumePrompt(checkpoint);
+      const prompt = resumeDetector.generateResumePrompt(checkpoint);
       
       expect(prompt).toBeDefined();
       expect(prompt.sections.situation).toContain('crash');
@@ -194,7 +194,7 @@ describe('ResumeDetector', () => {
         crashRisk: 'danger'
       });
       
-      const promptCrash = await resumeDetector.generateResumePrompt(checkpointDanger);
+      const promptCrash = resumeDetector.generateResumePrompt(checkpointDanger);
       expect(promptCrash.sections.situation).toContain('crash');
       
       const checkpointComplete = await createTestCheckpoint(checkpointRepo, `${sessionId}-2`, {
@@ -203,7 +203,7 @@ describe('ResumeDetector', () => {
         crashRisk: 'safe'
       });
       
-      const promptExit = await resumeDetector.generateResumePrompt(checkpointComplete);
+      const promptExit = resumeDetector.generateResumePrompt(checkpointComplete);
       expect(promptExit.sections.situation).toContain('manual');
     });
 
@@ -213,7 +213,7 @@ describe('ResumeDetector', () => {
         progress: 0.5
       });
       
-      const prompt = await resumeDetector.generateResumePrompt(minimal);
+      const prompt = resumeDetector.generateResumePrompt(minimal);
       
       expect(prompt).toBeDefined();
       expect(prompt.sections.situation).toBeDefined();
@@ -298,7 +298,7 @@ describe('ResumeDetector', () => {
       });
       
       const start = Date.now();
-      await resumeDetector.generateResumePrompt(checkpoint);
+      resumeDetector.generateResumePrompt(checkpoint);
       const duration = Date.now() - start;
       
       expect(duration).toBeLessThan(50);

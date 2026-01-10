@@ -123,7 +123,7 @@ export class SignalHistoryRepository {
           WHERE session_id = ?
         `;
 
-        this.db!.get(nextNumberSQL, [sessionId], (err, row: any) => {
+        this.db!.get(nextNumberSQL, [sessionId], (err, row: { next_number: number } | undefined) => {
           if (err) {
             reject(err);
             return;
@@ -174,7 +174,7 @@ export class SignalHistoryRepository {
           }
 
           // Process snapshots sequentially to avoid race conditions
-          const processNext = (index: number) => {
+          const processNext = (index: number): void => {
             if (index >= snapshots.length) {
               // All processed - commit transaction
               this.db!.run('COMMIT', (err) => {
@@ -193,7 +193,7 @@ export class SignalHistoryRepository {
               WHERE session_id = ?
             `;
 
-            this.db!.get(nextNumberSQL, [sessionId], (err, row: any) => {
+            this.db!.get(nextNumberSQL, [sessionId], (err, row: { next_number: number } | undefined) => {
               if (err) {
                 this.db!.run('ROLLBACK');
                 reject(err);
@@ -309,7 +309,7 @@ export class SignalHistoryRepository {
 
   // Helper methods for database operations
 
-  private run(sql: string, params: any[] = []): Promise<{ changes: number }> {
+  private run(sql: string, params: unknown[] = []): Promise<{ changes: number }> {
     return new Promise((resolve, reject) => {
       if (!this.db) {
         reject(new Error('Database not initialized'));
@@ -323,7 +323,7 @@ export class SignalHistoryRepository {
     });
   }
 
-  private get<T>(sql: string, params: any[] = []): Promise<T | undefined> {
+  private get<T>(sql: string, params: unknown[] = []): Promise<T | undefined> {
     return new Promise((resolve, reject) => {
       if (!this.db) {
         reject(new Error('Database not initialized'));
@@ -337,7 +337,7 @@ export class SignalHistoryRepository {
     });
   }
 
-  private all<T>(sql: string, params: any[] = []): Promise<T[]> {
+  private all<T>(sql: string, params: unknown[] = []): Promise<T[]> {
     return new Promise((resolve, reject) => {
       if (!this.db) {
         reject(new Error('Database not initialized'));

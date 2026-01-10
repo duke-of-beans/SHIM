@@ -50,7 +50,7 @@ const CONTEXT_WINDOW_SIZE = 200000; // Claude Sonnet context window
 
 export class SignalCollector {
   private thresholds: RiskThresholds;
-  private encoder: any;
+  private encoder: ReturnType<typeof encoding_for_model>;
 
   // Counters
   private messageCount = 0;
@@ -81,7 +81,7 @@ export class SignalCollector {
   /**
    * Record a message
    */
-  onMessage(content: string, role: 'user' | 'assistant'): void {
+  onMessage(content: string, _role: 'user' | 'assistant'): void {
     this.messageCount++;
 
     // Estimate tokens
@@ -106,7 +106,7 @@ export class SignalCollector {
   /**
    * Record a tool call
    */
-  onToolCall(tool: string, args: any, result: any, latency: number): void {
+  onToolCall(tool: string, args: Record<string, unknown>, result: Record<string, unknown>, latency: number): void {
     this.toolCallCount++;
     this.toolCallsSinceCheckpoint++;
 
@@ -264,7 +264,7 @@ export class SignalCollector {
     return 'safe';
   }
 
-  private countSignalsExceeding(signals: CrashSignals, thresholds: any): number {
+  private countSignalsExceeding(signals: CrashSignals, thresholds: RiskThresholds['warningZone'] | RiskThresholds['dangerZone']): number {
     let count = 0;
 
     if (signals.contextWindowUsage >= thresholds.contextWindowUsage) count++;
