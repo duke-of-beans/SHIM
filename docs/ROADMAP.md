@@ -57,7 +57,7 @@ SHIM implementation follows a dependency-ordered approach where each phase enabl
 
 **Status:** ✅ COMPLETE (7 days)  
 **Test Coverage:** 98.36% (71/71 tests passing)  
-**Commits:** 4 (b4ac99e, 863ee09, 3922f36, others)
+**Commits:** 4 (b4ac99e, 863ee09, 3922f36, 91b69c5)
 
 **Components Delivered:**
 1. **SignalCollector** (238 LOC, 53 tests)
@@ -81,11 +81,34 @@ SHIM implementation follows a dependency-ordered approach where each phase enabl
 
 ### Week 3-4: Checkpoint System
 
-- [ ] Design checkpoint schema
-- [ ] Implement checkpoint serialization
-- [ ] Create SQLite storage layer
+- [x] Design checkpoint schema (Day 8)
+- [x] Implement checkpoint serialization with gzip compression (Day 8)
+- [x] Create SQLite storage layer - CheckpointRepository (Day 8)
 - [ ] Build checkpoint trigger system
 - [ ] Implement auto-checkpoint logic
+
+**Status:** 🚧 IN PROGRESS (Day 8)  
+**Test Coverage:** 100% (24/24 tests passing)  
+**Performance:** Save <100ms, Retrieve <50ms, Compression <100KB
+
+**Components Delivered:**
+1. **CheckpointRepository** (600+ LOC, 24 tests)
+   - Complete checkpoint data model with 6 state categories
+   - Gzip compression (typical 3-5x ratio)
+   - Auto-increment checkpoint numbers per session
+   - Resume event tracking
+   - Retention-based cleanup
+   - Query by risk level, session, restoration status
+   - Composite sorting (timestamp + checkpoint_number)
+   - WAL mode for concurrent access
+
+**Key Implementation Details:**
+- Serializes 6 state categories separately (conversation, task, file, tool, signals, preferences)
+- Each category compressed independently for optimal compression
+- Supports both explicit checkpoint numbers and auto-increment
+- UNIQUE constraint on (session_id, checkpoint_number)
+- Resume events stored separately with foreign key to checkpoints
+- Cleanup by retention period (configurable days)
 
 ### Week 5-6: Resume Protocol
 

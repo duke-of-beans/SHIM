@@ -133,6 +133,25 @@ export interface Checkpoint {
   toolState: ToolState;
   signals: CrashSignals;
   userPreferences: UserPreferences;
+  
+  // Recovery tracking (optional)
+  restored_at?: string;
+  restore_success?: boolean;
+  restore_fidelity?: number;
+}
+
+export interface ResumeEvent {
+  id?: string;
+  checkpointId: string;
+  sessionId: string;
+  restoredAt?: string;
+  interruptionReason: InterruptionReason;
+  timeSinceCheckpoint: number;
+  resumeConfidence: number;
+  userConfirmed?: boolean;
+  success: boolean;
+  fidelityScore: number;
+  notes?: string;
 }
 
 export interface ResumeDetection {
