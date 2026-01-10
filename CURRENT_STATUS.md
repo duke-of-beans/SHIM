@@ -84,12 +84,12 @@
 ## Recent Activity
 
 **Latest Commits:**
-- 33c5720 - feat: implement ResumeDetector with crash detection
+- 63f883e - feat: implement ResumeDetector with crash detection and resume prompts
+- 6976b9e - docs: update status for Week 3-4 completion
 - 476e297 - test: add checkpoint system integration tests
-- 9220034 - feat: implement CheckpointManager with intelligent triggering
 
 **Latest Session:**
-- Implemented ResumeDetector (213 LOC, 18 tests)
+- Implemented ResumeDetector (253 LOC, 18 tests)
 - Resume detection from unrestored checkpoints
 - Interruption reason classification system
 - Confidence calculation with risk and recency factors
