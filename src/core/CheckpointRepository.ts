@@ -11,7 +11,7 @@
  */
 
 import sqlite3 from 'sqlite3';
-import { Checkpoint, ResumeEvent, CrashRisk } from '../models/Checkpoint';
+import { Checkpoint, ResumeEvent, CrashRisk, InterruptionReason, CheckpointTrigger } from '../models/Checkpoint';
 import { v4 as uuidv4 } from 'uuid';
 import * as zlib from 'zlib';
 
@@ -219,7 +219,7 @@ export class CheckpointRepository {
             WHERE session_id = ?
           `;
 
-          this.db!.get(nextNumberSQL, [checkpoint.sessionId], (err, row: any) => {
+          this.db!.get(nextNumberSQL, [checkpoint.sessionId], (err, row: { next_number?: number }) => {
             if (err) {
               reject(err);
               return;
@@ -238,7 +238,7 @@ export class CheckpointRepository {
   private saveWithNumber(
     checkpoint: Checkpoint,
     resolve: (value: string) => void,
-    reject: (reason: any) => void
+    reject: (reason?: unknown) => void
   ): void {
     // Serialize and compress each state section
     const conversationStateJSON = JSON.stringify(checkpoint.conversationState);
@@ -420,7 +420,7 @@ export class CheckpointRepository {
       checkpointId: row.checkpoint_id,
       sessionId: row.session_id,
       restoredAt: row.restored_at,
-      interruptionReason: row.interruption_reason as any,
+      interruptionReason: row.interruption_reason as InterruptionReason,
       timeSinceCheckpoint: row.time_since_checkpoint,
       resumeConfidence: row.resume_confidence,
       userConfirmed: row.user_confirmed !== null ? row.user_confirmed === 1 : undefined,
@@ -499,7 +499,7 @@ export class CheckpointRepository {
       sessionId: row.session_id,
       checkpointNumber: row.checkpoint_number,
       createdAt: row.created_at,
-      triggeredBy: row.triggered_by as any,
+      triggeredBy: row.triggered_by as CheckpointTrigger,
       conversationState,
       taskState,
       fileState,
@@ -512,7 +512,7 @@ export class CheckpointRepository {
     };
   }
 
-  private run(sql: string, params: any[] = []): Promise<{ changes: number; lastID: number }> {
+  private run(sql: string, params: unknown[] = []): Promise<{ changes: number; lastID: number }> {
     return new Promise((resolve, reject) => {
       if (!this.db) {
         reject(new Error('Database not initialized'));
@@ -526,7 +526,7 @@ export class CheckpointRepository {
     });
   }
 
-  private get<T>(sql: string, params: any[] = []): Promise<T | null> {
+  private get<T>(sql: string, params: unknown[] = []): Promise<T | null> {
     return new Promise((resolve, reject) => {
       if (!this.db) {
         reject(new Error('Database not initialized'));
@@ -540,7 +540,7 @@ export class CheckpointRepository {
     });
   }
 
-  private all<T>(sql: string, params: any[] = []): Promise<T[]> {
+  private all<T>(sql: string, params: unknown[] = []): Promise<T[]> {
     return new Promise((resolve, reject) => {
       if (!this.db) {
         reject(new Error('Database not initialized'));

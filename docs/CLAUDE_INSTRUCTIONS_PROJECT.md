@@ -154,18 +154,58 @@ Breaking changes: [if applicable]
 
 ## §3 AUTHORITY PROTOCOL [MANDATORY PUSH-BACK TRIGGERS]
 
-### Trigger 1: Architectural Whack-A-Mole
+### Trigger 1: Architectural Whack-A-Mole [CRITICAL - ALWAYS STOP]
 
+**THE GOLDEN RULE:**
+> "We develop WAY faster than we debug. Always."
+
+**Detection Criteria:**
 ```
-IF (same_fix_repeated >= 3 || treating_symptoms || workarounds_piling) THEN
-  🛑 STOP - ARCHITECTURAL ISSUE DETECTED
-  
-  CURRENT APPROACH: [describe]
-  ROOT PROBLEM: [identify]
-  RIGHT SOLUTION: [propose proper architecture]
-  RECOMMENDATION: DELETE current work, BUILD proper solution
-  
-  Do you want to: A) Rebuild properly | B) Continue (not recommended)
+IF (same_fix_repeated >= 3 || 
+    treating_symptoms || 
+    workarounds_piling || 
+    manual_edits_accumulating ||
+    time_to_fix > 10_minutes) THEN
+  🛑 STOP IMMEDIATELY - ARCHITECTURAL ISSUE DETECTED
+```
+
+**Mandatory Analysis:**
+```
+CURRENT APPROACH: [describe what we're doing]
+ROOT PROBLEM: [what's the actual issue?]
+TIME COST: Debugging = [X] min vs Rebuilding = [Y] min
+PREVENTION: Does current approach prevent future occurrences?
+
+RIGHT SOLUTION: [architectural fix that prevents problem]
+RECOMMENDATION: DELETE current work, BUILD proper solution
+```
+
+**Decision Framework:**
+```
+Debugging Time > 10 minutes? → STOP, rebuild
+Same fix repeated 3+ times? → STOP, rebuild
+Manual edits accumulating? → STOP, automate
+Workarounds piling up? → STOP, fix architecture
+No prevention mechanism? → STOP, add enforcement
+
+RULE: If rebuilding is faster than debugging, ALWAYS rebuild.
+```
+
+**Examples:**
+- ❌ BAD: Fixing 27 ESLint errors manually (45 min, no prevention)
+- ✅ GOOD: Enable strict tsconfig.json (5 min setup + 30 min fixes = permanent prevention)
+
+- ❌ BAD: Debugging type inference issues one-by-one
+- ✅ GOOD: Add `"strict": true` to tsconfig, let compiler show ALL issues
+
+- ❌ BAD: Manually fixing import paths across files
+- ✅ GOOD: Add path alias to tsconfig, fix imports programmatically
+
+**User Confirmation Required:**
+```
+Do you want to:
+A) STOP and rebuild properly (recommended - faster long-term)
+B) Continue debugging (not recommended - slower, no prevention)
 ```
 
 ### Trigger 2: Long Operations (>8 minutes)
@@ -794,7 +834,175 @@ Discover Pattern → Document Lesson → Create Enforcement → Commit
 
 ---
 
-## §13 SESSION END PROTOCOL
+## §12 TRIANGULATION PROTOCOL [RESEARCH & DEBUGGING]
+
+**THE PRINCIPLE:**
+> "When having a hard time researching things we did or looking for things - triangulate between git, chat history, and locally stored sessions/logs/summaries."
+
+**Why Triangulation Matters:**
+- Single source = incomplete picture
+- Different sources reveal different aspects
+- Cross-validation prevents false assumptions
+- **Saves massive time** (2 min triangulation vs 45 min debugging)
+
+### The Three Sources
+
+**1. Git History (WHAT was done, WHEN)**
+
+```powershell
+# Find commits by topic
+Desktop Commander:start_process({
+  command: "cd D:\\SHIM; git log --oneline --all --grep=\"eslint\" -20",
+  timeout_ms: 10000
+})
+
+# See file at specific commit
+Desktop Commander:start_process({
+  command: "cd D:\\SHIM; git show 1f15791:.eslintrc.json",
+  timeout_ms: 10000
+})
+
+# Find when file changed
+Desktop Commander:start_process({
+  command: "cd D:\\SHIM; git log --oneline --all -- src/core/SignalCollector.ts",
+  timeout_ms: 10000
+})
+```
+
+**Best for:**
+- Timeline of changes
+- Historical file contents
+- Who/when/what questions
+
+---
+
+**2. Chat History (WHY decisions were made, CONTEXT)**
+
+```typescript
+conversation_search({
+  query: "ESLint strict rules enforcement",
+  max_results: 5
+})
+
+conversation_search({
+  query: "lesson enforcement no-explicit-any",
+  max_results: 5
+})
+```
+
+**Best for:**
+- Decision rationale
+- Discussions and debates
+- Alternative approaches considered
+
+---
+
+**3. Local Documentation (HOW things work, CURRENT STATE)**
+
+```typescript
+Desktop Commander:read_file({
+  path: "D:\\SHIM\\docs\\LEARNED_LESSONS_ENFORCEMENT.md"
+})
+
+Desktop Commander:read_file({
+  path: "D:\\SHIM\\CURRENT_STATUS.md"
+})
+
+Desktop Commander:start_search({
+  path: "D:\\SHIM\\docs",
+  pattern: "triangulation|research method",
+  searchType: "content"
+})
+```
+
+**Best for:**
+- Current implementation
+- Documented patterns
+- Project conventions
+
+---
+
+### Triangulation Workflow
+
+**When Stuck or Confused:**
+
+```
+1. STATE THE QUESTION
+   "When did we add strict ESLint rules?"
+
+2. TRIANGULATE (in parallel):
+   - Git: Find commits mentioning "eslint"
+   - Chat: Search for "ESLint strict rules"
+   - Docs: Read LEARNED_LESSONS_ENFORCEMENT.md
+
+3. SYNTHESIZE:
+   Git shows: Commit 1f15791 added rules 2 days ago
+   Chat shows: [no relevant discussions found]
+   Docs show: Part of lesson enforcement system
+
+4. INSIGHT:
+   Rules added AFTER code was written
+   → This is a one-time migration, not ongoing debugging
+   → Right solution: Enable strict tsconfig.json
+
+Total time: 2 minutes (vs 45 min blind debugging)
+```
+
+---
+
+### Example: "Why do we have 27 ESLint violations?"
+
+**Without Triangulation:**
+- Assume code is "wrong"
+- Fix violations manually one-by-one
+- 45 minutes of edits
+- High risk of breaking tests
+- No prevention for future violations
+
+**With Triangulation:**
+- Git: Rules added in commit 1f15791 (2 days ago)
+- Code predates enforcement rules
+- This is **migration**, not debugging
+- Right solution: Enable `strict: true` in tsconfig
+- One-time 30min investment + permanent prevention
+
+**Savings:** 15 minutes + permanent solution vs temporary fix
+
+---
+
+### When to Triangulate
+
+**ALWAYS triangulate when:**
+- "Why is this happening?" (root cause needed)
+- "When did we decide X?" (historical context)
+- "How does this work?" (current implementation)
+- Stuck on something for >5 minutes
+- About to start manual debugging
+
+**NEVER assume:**
+- You remember why something was done
+- The current state matches your mental model
+- One source tells the whole story
+
+---
+
+### Triangulation Anti-Patterns
+
+**❌ DON'T:**
+- Rely solely on chat history (incomplete, selective memory)
+- Only check git (missing rationale and context)
+- Just read docs (may be outdated)
+- Start debugging before triangulating
+
+**✅ DO:**
+- Check all three sources in parallel
+- Cross-validate findings
+- Update docs if drift detected
+- Document insights for future
+
+---
+
+## §13 LESSON ENFORCEMENT SYSTEM [AUTOMATED]
 
 **At end of every session:**
 

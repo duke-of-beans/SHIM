@@ -117,7 +117,7 @@ export class CheckpointManager {
    */
   async createCheckpoint(input: CreateCheckpointInput): Promise<Checkpoint> {
     const signals = this.signalCollector.getSignals();
-    const risk = this.signalCollector.getCrashRisk();
+    const _risk = this.signalCollector.getCrashRisk();
 
     const checkpoint: Checkpoint = {
       id: uuidv4(),

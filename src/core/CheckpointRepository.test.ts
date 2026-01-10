@@ -25,7 +25,7 @@ describe('CheckpointRepository', () => {
   });
 
   describe('Initialization', () => {
-    it('should create database file', async () => {
+    it('should create database file', () => {
       expect(fs.existsSync(testDbPath)).toBe(true);
     });
 
@@ -155,9 +155,9 @@ describe('CheckpointRepository', () => {
       const cp3 = createTestCheckpoint('session-1', 3);
       
       await repo.save(cp1);
-      await new Promise(r => setTimeout(r, 10)); // Ensure different timestamps
+      await new Promise(r => { setTimeout(r, 10); }); // Ensure different timestamps
       await repo.save(cp2);
-      await new Promise(r => setTimeout(r, 10));
+      await new Promise(r => { setTimeout(r, 10); });
       await repo.save(cp3);
       
       const checkpoints = await repo.listBySession('session-1');

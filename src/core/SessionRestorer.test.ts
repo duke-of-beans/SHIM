@@ -148,7 +148,7 @@ describe('SessionRestorer', () => {
         activeFiles: ['file1.ts', 'file2.ts']
       });
       
-      const fidelity = await sessionRestorer.calculateFidelity(checkpoint.id, {
+      const fidelity = sessionRestorer.calculateFidelity(checkpoint.id, {
         conversationRestored: true,
         taskRestored: true,
         filesRestored: true,

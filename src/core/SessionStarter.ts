@@ -85,7 +85,7 @@ export class SessionStarter {
     const state = await this.sessionRestorer.restoreState(checkpointId);
     
     // Calculate fidelity
-    const fidelity = await this.sessionRestorer.calculateFidelity(checkpointId, {
+    const fidelity = this.sessionRestorer.calculateFidelity(checkpointId, {
       conversationRestored: !!state.conversation,
       taskRestored: !!state.task,
       filesRestored: !!state.files,

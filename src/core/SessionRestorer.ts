@@ -5,7 +5,7 @@
  */
 
 import { CheckpointRepository } from './CheckpointRepository';
-import { Checkpoint } from '../models/Checkpoint';
+import { Checkpoint, ConversationMessage, ToolSession, PendingOp, ToolCallRecord } from '../models/Checkpoint';
 
 /**
  * Reconstructed session state from checkpoint
@@ -15,7 +15,7 @@ export interface RestoredState {
     summary: string;
     keyDecisions: string[];
     currentContext: string;
-    recentMessages: any[];
+    recentMessages: ConversationMessage[];
   };
   task: {
     operation: string;
@@ -32,9 +32,9 @@ export interface RestoredState {
     uncommittedDiff: string;
   };
   tools: {
-    activeSessions: any[];
-    pendingOperations: any[];
-    recentToolCalls: any[];
+    activeSessions: ToolSession[];
+    pendingOperations: PendingOp[];
+    recentToolCalls: ToolCallRecord[];
   };
 }
 
@@ -76,7 +76,7 @@ export class SessionRestorer {
    * Load checkpoint by ID
    */
   async loadCheckpoint(checkpointId: string): Promise<Checkpoint | null> {
-    return await this.checkpointRepo.getById(checkpointId);
+    return this.checkpointRepo.getById(checkpointId);
   }
 
   /**
@@ -126,10 +126,10 @@ export class SessionRestorer {
   /**
    * Calculate restoration fidelity
    */
-  async calculateFidelity(
+  calculateFidelity(
     checkpointId: string,
     components: FidelityComponents
-  ): Promise<number> {
+  ): number {
     const weights = {
       conversation: 0.3,
       task: 0.4,

@@ -1,7 +1,6 @@
 import { CheckpointManager } from './CheckpointManager';
 import { SignalCollector } from './SignalCollector';
 import { CheckpointRepository } from './CheckpointRepository';
-import { Checkpoint } from '../models/Checkpoint';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -119,7 +118,9 @@ describe('CheckpointManager', () => {
       });
       
       // Wait for time interval to pass
-      await new Promise(resolve => setTimeout(resolve, 150));
+      await new Promise(resolve => {
+        setTimeout(resolve, 150);
+      });
       
       const shouldCheckpoint = shortIntervalManager.shouldTriggerCheckpoint();
       
@@ -200,7 +201,9 @@ describe('CheckpointManager', () => {
         timeIntervalMs: 100
       });
       
-      await new Promise(resolve => setTimeout(resolve, 150));
+      await new Promise(resolve => {
+        setTimeout(resolve, 150);
+      });
       
       await shortIntervalManager.createCheckpoint({
         sessionId: 'session-1',

@@ -149,7 +149,7 @@ describe('Checkpoint System Integration', () => {
   });
 
   describe('Trigger integration', () => {
-    it('should respect priority order: danger > warning > intervals', async () => {
+    it('should respect priority order: danger > warning > intervals', () => {
       // Simulate warning-level signals (15-19% error rate = warning threshold)
       for (let i = 0; i < 100; i++) {
         // 17% error rate (above 15% warning, below 20% danger)
@@ -249,7 +249,7 @@ describe('Checkpoint System Integration', () => {
       
       // Check trigger (should be fast)
       const triggerStart = Date.now();
-      const shouldCheckpoint = checkpointManager.shouldTriggerCheckpoint();
+      const _shouldCheckpoint = checkpointManager.shouldTriggerCheckpoint();
       const triggerDuration = Date.now() - triggerStart;
       
       expect(triggerDuration).toBeLessThan(10); // <10ms trigger check

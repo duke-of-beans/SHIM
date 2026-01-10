@@ -42,6 +42,46 @@ for (const item of items) {
 
 ---
 
+#### Lesson: Develop Don't Debug (Anti-Whack-A-Mole)
+```typescript
+// DETECTION CRITERIA:
+// - Same fix repeated 3+ times
+// - Manual edits accumulating (>10 min of fixes)
+// - Treating symptoms, not root cause
+// - No prevention mechanism in place
+
+// ❌ WRONG APPROACH: Manual debugging
+// Example: Fixing 27 ESLint violations one-by-one
+// Time: 45 minutes
+// Prevention: NONE
+// Result: Future violations still possible
+
+// ✅ RIGHT APPROACH: Architectural fix
+// Example: Enable strict tsconfig.json
+// Time: 5 min setup + 30 min fixes = 35 min total
+// Prevention: Compile-time enforcement FOREVER
+// Result: Impossible to commit bad types
+
+// RULE: If debugging time > 10 min, STOP and rebuild
+// RULE: We develop WAY faster than we debug
+```
+
+**Source:** Week 3-4, ESLint violation fix session (January 10, 2026)
+
+**Enforcement:**
+- Authority Protocol Trigger 1 (CLAUDE_INSTRUCTIONS_PROJECT.md)
+- Mandatory STOP when whack-a-mole detected
+- User confirmation required to continue debugging
+- Decision framework compares debug time vs rebuild time
+
+**Impact:**
+- Prevents time waste on manual fixes
+- Forces architectural thinking
+- Builds permanent solutions
+- Compounds prevention mechanisms
+
+---
+
 #### Lesson: No `any` Types
 ```typescript
 // ❌ BLOCKED by ESLint
