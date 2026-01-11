@@ -471,27 +471,27 @@ export class CheckpointRepository {
   private rowToCheckpoint(row: CheckpointRow): Checkpoint {
     // Decompress each state section
     const conversationState = JSON.parse(
-      zlib.gunzipSync(Buffer.from(row.conversation_state, 'base64')).toString('utf-8')
+      zlib.gunzipSync(Buffer.from(row.conversation_state, 'base64') as Uint8Array).toString('utf-8')
     );
     
     const taskState = JSON.parse(
-      zlib.gunzipSync(Buffer.from(row.task_state, 'base64')).toString('utf-8')
+      zlib.gunzipSync(Buffer.from(row.task_state, 'base64') as Uint8Array).toString('utf-8')
     );
     
     const fileState = JSON.parse(
-      zlib.gunzipSync(Buffer.from(row.file_state, 'base64')).toString('utf-8')
+      zlib.gunzipSync(Buffer.from(row.file_state, 'base64') as Uint8Array).toString('utf-8')
     );
     
     const toolState = JSON.parse(
-      zlib.gunzipSync(Buffer.from(row.tool_state, 'base64')).toString('utf-8')
+      zlib.gunzipSync(Buffer.from(row.tool_state, 'base64') as Uint8Array).toString('utf-8')
     );
     
     const signals = JSON.parse(
-      zlib.gunzipSync(Buffer.from(row.signals, 'base64')).toString('utf-8')
+      zlib.gunzipSync(Buffer.from(row.signals, 'base64') as Uint8Array).toString('utf-8')
     );
     
     const userPreferences = row.user_preferences 
-      ? JSON.parse(zlib.gunzipSync(Buffer.from(row.user_preferences, 'base64')).toString('utf-8'))
+      ? JSON.parse(zlib.gunzipSync(Buffer.from(row.user_preferences, 'base64') as Uint8Array).toString('utf-8'))
       : {};
 
     return {

@@ -12,7 +12,7 @@ describe('RedisConnectionManager', () => {
 
   describe('initialization', () => {
     it('should create with default configuration', () => {
-      manager = new RedisConnectionManager();
+      manager = new RedisConnectionManager({ lazyConnect: true });
       expect(manager).toBeDefined();
       expect(manager.isConnected()).toBe(false);
     });
@@ -21,7 +21,8 @@ describe('RedisConnectionManager', () => {
       const config: RedisConfig = {
         host: 'localhost',
         port: 6379,
-        db: 1
+        db: 1,
+        lazyConnect: true
       };
       manager = new RedisConnectionManager(config);
       expect(manager).toBeDefined();
@@ -30,7 +31,7 @@ describe('RedisConnectionManager', () => {
 
   describe('connection lifecycle', () => {
     it('should connect successfully to Redis', async () => {
-      manager = new RedisConnectionManager();
+      manager = new RedisConnectionManager({ lazyConnect: true });
       await manager.connect();
       
       expect(manager.isConnected()).toBe(true);
@@ -41,7 +42,8 @@ describe('RedisConnectionManager', () => {
       const config: RedisConfig = {
         host: 'localhost',
         port: 9999, // Non-existent Redis
-        retryStrategy: () => null // Don't retry
+        retryStrategy: () => null, // Don't retry
+        lazyConnect: true
       };
       manager = new RedisConnectionManager(config);
       
@@ -50,7 +52,7 @@ describe('RedisConnectionManager', () => {
     }, 10000);
 
     it('should disconnect cleanly', async () => {
-      manager = new RedisConnectionManager();
+      manager = new RedisConnectionManager({ lazyConnect: true });
       await manager.connect();
       expect(manager.isConnected()).toBe(true);
       
@@ -59,14 +61,14 @@ describe('RedisConnectionManager', () => {
     }, 10000);
 
     it('should handle disconnect when not connected', async () => {
-      manager = new RedisConnectionManager();
+      manager = new RedisConnectionManager({ lazyConnect: true });
       await expect(manager.disconnect()).resolves.not.toThrow();
     });
   });
 
   describe('health checks', () => {
     it('should ping successfully when connected', async () => {
-      manager = new RedisConnectionManager();
+      manager = new RedisConnectionManager({ lazyConnect: true });
       await manager.connect();
       
       const canPing = await manager.ping();
@@ -74,13 +76,13 @@ describe('RedisConnectionManager', () => {
     }, 10000);
 
     it('should return false when pinging disconnected client', async () => {
-      manager = new RedisConnectionManager();
+      manager = new RedisConnectionManager({ lazyConnect: true });
       const canPing = await manager.ping();
       expect(canPing).toBe(false);
     });
 
     it('should provide connection statistics', async () => {
-      manager = new RedisConnectionManager();
+      manager = new RedisConnectionManager({ lazyConnect: true });
       await manager.connect();
       
       const stats = manager.getConnectionStats();
@@ -93,7 +95,7 @@ describe('RedisConnectionManager', () => {
 
   describe('client access', () => {
     it('should provide Redis client when connected', async () => {
-      manager = new RedisConnectionManager();
+      manager = new RedisConnectionManager({ lazyConnect: true });
       await manager.connect();
       
       const client = manager.getClient();
@@ -109,7 +111,7 @@ describe('RedisConnectionManager', () => {
     }, 10000);
 
     it('should throw error when getting client before connection', () => {
-      manager = new RedisConnectionManager();
+      manager = new RedisConnectionManager({ lazyConnect: true });
       expect(() => manager.getClient()).toThrow('Redis not connected');
     });
   });
@@ -118,7 +120,7 @@ describe('RedisConnectionManager', () => {
     it('should connect in under 100ms', async () => {
       const start = Date.now();
       
-      manager = new RedisConnectionManager();
+      manager = new RedisConnectionManager({ lazyConnect: true });
       await manager.connect();
       
       const duration = Date.now() - start;
@@ -127,7 +129,7 @@ describe('RedisConnectionManager', () => {
     }, 10000);
 
     it('should ping with latency under 5ms', async () => {
-      manager = new RedisConnectionManager();
+      manager = new RedisConnectionManager({ lazyConnect: true });
       await manager.connect();
       
       const start = Date.now();
@@ -144,6 +146,7 @@ describe('RedisConnectionManager', () => {
       // This test requires Redis to actually be running
       // If Redis is not available, test will be skipped
       manager = new RedisConnectionManager({
+        lazyConnect: true,
         retryStrategy: (times) => {
           if (times > 3) return null; // Give up after 3 tries
           return Math.min(times * 100, 1000); // Exponential backoff

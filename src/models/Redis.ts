@@ -9,6 +9,7 @@ export interface RedisConfig {
   port?: number;              // Default: 6379
   password?: string;          // Optional auth
   db?: number;                // Database number (default: 0)
+  keyPrefix?: string;         // Optional key prefix for namespacing
   
   // Reliability
   retryStrategy?: (times: number) => number | null;

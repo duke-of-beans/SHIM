@@ -58,10 +58,8 @@ export class RedisConnectionManager {
         }
       });
       
-      // Connect if not lazy
-      if (!this.config.lazyConnect) {
-        this.client.connect().catch(reject);
-      }
+      // Always connect (lazyConnect only affects auto-connect on construction)
+      this.client.connect().catch(reject);
     });
   }
   

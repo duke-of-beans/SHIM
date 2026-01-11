@@ -19,6 +19,7 @@ describe('WorkerRegistry', () => {
       port: 6379,
       db: 1, // Test database
       keyPrefix: 'shim:test:',
+      lazyConnect: true,
     });
     
     await redisManager.connect();
@@ -160,7 +161,7 @@ describe('WorkerRegistry', () => {
       
       // Simulate time passing (mock lastHeartbeat to be old)
       const client = redisManager.getClient();
-      const key = `shim:test:worker:${workerId}`;
+      const key = `worker:${workerId}`; // Don't include keyPrefix - ioredis adds it automatically
       const worker = await registry.getWorker(workerId);
       
       if (worker) {
@@ -284,7 +285,7 @@ describe('WorkerRegistry', () => {
       const client = redisManager.getClient();
       for (let i = 0; i < 50; i++) {
         const workerId = workers[i];
-        const key = `shim:test:worker:${workerId}`;
+        const key = `worker:${workerId}`; // Don't include keyPrefix - ioredis adds it automatically
         const worker = await registry.getWorker(workerId);
         
         if (worker) {

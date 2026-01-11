@@ -39,3 +39,13 @@ export const REDIS_TEST_CONFIG: RedisConfig = {
   },
   maxRetriesPerRequest: 3,
 };
+
+/**
+ * Create a test Redis configuration with optional overrides
+ */
+export function createTestRedisConfig(overrides?: Partial<RedisConfig>): RedisConfig {
+  return {
+    ...REDIS_TEST_CONFIG,
+    ...overrides,
+  };
+}

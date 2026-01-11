@@ -5,22 +5,31 @@ import * as fs from 'fs';
 
 describe('SignalHistoryRepository', () => {
   let repository: SignalHistoryRepository;
-  const testDbPath = path.join(__dirname, '../../test.db');
+  let testDbPath: string;
 
   beforeEach(async () => {
-    // Clean up test database
-    if (fs.existsSync(testDbPath)) {
-      fs.unlinkSync(testDbPath);
-    }
-
+    // Use unique database file per test to avoid Windows file locking issues
+    testDbPath = path.join(__dirname, `../../test-${Date.now()}-${Math.random().toString(36).substr(2, 9)}.db`);
+    
     repository = new SignalHistoryRepository(testDbPath);
     await repository.initialize();
   });
 
   afterEach(async () => {
-    await repository.close();
+    if (repository) {
+      await repository.close();
+      // Wait a bit for Windows to release file lock
+      await new Promise(resolve => setTimeout(resolve, 50));
+    }
+    
+    // Clean up test database
     if (fs.existsSync(testDbPath)) {
-      fs.unlinkSync(testDbPath);
+      try {
+        fs.unlinkSync(testDbPath);
+      } catch (error) {
+        // Ignore file locking errors on cleanup
+        console.warn(`Could not delete ${testDbPath}: ${error}`);
+      }
     }
   });
 
