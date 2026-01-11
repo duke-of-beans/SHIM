@@ -170,23 +170,26 @@ export class StatsigIntegration {
     }
     
     try {
-      const experiment = Statsig.getExperiment(
-        { userID: userId, custom: customAttributes },
+      const experiment = await Statsig.getExperiment(
+        { 
+          userID: userId, 
+          custom: customAttributes as Record<string, string | number | boolean | string[] | undefined> | undefined
+        },
         experimentName
       );
       
-      const variantName = experiment.get('variant', 'control');
-      const variantValue = experiment.get('value', null);
+      const variantName = experiment.get('variant', 'control') as string;
+      const variantValue = experiment.get('value', null) as string | number | null;
       
       return {
         name: variantName,
-        value: variantValue
+        value: variantValue ?? 0
       };
     } catch (error) {
       // Return control on error
       return {
         name: 'control',
-        value: this.experiments.get(experimentName)?.control.value || null
+        value: this.experiments.get(experimentName)?.control.value ?? 0
       };
     }
   }

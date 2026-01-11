@@ -158,7 +158,7 @@ export class OpportunityDetector {
     const opportunities: Opportunity[] = [];
     
     // Check crash prediction accuracy
-    const crashAccuracy = this.metrics.getMetricValue('shim_crash_prediction_accuracy');
+    const crashAccuracy = await this.metrics.getMetricValue('shim_crash_prediction_accuracy');
     if (crashAccuracy !== undefined && crashAccuracy < 0.90) {
       const crashRate = 1 - crashAccuracy;
       
@@ -180,7 +180,7 @@ export class OpportunityDetector {
     }
     
     // Check checkpoint creation time
-    const checkpointStats = this.metrics.getHistogramStats('shim_checkpoint_creation_time');
+    const checkpointStats = await this.metrics.getHistogramStats('shim_checkpoint_creation_time');
     if (checkpointStats.count >= this.config.minSampleSize) {
       const avgTime = checkpointStats.sum / checkpointStats.count;
       
@@ -202,7 +202,7 @@ export class OpportunityDetector {
     }
     
     // Check resume success rate
-    const resumeRate = this.metrics.getMetricValue('shim_resume_success_rate');
+    const resumeRate = await this.metrics.getMetricValue('shim_resume_success_rate');
     if (resumeRate !== undefined && resumeRate < 0.90) {
       opportunities.push({
         id: this.generateId(),
@@ -229,7 +229,7 @@ export class OpportunityDetector {
     const opportunities: Opportunity[] = [];
     
     // Check model routing accuracy
-    const routingAccuracy = this.metrics.getMetricValue('shim_model_routing_accuracy');
+    const routingAccuracy = await this.metrics.getMetricValue('shim_model_routing_accuracy');
     if (routingAccuracy !== undefined && routingAccuracy < 0.85) {
       opportunities.push({
         id: this.generateId(),
@@ -247,7 +247,7 @@ export class OpportunityDetector {
     }
     
     // Check for token optimization opportunities
-    const selectionCounts = this.metrics.getModelSelectionCounts();
+    const selectionCounts = await this.metrics.getModelSelectionCounts();
     const totalSelections = selectionCounts.haiku + selectionCounts.sonnet + selectionCounts.opus;
     
     if (totalSelections >= this.config.minSampleSize) {
@@ -281,7 +281,7 @@ export class OpportunityDetector {
     const opportunities: Opportunity[] = [];
     
     // Check supervisor restart time
-    const restartStats = this.metrics.getHistogramStats('shim_supervisor_restart_time');
+    const restartStats = await this.metrics.getHistogramStats('shim_supervisor_restart_time');
     if (restartStats.count >= this.config.minSampleSize) {
       const avgRestart = restartStats.sum / restartStats.count;
       
@@ -303,7 +303,7 @@ export class OpportunityDetector {
     }
     
     // Check process monitor latency
-    const latencyStats = this.metrics.getHistogramStats('shim_process_monitor_latency');
+    const latencyStats = await this.metrics.getHistogramStats('shim_process_monitor_latency');
     if (latencyStats.count >= this.config.minSampleSize) {
       const avgLatency = latencyStats.sum / latencyStats.count;
       

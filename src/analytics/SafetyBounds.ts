@@ -101,7 +101,7 @@ export class SafetyBounds extends EventEmitter {
     
     // Check crash rate
     if (this.config.crashRate) {
-      const accuracy = metrics.getMetricValue('shim_crash_prediction_accuracy');
+      const accuracy = await metrics.getMetricValue('shim_crash_prediction_accuracy');
       if (accuracy !== undefined) {
         const crashRate = 1 - accuracy;
         const violation = this.checkBound('crashRate', crashRate, this.config.crashRate);
@@ -118,7 +118,7 @@ export class SafetyBounds extends EventEmitter {
     
     // Check checkpoint time
     if (this.config.checkpointTime) {
-      const stats = metrics.getHistogramStats('shim_checkpoint_creation_time');
+      const stats = await metrics.getHistogramStats('shim_checkpoint_creation_time');
       if (stats.count > 0) {
         const avgTime = stats.sum / stats.count;
         const violation = this.checkBound('checkpointTime', avgTime, this.config.checkpointTime);
@@ -135,7 +135,7 @@ export class SafetyBounds extends EventEmitter {
     
     // Check resume success rate
     if (this.config.resumeSuccessRate) {
-      const rate = metrics.getMetricValue('shim_resume_success_rate');
+      const rate = await metrics.getMetricValue('shim_resume_success_rate');
       if (rate !== undefined) {
         const violation = this.checkBound('resumeSuccessRate', rate, this.config.resumeSuccessRate);
         if (violation) {
@@ -151,7 +151,7 @@ export class SafetyBounds extends EventEmitter {
     
     // Check restart time
     if (this.config.restartTime) {
-      const stats = metrics.getHistogramStats('shim_supervisor_restart_time');
+      const stats = await metrics.getHistogramStats('shim_supervisor_restart_time');
       if (stats.count > 0) {
         const avgTime = stats.sum / stats.count;
         const violation = this.checkBound('restartTime', avgTime, this.config.restartTime);
@@ -238,7 +238,7 @@ export class SafetyBounds extends EventEmitter {
     
     // Check crash rate against baseline
     if (this.baseline.crashRate !== undefined) {
-      const accuracy = metrics.getMetricValue('shim_crash_prediction_accuracy');
+      const accuracy = await metrics.getMetricValue('shim_crash_prediction_accuracy');
       if (accuracy !== undefined) {
         const crashRate = 1 - accuracy;
         
@@ -257,7 +257,7 @@ export class SafetyBounds extends EventEmitter {
     
     // Check checkpoint time against baseline
     if (this.baseline.checkpointTime !== undefined) {
-      const stats = metrics.getHistogramStats('shim_checkpoint_creation_time');
+      const stats = await metrics.getHistogramStats('shim_checkpoint_creation_time');
       if (stats.count > 0) {
         const avgTime = stats.sum / stats.count;
         

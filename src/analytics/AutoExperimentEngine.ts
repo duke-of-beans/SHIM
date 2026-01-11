@@ -429,7 +429,7 @@ export class AutoExperimentEngine extends EventEmitter {
         if (!validation.passed) {
           this.emit('experiment_rejected', {
             opportunity,
-            reason: validation.rollbackReason
+            reason: validation.rollbackReason ?? 'Safety validation failed'
           });
           continue;
         }
@@ -454,13 +454,13 @@ export class AutoExperimentEngine extends EventEmitter {
   private async performAutoRollback(validation: ValidationResult): Promise<void> {
     for (const experiment of this.activeExperiments.values()) {
       try {
-        await this.statsig.rollback(experiment.name, validation.rollbackReason);
+        await this.statsig.rollback(experiment.name, validation.rollbackReason ?? 'Safety check failed');
         
         this.activeExperiments.delete(experiment.id);
         this.rollbackedExperiments.push(experiment);
         this.stats.rollbacksTriggered++;
         
-        this.emit('auto_rollback', { experiment, reason: validation.rollbackReason });
+        this.emit('auto_rollback', { experiment, reason: validation.rollbackReason ?? 'Safety check failed' });
         
       } catch (error) {
         this.emit('error', { phase: 'rollback', experiment, error });
@@ -491,7 +491,7 @@ export class AutoExperimentEngine extends EventEmitter {
           if (!validation.passed) {
             this.emit('deployment_rejected', {
               experiment,
-              reason: validation.rollbackReason
+              reason: validation.rollbackReason ?? 'Safety validation failed'
             });
             continue;
           }

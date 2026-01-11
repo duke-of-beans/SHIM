@@ -91,12 +91,12 @@ describe('SHIMMetrics', () => {
       expect(total).toBeGreaterThanOrEqual(15000);
     });
     
-    it('should record model selection by type', () => {
+    it('should record model selection by type', async () => {
       metrics.recordModelSelection('haiku', 'simple_query');
       metrics.recordModelSelection('sonnet', 'code_generation');
       metrics.recordModelSelection('opus', 'architecture_design');
       
-      const counts = metrics.getModelSelectionCounts();
+      const counts = await metrics.getModelSelectionCounts();
       expect(counts.haiku).toBeGreaterThan(0);
       expect(counts.sonnet).toBeGreaterThan(0);
       expect(counts.opus).toBeGreaterThan(0);
@@ -194,40 +194,40 @@ describe('SHIMMetrics', () => {
       expect(value).toBeGreaterThan(0);
     });
     
-    it('should reset all metrics', () => {
+    it('should reset all metrics', async () => {
       metrics.recordCrashPredictionAccuracy(0.95);
       metrics.recordTokenSavings(10000);
       
       metrics.reset();
       
       // Metrics should be reset to defaults
-      const names = metrics.getMetricNames();
+      const names = await metrics.getMetricNames();
       expect(names.length).toBeGreaterThan(0); // Default metrics still registered
     });
   });
   
   describe('Metric Queries', () => {
-    it('should get gauge value', () => {
+    it('should get gauge value', async () => {
       metrics.recordCrashPredictionAccuracy(0.88);
       
-      const value = metrics.getGaugeValue('shim_crash_prediction_accuracy');
+      const value = await metrics.getGaugeValue('shim_crash_prediction_accuracy');
       expect(value).toBe(0.88);
     });
     
-    it('should get counter value', () => {
+    it('should get counter value', async () => {
       metrics.recordTokenSavings(5000);
       metrics.recordTokenSavings(3000);
       
-      const total = metrics.getCounterValue('shim_token_savings_total');
+      const total = await metrics.getCounterValue('shim_token_savings_total');
       expect(total).toBeGreaterThanOrEqual(8000);
     });
     
-    it('should get histogram statistics', () => {
+    it('should get histogram statistics', async () => {
       metrics.recordCheckpointCreationTime(20);
       metrics.recordCheckpointCreationTime(30);
       metrics.recordCheckpointCreationTime(40);
       
-      const stats = metrics.getHistogramStats('shim_checkpoint_creation_time');
+      const stats = await metrics.getHistogramStats('shim_checkpoint_creation_time');
       expect(stats.count).toBe(3);
       expect(stats.sum).toBe(90);
     });

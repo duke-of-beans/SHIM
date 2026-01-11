@@ -176,9 +176,9 @@ export class SHIMMetrics {
   /**
    * Get all registered metric names
    */
-  getMetricNames(): string[] {
-    const metrics = this.registry.getMetricsAsJSON();
-    return metrics.map(m => m.name);
+  async getMetricNames(): Promise<string[]> {
+    const metrics = await this.registry.getMetricsAsJSON();
+    return metrics.map((m: promClient.MetricObjectWithValues<promClient.MetricValue<string>>) => m.name);
   }
   
   /**
@@ -243,9 +243,9 @@ export class SHIMMetrics {
   /**
    * Get model selection counts
    */
-  getModelSelectionCounts(): ModelSelectionCounts {
-    const metrics = this.registry.getMetricsAsJSON();
-    const selections = metrics.find(m => m.name === 'shim_model_selections_total');
+  async getModelSelectionCounts(): Promise<ModelSelectionCounts> {
+    const metrics = await this.registry.getMetricsAsJSON();
+    const selections = metrics.find((m: promClient.MetricObjectWithValues<promClient.MetricValue<string>>) => m.name === 'shim_model_selections_total');
     
     const counts: ModelSelectionCounts = { haiku: 0, sonnet: 0, opus: 0 };
     
@@ -350,44 +350,48 @@ export class SHIMMetrics {
   incrementCounter(name: string, labels?: Record<string, string>): void {
     const metric = this.customMetrics.get(name);
     if (metric && metric instanceof promClient.Counter) {
-      metric.inc(labels);
+      if (labels) {
+        metric.inc(labels);
+      } else {
+        metric.inc();
+      }
     }
   }
   
   /**
    * Get counter value
    */
-  getCounterValue(name: string, labels?: Record<string, string>): number {
-    const metrics = this.registry.getMetricsAsJSON();
-    const metric = metrics.find(m => m.name === name);
+  async getCounterValue(name: string, labels?: Record<string, string>): Promise<number> {
+    const metrics = await this.registry.getMetricsAsJSON();
+    const metric = metrics.find((m: promClient.MetricObjectWithValues<promClient.MetricValue<string>>) => m.name === name);
     
     if (!metric || !('values' in metric)) {
       return 0;
     }
     
     if (labels) {
-      const value = metric.values.find(v => 
-        v.labels && Object.entries(labels).every(([k, val]) => v.labels![k] === val)
+      const value = metric.values.find((v: promClient.MetricValue<string>) => 
+        v.labels && Object.entries(labels).every(([k, val]: [string, string]) => v.labels![k] === val)
       );
       return value?.value || 0;
     }
     
-    return metric.values.reduce((sum, v) => sum + (v.value || 0), 0);
+    return metric.values.reduce((sum: number, v: promClient.MetricValue<string>) => sum + (v.value || 0), 0);
   }
   
   /**
    * Get gauge value
    */
-  getGaugeValue(name: string): number | undefined {
-    return this.getMetricValue(name);
+  async getGaugeValue(name: string): Promise<number | undefined> {
+    return await this.getMetricValue(name);
   }
   
   /**
    * Get metric value (generic)
    */
-  getMetricValue(name: string): number | undefined {
-    const metrics = this.registry.getMetricsAsJSON();
-    const metric = metrics.find(m => m.name === name);
+  async getMetricValue(name: string): Promise<number | undefined> {
+    const metrics = await this.registry.getMetricsAsJSON();
+    const metric = metrics.find((m: promClient.MetricObjectWithValues<promClient.MetricValue<string>>) => m.name === name);
     
     if (!metric) {
       return undefined;
@@ -423,21 +427,24 @@ export class SHIMMetrics {
   /**
    * Get histogram statistics
    */
-  getHistogramStats(name: string): HistogramStats {
-    const metrics = this.registry.getMetricsAsJSON();
-    const metric = metrics.find(m => m.name === name);
+  async getHistogramStats(name: string): Promise<HistogramStats> {
+    const metrics = await this.registry.getMetricsAsJSON();
+    const metric = metrics.find((m: promClient.MetricObjectWithValues<promClient.MetricValue<string>>) => m.name === name);
     
     if (!metric || !('values' in metric)) {
       return { count: 0, sum: 0 };
     }
     
-    // Find count and sum labels
-    const countValue = metric.values.find(v => v.metricName?.includes('_count'));
-    const sumValue = metric.values.find(v => v.metricName?.includes('_sum'));
+    // For histograms, the count and sum are in separate metrics with _count and _sum suffixes
+    const countMetric = metrics.find((m: promClient.MetricObjectWithValues<promClient.MetricValue<string>>) => m.name === `${name}_count`);
+    const sumMetric = metrics.find((m: promClient.MetricObjectWithValues<promClient.MetricValue<string>>) => m.name === `${name}_sum`);
+    
+    const countValue = countMetric && 'values' in countMetric ? countMetric.values[0]?.value : undefined;
+    const sumValue = sumMetric && 'values' in sumMetric ? sumMetric.values[0]?.value : undefined;
     
     return {
-      count: countValue?.value || 0,
-      sum: sumValue?.value || 0
+      count: countValue || 0,
+      sum: sumValue || 0
     };
   }
   
