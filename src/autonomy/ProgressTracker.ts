@@ -8,7 +8,7 @@
  * Component 2/8
  */
 
-import { GoalDecomposition, SubGoal } from './GoalDecomposer';
+import { GoalDecomposition } from './GoalDecomposer';
 
 export interface Blocker {
   id: string;
