@@ -34,3 +34,32 @@ export interface ConnectionStats {
   commandsSent?: number;
   commandsFailed?: number;
 }
+
+/**
+ * Worker Status
+ * 
+ * Current operational status of a worker
+ */
+export type WorkerStatus = 'idle' | 'busy';
+
+/**
+ * Worker Health
+ * 
+ * Health status based on heartbeat monitoring
+ */
+export type WorkerHealth = 'healthy' | 'degraded' | 'crashed';
+
+/**
+ * Worker Information
+ * 
+ * Complete worker registration and status data
+ */
+export interface WorkerInfo {
+  workerId: string;            // Unique worker identifier
+  chatId: string;              // Associated chat session ID
+  status: WorkerStatus;        // Current operational status
+  health: WorkerHealth;        // Health based on heartbeat
+  registeredAt: number;        // Timestamp of registration (ms since epoch)
+  lastHeartbeat: number;       // Timestamp of last heartbeat (ms since epoch)
+  currentTask?: string;        // Optional current task ID
+}
