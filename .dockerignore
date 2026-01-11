@@ -1,0 +1,59 @@
+# SHIM Docker Ignore
+# Files to exclude from Docker build context
+
+# Dependencies
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
+
+# TypeScript
+*.tsbuildinfo
+dist/
+
+# Tests
+**/*.test.ts
+**/*.spec.ts
+coverage/
+.nyc_output/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Docs
+*.md
+docs/
+demos/
+
+# Logs
+logs/
+*.log
+
+# Temp
+tmp/
+temp/
+checkpoints/
