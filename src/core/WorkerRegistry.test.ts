@@ -6,7 +6,7 @@
 
 import { WorkerRegistry } from './WorkerRegistry';
 import { RedisConnectionManager } from './RedisConnectionManager';
-import { WorkerInfo, WorkerHealth } from '../models/Redis';
+import { WorkerHealth } from '../models/Redis';
 
 describe('WorkerRegistry', () => {
   let registry: WorkerRegistry;
@@ -65,7 +65,7 @@ describe('WorkerRegistry', () => {
       const registeredAt1 = worker1?.registeredAt;
       
       // Wait a bit
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise(resolve => { setTimeout(resolve, 100); });
       
       // Second registration
       await registry.registerWorker(workerId, chatId2);
@@ -129,7 +129,7 @@ describe('WorkerRegistry', () => {
       const worker1 = await registry.getWorker(workerId);
       
       // Wait a bit
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise(resolve => { setTimeout(resolve, 100); });
       
       await registry.heartbeat(workerId);
       const worker2 = await registry.getWorker(workerId);

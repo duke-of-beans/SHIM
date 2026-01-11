@@ -1,6 +1,6 @@
 {
   "name": "shim",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Session Handling & Intelligent Management for Claude Desktop",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -13,7 +13,8 @@
     "lint": "eslint src/**/*.ts",
     "format": "prettier --write \"src/**/*.ts\"",
     "mcp:start": "node dist/mcp/server.js",
-    "db:migrate": "node dist/database/migrate.js"
+    "db:migrate": "node dist/database/migrate.js",
+    "metrics:start": "node dist/analytics/metrics-server.js"
   },
   "keywords": [
     "claude",
@@ -21,14 +22,19 @@
     "crash-prevention",
     "checkpoint",
     "mcp",
-    "development-tools"
+    "development-tools",
+    "analytics",
+    "auto-experimentation"
   ],
   "author": "",
   "license": "MIT",
   "dependencies": {
     "bullmq": "^5.66.4",
     "ioredis": "^5.9.1",
+    "prom-client": "^15.1.0",
+    "simple-statistics": "^7.8.3",
     "sqlite3": "^5.1.7",
+    "statsig-node": "^5.24.0",
     "tiktoken": "^1.0.15",
     "uuid": "^9.0.1"
   },

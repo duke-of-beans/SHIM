@@ -147,7 +147,7 @@ describe('RedisConnectionManager', () => {
       // If Redis is not available, test will be skipped
       manager = new RedisConnectionManager({
         lazyConnect: true,
-        retryStrategy: (times) => {
+        retryStrategy: (times): number | null => {
           if (times > 3) return null; // Give up after 3 tries
           return Math.min(times * 100, 1000); // Exponential backoff
         }
@@ -158,7 +158,7 @@ describe('RedisConnectionManager', () => {
         expect(manager.isConnected()).toBe(true);
       } catch (error) {
         // Skip test if Redis not available
-        console.log('Skipping reconnection test - Redis not available');
+        // Test will pass silently if Redis unavailable
       }
     }, 15000);
   });

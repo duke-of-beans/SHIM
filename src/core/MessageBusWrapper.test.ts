@@ -1,4 +1,4 @@
-/**
+﻿/**
  * MessageBusWrapper Tests
  * 
  * Tests Redis Pub/Sub wrapper for event broadcasting.
@@ -66,7 +66,7 @@ describe('MessageBusWrapper', () => {
       await messageBus.publish('task:started', event);
 
       // Give pub/sub time to deliver
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise(resolve => { setTimeout(resolve, 100); });
 
       expect(received.length).toBe(1);
       expect(received[0].type).toBe('task:started');
@@ -97,7 +97,7 @@ describe('MessageBusWrapper', () => {
       await messageBus.publishToPattern('task:started', startedEvent);
       await messageBus.publishToPattern('task:completed', completedEvent);
 
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise(resolve => { setTimeout(resolve, 100); });
 
       expect(received.length).toBe(2);
       expect(received[0].type).toBe('task:started');
@@ -135,7 +135,7 @@ describe('MessageBusWrapper', () => {
       };
 
       await messageBus.publish('worker:registered', event);
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise(resolve => { setTimeout(resolve, 100); });
 
       expect(received.length).toBe(1);
     });
@@ -157,7 +157,7 @@ describe('MessageBusWrapper', () => {
       };
 
       await messageBus.publish('test:channel', event);
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise(resolve => { setTimeout(resolve, 100); });
 
       expect(received1.length).toBe(1);
       expect(received2.length).toBe(1);
@@ -179,7 +179,7 @@ describe('MessageBusWrapper', () => {
         timestamp: Date.now()
       });
 
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise(resolve => { setTimeout(resolve, 100); });
 
       expect(received.length).toBe(1);
       expect(received[0].channel).toBe('supervisor:command');
@@ -210,7 +210,7 @@ describe('MessageBusWrapper', () => {
         timestamp: Date.now()
       });
 
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise(resolve => { setTimeout(resolve, 100); });
       expect(received.length).toBe(1);
 
       // Unsubscribe
@@ -223,7 +223,7 @@ describe('MessageBusWrapper', () => {
         timestamp: Date.now()
       });
 
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise(resolve => { setTimeout(resolve, 100); });
 
       // Should still be 1 (not received second message)
       expect(received.length).toBe(1);
@@ -241,7 +241,7 @@ describe('MessageBusWrapper', () => {
         timestamp: Date.now()
       });
 
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise(resolve => { setTimeout(resolve, 100); });
       expect(received.length).toBe(1);
 
       await messageBus.punsubscribe('pattern:*');
@@ -252,7 +252,7 @@ describe('MessageBusWrapper', () => {
         timestamp: Date.now()
       });
 
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise(resolve => { setTimeout(resolve, 100); });
       expect(received.length).toBe(1);
     });
   });
@@ -317,7 +317,7 @@ describe('MessageBusWrapper', () => {
         timestamp: Date.now()
       });
 
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise(resolve => { setTimeout(resolve, 100); });
 
       expect(received.length).toBe(1);
       

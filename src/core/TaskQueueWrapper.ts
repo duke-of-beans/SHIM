@@ -13,7 +13,7 @@ import { RedisConnectionManager } from './RedisConnectionManager';
  */
 export interface Task {
   type: string;
-  data: any;
+  data: Record<string, unknown>;
 }
 
 /**
@@ -21,7 +21,7 @@ export interface Task {
  */
 export interface TaskResult {
   success: boolean;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 /**
@@ -120,14 +120,20 @@ export class TaskQueueWrapper {
   /**
    * Get Redis connection configuration
    */
-  private getConnectionConfig(): any {
+  private getConnectionConfig(): {
+    host: string;
+    port: number;
+    db: number;
+    password?: string;
+    keyPrefix?: string;
+  } {
     try {
       // Try to get client - this might throw if not connected
       const redisClient = this.connection.getClient();
       return {
-        host: redisClient.options.host,
-        port: redisClient.options.port,
-        db: redisClient.options.db,
+        host: redisClient.options.host || 'localhost',
+        port: redisClient.options.port || 6379,
+        db: redisClient.options.db || 0,
         password: redisClient.options.password,
         keyPrefix: redisClient.options.keyPrefix
       };
@@ -150,7 +156,11 @@ export class TaskQueueWrapper {
       throw new Error('Task is required');
     }
 
-    const jobOptions: any = {};
+    const jobOptions: {
+      priority?: number;
+      delay?: number;
+      attempts?: number;
+    } = {};
 
     if (options?.priority) {
       jobOptions.priority = options.priority;
@@ -225,11 +235,11 @@ export class TaskQueueWrapper {
         };
 
         // Progress callback
-        const progress: ProgressCallback = (percentage: number, message?: string) => {
-          job.updateProgress(percentage);
+        const progress: ProgressCallback = (percentage: number, _message?: string) => {
+          void job.updateProgress(percentage);
         };
 
-        return await processor(task, progress);
+        return processor(task, progress);
       },
       {
         connection: connectionConfig,
@@ -254,14 +264,14 @@ export class TaskQueueWrapper {
    * Pause queue
    */
   async pause(): Promise<void> {
-    await this.queue.pause();
+    return this.queue.pause();
   }
 
   /**
    * Resume queue
    */
   async resume(): Promise<void> {
-    await this.queue.resume();
+    return this.queue.resume();
   }
 
   /**
@@ -304,14 +314,14 @@ export class TaskQueueWrapper {
    * Get waiting job count
    */
   async getWaitingCount(): Promise<number> {
-    return await this.queue.getWaitingCount();
+    return this.queue.getWaitingCount();
   }
 
   /**
    * Get active job count
    */
   async getActiveCount(): Promise<number> {
-    return await this.queue.getActiveCount();
+    return this.queue.getActiveCount();
   }
 
   /**

@@ -19,7 +19,7 @@ describe('SignalHistoryRepository', () => {
     if (repository) {
       await repository.close();
       // Wait a bit for Windows to release file lock
-      await new Promise(resolve => setTimeout(resolve, 50));
+      await new Promise(resolve => { setTimeout(resolve, 50); });
     }
     
     // Clean up test database

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * TaskQueueWrapper Tests
  * 
  * Tests for BullMQ wrapper with SHIM-specific task handling
@@ -37,7 +37,9 @@ describe('TaskQueueWrapper', () => {
     }
     
     // Wait for BullMQ internal cleanup
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise<void>(resolve => {
+      setTimeout(resolve, 100);
+    });
     
     if (connection?.isConnected()) {
       await connection.disconnect();
@@ -209,14 +211,14 @@ describe('TaskQueueWrapper', () => {
 
       // Add task and wait a bit for it to be queued
       const taskId = await queue.addTask(task);
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise(resolve => { setTimeout(resolve, 100); });
 
       // Check that task was added
       const stats = await queue.getQueueStats();
       expect(stats.waiting + stats.active + stats.completed).toBeGreaterThan(0);
 
       // Wait for worker to process
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise(resolve => { setTimeout(resolve, 2000); });
 
       expect(processedTask).not.toBeNull();
       expect(processedTask).toBeDefined();
@@ -249,7 +251,7 @@ describe('TaskQueueWrapper', () => {
       // Attempt 2: after 1000ms backoff
       // Attempt 3: after 2000ms backoff
       // Total: ~3500ms + processing time
-      await new Promise(resolve => setTimeout(resolve, 8000));
+      await new Promise(resolve => { setTimeout(resolve, 8000); });
 
       expect(attemptCount).toBeGreaterThanOrEqual(3);
     }, 15000); // Increase timeout to 15 seconds
@@ -262,7 +264,7 @@ describe('TaskQueueWrapper', () => {
         concurrentCount++;
         maxConcurrent = Math.max(maxConcurrent, concurrentCount);
         
-        await new Promise(resolve => setTimeout(resolve, 50));
+        await new Promise(resolve => { setTimeout(resolve, 50); });
         
         concurrentCount--;
         return { success: true };
@@ -276,7 +278,7 @@ describe('TaskQueueWrapper', () => {
       }
 
       // Wait for processing
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => { setTimeout(resolve, 1000); });
 
       expect(maxConcurrent).toBeLessThanOrEqual(3);
     });
@@ -287,13 +289,13 @@ describe('TaskQueueWrapper', () => {
       const processor = async (task: any, progress: (pct: number) => void) => {
         if (progress) {
           progress(25);
-          await new Promise(resolve => setTimeout(resolve, 10));
+          await new Promise(resolve => { setTimeout(resolve, 10); });
           
           progress(50);
-          await new Promise(resolve => setTimeout(resolve, 10));
+          await new Promise(resolve => { setTimeout(resolve, 10); });
           
           progress(75);
-          await new Promise(resolve => setTimeout(resolve, 10));
+          await new Promise(resolve => { setTimeout(resolve, 10); });
           
           progress(100);
         }
@@ -312,7 +314,7 @@ describe('TaskQueueWrapper', () => {
       await queue.addTask({ type: 'progress-test', data: {} });
 
       // Wait for worker to pick up and process job
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => { setTimeout(resolve, 1000); });
 
       expect(progressUpdates.length).toBeGreaterThan(0);
       expect(progressUpdates).toContain(25);
@@ -337,7 +339,7 @@ describe('TaskQueueWrapper', () => {
       await queue.resume();
 
       // Queue should process now
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise(resolve => { setTimeout(resolve, 100); });
     });
 
     it('should drain queue (remove waiting jobs)', async () => {
@@ -359,7 +361,7 @@ describe('TaskQueueWrapper', () => {
 
       // Add and process task
       await queue.addTask({ type: 'clean-test', data: {} });
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise(resolve => { setTimeout(resolve, 100); });
 
       // Clean completed jobs
       await queue.clean(0);
@@ -401,7 +403,7 @@ describe('TaskQueueWrapper', () => {
     it('should return accurate active count', async () => {
       // Register slow processor (longer delay to ensure tasks stay active)
       await queue.registerWorker(async (task) => {
-        await new Promise(resolve => setTimeout(resolve, 2000)); // Very long delay
+        await new Promise(resolve => { setTimeout(resolve, 2000); }); // Very long delay
         return { success: true };
       });
 
@@ -411,7 +413,7 @@ describe('TaskQueueWrapper', () => {
       await queue.addTask({ type: 'active-3', data: {} });
 
       // Wait for tasks to become active
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => { setTimeout(resolve, 500); });
 
       const activeCount = await queue.getActiveCount();
       // With concurrency=1 (default), should have 1 active at a time
@@ -439,7 +441,7 @@ describe('TaskQueueWrapper', () => {
         
         if (processCount === 1) {
           // Simulate stall (process hangs)
-          await new Promise(resolve => setTimeout(resolve, 60000));
+          await new Promise(resolve => { setTimeout(resolve, 60000); });
         }
         
         return { success: true };
@@ -450,7 +452,7 @@ describe('TaskQueueWrapper', () => {
       await queue.addTask({ type: 'stall-test', data: {} });
 
       // Wait for stall detection (30s interval from config)
-      await new Promise(resolve => setTimeout(resolve, 35000));
+      await new Promise(resolve => { setTimeout(resolve, 35000); });
 
       // Job should be retried
       expect(processCount).toBeGreaterThan(1);

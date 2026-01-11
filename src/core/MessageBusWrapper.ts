@@ -13,7 +13,7 @@ import { RedisConnectionManager } from './RedisConnectionManager';
  */
 export interface ProgressEvent {
   type: string;
-  data: any;
+  data: Record<string, unknown>;
   timestamp: number;
 }
 
@@ -80,19 +80,19 @@ export class MessageBusWrapper {
   private setupSubscriberHandlers(): void {
     // Handle channel messages
     this.subscriber.on('message', (channel: string, message: string) => {
-      this.handleMessage(channel, message, false);
+      void this.handleMessage(channel, message, false);
     });
 
     // Handle pattern messages
     this.subscriber.on('pmessage', (pattern: string, channel: string, message: string) => {
-      this.handlePatternMessage(pattern, channel, message);
+      void this.handlePatternMessage(pattern, channel, message);
     });
   }
 
   /**
    * Handle incoming message from channel
    */
-  private async handleMessage(channel: string, message: string, isPattern: boolean): Promise<void> {
+  private async handleMessage(channel: string, message: string, _isPattern: boolean): Promise<void> {
     try {
       const event: ProgressEvent = JSON.parse(message);
       const handlers = this.channelHandlers.get(channel);
