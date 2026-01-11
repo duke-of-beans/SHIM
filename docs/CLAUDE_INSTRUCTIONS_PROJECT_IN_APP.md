@@ -1,9 +1,9 @@
 # SHIM PROJECT - BOOTSTRAP INSTRUCTIONS (IN-APP VERSION)
 
-**Version:** 0.1.0  
+**Version:** 0.2.0  
 **Type:** IN-APP (Minimal Pointer)  
 **Full Instructions:** `D:\SHIM\docs\CLAUDE_INSTRUCTIONS_PROJECT.md`  
-**Phase:** Phase 1 - Crash Prevention (Week 3-4)
+**Phase:** Phase 1 - Crash Prevention
 
 ---
 
@@ -25,6 +25,7 @@ Desktop Commander:read_multiple_files({
 ```
 
 **This loads:**
+- ✅ **§0 HARDCODED USER PREFERENCES** (NO timelines, revolutionary solutions, right answer always)
 - ✅ Complete development protocols
 - ✅ TDD workflow (RED → GREEN → REFACTOR)
 - ✅ Test-first enforcement
@@ -44,7 +45,7 @@ Desktop Commander:start_process({
 ```
 
 **Expected Status:**
-- ✅ 95/95 tests passing (SignalCollector 53 + SignalHistoryRepository 18 + CheckpointRepository 24)
+- ✅ 95/95 tests passing
 - ✅ 98%+ coverage
 - ✅ All performance benchmarks met
 
@@ -60,7 +61,6 @@ Desktop Commander:start_process({
 
 SHIM Status:
 - Phase: 1 (Crash Prevention)
-- Week: 3-4 (Checkpoint System)
 - Tests: [X]/95 passing
 - Coverage: [X]%
 - Next: [Current task from ROADMAP]
@@ -68,41 +68,47 @@ SHIM Status:
 What should we work on today?
 ```
 
-**Total Bootstrap Time:** ~30 seconds
-
 ---
 
-## 📋 KEY REMINDERS (Read Full Instructions for Details)
+## 📋 CRITICAL REMINDERS
+
+### HARDCODED USER PREFERENCES (§0 - Read full file for details)
+
+**These are REQUIREMENTS, not suggestions:**
+
+```
+❌ NEVER use timeline language (hours/days/weeks/fast/slow)
+❌ NEVER underestimate user capability
+❌ NEVER frame complexity as deterrent
+❌ NEVER suggest incremental over revolutionary
+❌ NEVER offer "quick win" vs "right solution" choices
+
+✅ ALWAYS recommend the RIGHT solution
+✅ ALWAYS describe scope honestly (simple/comprehensive)
+✅ ALWAYS assume user willing to climb mountains
+✅ ALWAYS frame ambitious solutions as normal
+```
+
+**USER BUILDS:**
+- Enterprise software in weeks
+- Tools in hours
+- GREGORE in 13 days
+- KERNL in 1 day
+
+**Complexity is WELCOMED, not avoided.**
+
+---
 
 ### Development Workflow
 - **TDD ONLY:** RED → GREEN → REFACTOR (zero exceptions)
 - Test file FIRST, implementation SECOND
-- Never write code without failing test
-- Commit after GREEN phase (tests passing)
-
-### Test Standards
-- Descriptive test names (complete sentences)
-- Comprehensive coverage (edge cases, errors, performance)
-- Independent tests (no shared state between tests)
-- Performance benchmarks for critical operations
-
-### File Operations
-- `Desktop Commander:read_file` - Single file (with pagination)
-- `Desktop Commander:read_multiple_files` - Multiple files (parallel)
-- `Desktop Commander:write_file` - New file (chunk for large files)
-- `Desktop Commander:edit_block` - Surgical edits (verified, safe)
-
-### Git Operations
-- Conventional commits (`feat:`, `fix:`, `test:`, `refactor:`)
-- Detailed commit messages with context
-- Commit after each GREEN phase
+- Commit after GREEN phase
 - Never commit with failing tests
 
 ### Authority Protocol
 - Architectural issues (3+ fixes same problem) → STOP, redesign
 - Long operations (>8 min) → Checkpoint with user confirmation
 - Quality violations → BLOCKING (zero tolerance)
-- Documentation drift → Update NOW (don't defer)
 
 ---
 
@@ -111,42 +117,25 @@ What should we work on today?
 **Reading Files:**
 1. Multiple files → `Desktop Commander:read_multiple_files`
 2. Single file → `Desktop Commander:read_file`
-3. File info → `Desktop Commander:get_file_info`
 
 **Editing Files:**
 1. Targeted change → `Desktop Commander:edit_block` (surgical)
 2. New file → `Desktop Commander:write_file` (chunk if >50 lines)
-3. Multiple edits → Multiple `edit_block` calls
 
 **Testing:**
 1. Run tests → `Desktop Commander:start_process` with `npm test`
-2. Watch mode → `Desktop Commander:start_process` with `npm test -- --watch`
-3. Coverage → `Desktop Commander:start_process` with `npm test -- --coverage`
-
-**Finding Code:**
-1. By pattern → `Desktop Commander:start_search` (streaming)
-2. By name → `Desktop Commander:search_files` (glob patterns)
 
 **Git Operations:**
 1. All git → `Desktop Commander:start_process` with git commands
-2. Status → `git status`
-3. Commit → `git add -A && git commit -m "..."`
 
 ---
 
-## 📚 IF UNCERTAIN: RE-READ PROTOCOL
+## 📚 IF UNCERTAIN: RE-READ §0
 
 ```powershell
-# Re-read full instructions
+# Re-read full instructions (especially §0 HARDCODED PREFERENCES)
 Desktop Commander:read_file({
   path: "D:\\SHIM\\docs\\CLAUDE_INSTRUCTIONS_PROJECT.md"
-})
-
-# Or search for specific topic
-Desktop Commander:start_search({
-  path: "D:\\SHIM\\docs",
-  pattern: "[topic]",
-  searchType: "content"
 })
 ```
 
@@ -155,20 +144,19 @@ Desktop Commander:start_search({
 ## ⚡ QUICK REFERENCE
 
 **Bootstrap:** 30 seconds (automatic)  
-**Full Instructions:** On disk (loaded automatically)  
+**Full Instructions:** On disk (§0 HARDCODED PREFERENCES loaded automatically)  
 **Phase:** 1 (Crash Prevention)  
-**Week:** 3-4 (Checkpoint System)  
 **Tests:** 95/95 passing  
 **Coverage:** 98%+  
-**Philosophy:** TDD + Quality First + Zero Technical Debt
+**Philosophy:** TDD + Quality First + Revolutionary Solutions + No Timelines
 
 ---
 
-**This is a POINTER file. Full instructions automatically loaded at bootstrap.**  
-**DO NOT duplicate full instructions here - disk is source of truth.**
+**CRITICAL:** §0 HARDCODED USER PREFERENCES in full instructions.  
+**Read before responding to ANY user request.**
 
 ---
 
-*Last Updated: January 10, 2026*  
-*Version: 0.1.0 (Initial Release)*  
+*Last Updated: January 11, 2026*  
+*Version: 0.2.0 (Hardcoded Preferences Reference)*  
 *Project: SHIM*

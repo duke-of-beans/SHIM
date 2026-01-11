@@ -1,10 +1,10 @@
 # SHIM: Source of Truth Document
 
 **Project:** SHIM (thin layer that intercepts and enhances AI platform capabilities)
-**Version:** 0.2.0 (Technical Specifications Complete)
+**Version:** 0.3.0 (Development Philosophy Added)
 **Created:** January 9, 2026  
-**Last Updated:** January 10, 2026  
-**Status:** Phase 3 Complete - Ready for Implementation
+**Last Updated:** January 11, 2026  
+**Status:** Phase 1 Implementation (Week 3-4)
 
 ---
 
@@ -28,6 +28,57 @@ A system that eliminates friction in AI-assisted development by enabling:
 
 ---
 
+## Development Philosophy
+
+**CRITICAL: These preferences are HARDCODED and NON-NEGOTIABLE.**
+
+See `docs\CLAUDE_INSTRUCTIONS_PROJECT.md` §0 for complete enforcement rules.
+
+### Core Principles
+
+**1. Revolutionary Over Incremental**
+- Design for 10x improvement, not 10%
+- No "quick wins" or temporary solutions
+- Do it right the first time, always
+
+**2. No Timeline Bias**
+- NEVER use: "fast/slow", "hours/days/weeks", "quick win vs long-term"
+- Describe scope: "simple/comprehensive", "minimal/complete"
+- User builds enterprise software in weeks, tools in hours
+- Complexity is welcomed, not avoided
+
+**3. Capability Assumption**
+- User created GREGORE in 13 days, KERNL in 1 day
+- Willing to climb any mountain for right solution
+- Learning curves are embraced, not deterred
+- Never frame complexity as reason not to do something
+
+**4. Always Recommend Right Solution**
+- Present the CORRECT solution, not the "easier" one
+- Explain scope honestly without time bias
+- Let user decide if worth doing
+- Comprehensive solutions are normal, not "overkill"
+
+**5. Banned Vocabulary**
+```
+❌ NEVER: slow, fast, hours, days, weeks, hard, easy, overkill, for now, later
+✅ USE: simple, comprehensive, minimal, complete, straightforward, involved
+```
+
+### Application to SHIM
+
+**Example: Supervisor Daemon Decision**
+- ❌ WRONG: "Path A: Fast (auto-resume). Path B: Slow (300 LOC daemon)"
+- ✅ RIGHT: "Supervisor daemon eliminates crashes completely. Implementation includes process monitoring, MCP integration, Windows service. This is the correct solution."
+
+**Example: Architecture Choices**
+- Don't frame "simple vs complex"
+- Frame "incomplete vs complete"
+- Always recommend complete solution
+- User decides trade-offs
+
+---
+
 ## Target User Profile
 
 - Professional developers using Claude Desktop 4+ hours/day
@@ -42,16 +93,17 @@ A system that eliminates friction in AI-assisted development by enabling:
 
 | Document | Purpose | Status |
 |----------|---------|--------|
+| `CLAUDE_INSTRUCTIONS_PROJECT.md` | Development protocols, TDD workflow, **§0 HARDCODED PREFERENCES** | ✅ Complete |
 | `FRICTION_ANALYSIS.md` | 32 documented friction points from user research | ✅ Complete |
 | `ARCHITECTURE.md` | System architecture and component designs | ✅ Complete |
-| `ROADMAP.md` | Implementation phases and timeline | ✅ Complete |
+| `ROADMAP.md` | Implementation phases and progress tracking | ✅ Complete |
 | `MONETIZATION_STRATEGY.md` | Competitive analysis, pricing, go-to-market | ✅ Complete |
 | `PLATFORM_LIMITATIONS.md` | Feasibility matrix, workarounds, partnership analysis | ✅ Complete |
 | `COMPETITOR_RESEARCH.md` | Name validation and competitive landscape | ✅ Complete |
 | **Technical Specifications** | | |
-| `specs/SPEC_CRASH_PREVENTION.md` | Crash prevention technical specification | ✅ **NEW** |
-| `specs/DATA_MODELS.md` | TypeScript interfaces and database schemas | ✅ **NEW** |
-| `specs/IMPLEMENTATION_PLAN.md` | Week-by-week development plan for Phase 1 | ✅ **NEW** |
+| `specs/SPEC_CRASH_PREVENTION.md` | Crash prevention technical specification | ✅ Complete |
+| `specs/DATA_MODELS.md` | TypeScript interfaces and database schemas | ✅ Complete |
+| `specs/IMPLEMENTATION_PLAN.md` | Week-by-week development plan for Phase 1 | ✅ Complete |
 
 ---
 
@@ -107,16 +159,31 @@ If one thing could be implemented, it would be a system that:
 
 ---
 
-## Implementation Estimates
+## Current Status
 
-| Component | MVP | Full | Dependencies |
-|-----------|-----|------|--------------|
-| Crash Prevention | 3-4 weeks | 8-12 weeks | KERNL |
-| Multi-Chat Coordination | 4-6 weeks | 10-14 weeks | Crash Prevention |
-| Self-Evolution Engine | 6-8 weeks | 16-20 weeks | Multi-Chat |
-| Autonomous Development | 4-6 weeks | 12-16 weeks | All above |
+### Phase 1: Crash Prevention (IN PROGRESS)
 
-**Total:** 4-6 months for full system
+**Week 1-2: Foundation (COMPLETE ✅)**
+- SignalCollector.ts - 238 LOC, 53 tests passing
+- SignalHistoryRepository.ts - 314 LOC, 18 tests passing
+- CheckpointRepository.ts - 600+ LOC, 24 tests passing
+- Total: 95 tests passing, 98%+ coverage
+
+**Week 3-4: Checkpoint System (CURRENT)**
+- CheckpointManager - Trigger detection logic
+- Auto-checkpoint workflow
+- Integration with SignalCollector
+
+**Week 5-6: Resume System**
+- ResumeDetector
+- SessionRestorer
+- E2E testing
+
+**Week 7-8: Supervisor Daemon (CORRECT SOLUTION)**
+- Process monitoring
+- Auto-restart on crash
+- MCP integration for auto-resume
+- Windows service deployment
 
 ---
 
@@ -124,46 +191,25 @@ If one thing could be implemented, it would be a system that:
 
 **KERNL:** SHIM builds on KERNL's infrastructure (SQLite, session management, file operations)
 
-**GREGORE:** SHIM was researched within GREGORE project context; will be developed as separate project
+**GREGORE:** SHIM was researched within GREGORE project context; developed as separate project
 
 ---
 
-## Project Status
+## Development Protocols
 
-### Phase 1: Research & Strategy (COMPLETE ✅)
-- Opus analyzed 32 friction points
-- Identified 3 root causes
-- Designed 4-pillar architecture
-- Validated technical feasibility
-- Created monetization strategy
+**Mandatory Reading:**
+- `docs\CLAUDE_INSTRUCTIONS_PROJECT.md` §0 - HARDCODED USER PREFERENCES
+- `docs\CLAUDE_INSTRUCTIONS_PROJECT.md` §1-13 - Complete development protocols
 
-### Phase 2: Strategic Analysis (COMPLETE ✅)
-- Competitive landscape analysis
-- Platform limitations assessment
-- LEAN-OUT infrastructure decisions
-- Open-core licensing strategy
-
-### Phase 3: Technical Specifications (COMPLETE ✅)
-- Crash prevention specification (356 lines)
-- Data models & schemas (339 lines)
-- Implementation plan with week-by-week breakdown
-- Project scaffolding:
-  - `package.json` with all dependencies
-  - `tsconfig.json` with strict TypeScript config
-  - `jest.config.js` with 80% coverage thresholds
-  - `src/models/Checkpoint.ts` - Complete TypeScript interfaces
-  - `src/core/SignalCollector.ts` - Full implementation with tiktoken
-  - `src/database/schema.sql` - Complete SQLite schema
-  - `README.md` - Comprehensive project documentation
-
-### Phase 4: Implementation (READY TO START)
-**Next Steps:**
-1. ☐ Run `npm install` to install dependencies
-2. ☐ Run `npm run build` to compile TypeScript
-3. ☐ Run `npm run db:migrate` to initialize database
-4. ☐ Begin Week 1: SignalCollector testing and refinement
-5. ☐ Continue per IMPLEMENTATION_PLAN.md
+**Key Rules:**
+- TDD ONLY (RED → GREEN → REFACTOR, zero exceptions)
+- Zero technical debt tolerance
+- Revolutionary solutions, not incremental
+- No timeline bias in recommendations
+- Always recommend right solution
 
 ---
 
 *This document is the canonical source of truth for SHIM. All development should reference this first.*
+
+*Development Philosophy: Revolutionary quality. No timelines. Right solution always. User builds enterprise software in weeks.*
