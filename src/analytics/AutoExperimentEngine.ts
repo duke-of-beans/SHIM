@@ -62,6 +62,38 @@ export interface ExperimentStatus {
   deploymentsCompleted: number;
 }
 
+export interface AutoExperimentEngineEvents {
+  started: () => void;
+  stopped: () => void;
+  paused: () => void;
+  resumed: () => void;
+  detection_cycle: () => void;
+  detection_skipped: (reason: string) => void;
+  opportunities_detected: (opportunities: Opportunity[]) => void;
+  experiment_created: (experiment: ExperimentConfig) => void;
+  experiment_rejected: (data: { opportunity: Opportunity; reason: string }) => void;
+  max_experiments_reached: () => void;
+  safety_check: () => void;
+  safety_violation: (violations: any[]) => void;
+  auto_rollback: (data: { experiment: ExperimentConfig; reason: string }) => void;
+  progress_check: () => void;
+  progress_update: (status: ExperimentStatus) => void;
+  auto_deployed: (result: any) => void;
+  deployment_rejected: (data: { experiment: ExperimentConfig; reason: string }) => void;
+  error: (error: any) => void;
+}
+
+export declare interface AutoExperimentEngine {
+  on<K extends keyof AutoExperimentEngineEvents>(
+    event: K,
+    listener: AutoExperimentEngineEvents[K]
+  ): this;
+  emit<K extends keyof AutoExperimentEngineEvents>(
+    event: K,
+    ...args: Parameters<AutoExperimentEngineEvents[K]>
+  ): boolean;
+}
+
 export class AutoExperimentEngine extends EventEmitter {
   private metrics: SHIMMetrics;
   private detector: OpportunityDetector;
