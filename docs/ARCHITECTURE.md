@@ -1,9 +1,14 @@
 # 🏗️ SHIM Architecture
 
+**Version:** 0.2.0 (Analytics & Model Routing Added)  
+**Last Updated:** January 11, 2026
+
 ## Overview
 
-**SHIM** (thin layer that intercepts and enhances AI platform capabilities) is a comprehensive system enabling autonomous AI-assisted development through:
+**SHIM** (thin layer that intercepts and enhances AI platform capabilities) is a comprehensive **self-improving** system enabling autonomous AI-assisted development through:
 - Crash Prevention & Recovery
+- Intelligent Model Routing (NEW)
+- Analytics & Auto-Experimentation (NEW - Kaizen Loop)
 - Multi-Chat Coordination  
 - Self-Evolution Engine
 - Zero-Intervention Development
@@ -12,13 +17,40 @@
 
 **Name Etymology:** In computing, a shim is a library that transparently intercepts API calls and changes the arguments passed, handles the operation itself, or redirects the operation elsewhere. SHIM intercepts Claude Desktop's capabilities and enhances them with persistence, coordination, and intelligence.
 
+**NEW: Fully Automatic Self-Improvement**
+- Continuous A/B testing without human intervention
+- Statistical validation and gradual rollout
+- Automatic parameter tuning within safety bounds
+- Zero manual improvement application required
+
+---
+
+## LEAN-OUT Principle
+
+> "Build intelligence, not plumbing. Use battle-tested tools for generic problems."
+
+**Infrastructure Stack:**
+- **Redis + BullMQ** - Job queues, messaging, locks
+- **Prometheus + Grafana** - Metrics storage, dashboards
+- **Statsig** - A/B testing, experiments
+- **simple-statistics** - Statistical validation
+- **SQLite** - Local persistence
+- **File System** - Large payloads
+
+**Custom Code Focus:**
+- Domain-specific logic only
+- SHIM-specific intelligence
+- Minimal wrappers (<100 LOC)
+
+**Result:** ~2,770 LOC custom code (vs 5,000+ without LEAN-OUT)
+
 ---
 
 ## ARCHITECTURE COMPONENTS
 
-### Component 1: Crash Prevention System (COMPLETE)
+### Component 1: Crash Prevention System ✅ COMPLETE
 
-**Status:** ✅ Fully designed
+**Status:** Phase 1 Weeks 1-6 Complete
 
 **Key Features:**
 - Predictive crash detection via observable signals
@@ -39,17 +71,430 @@
 - File state (active, modified, staged, uncommitted diff)
 - Tool state (active sessions, pending operations)
 
+**Implemented Components:**
+- SignalCollector (238 LOC, 53 tests) ✅
+- SignalHistoryRepository (314 LOC, 18 tests) ✅
+- CheckpointRepository (600+ LOC, 24 tests) ✅
+- CheckpointManager (218 LOC, 19 tests) ✅
+- ResumeDetector (213 LOC, 18 tests) ✅
+- SessionRestorer (296 LOC, 13 tests) ✅
+- SessionStarter (8 tests) ✅
+
+**Next:** Supervisor Daemon (Week 7-8)
+
 ---
 
-### Component 2: Multi-Chat Coordination Protocol (COMPLETE)
+### Component 1.5: Analytics & Auto-Experimentation (NEW)
 
-**Status:** ✅ Fully designed
+**Status:** Designed (Phase 1.5)
+
+**Purpose:** Fully automatic self-improvement via Kaizen loop.
+
+**Architecture (LEAN-OUT):**
+```
+┌─────────────────────────────────────┐
+│    SHIM Core Components             │
+│  (Crash Prevention, Model Routing)  │
+└───────────────┬─────────────────────┘
+                │ Emit metrics
+                ▼
+┌─────────────────────────────────────┐
+│      PROMETHEUS (Battle-Tested)     │
+│    Time-series metrics storage      │
+│    prom-client (Node.js)            │
+└───────────────┬─────────────────────┘
+                │ Query metrics
+                ▼
+┌─────────────────────────────────────┐
+│   OpportunityDetector (CUSTOM)      │
+│   ~150 LOC - SHIM-specific          │
+│   Pattern detection                 │
+└───────────────┬─────────────────────┘
+                │ Opportunities
+                ▼
+┌─────────────────────────────────────┐
+│      STATSIG (Battle-Tested)        │
+│    A/B testing framework            │
+│    Free tier, automatic rollout     │
+└───────────────┬─────────────────────┘
+                │ Experiments
+                ▼
+┌─────────────────────────────────────┐
+│  simple-statistics (Battle-Tested)  │
+│    Statistical validation           │
+│    T-tests, p-values, effect sizes  │
+└───────────────┬─────────────────────┘
+                │ Validated
+                ▼
+┌─────────────────────────────────────┐
+│    SafetyBounds (CUSTOM)            │
+│    ~150 LOC - SHIM-specific         │
+│    Domain safety rules              │
+└───────────────┬─────────────────────┘
+                │ Deploy
+                └──► Auto-apply to SHIM
+                     (Kaizen loop)
+```
+
+#### Battle-Tested Tools (Zero Custom LOC)
+
+**Prometheus** - Metrics collection
+- Industry standard (10+ years)
+- Node.js client: `prom-client`
+- Perfect for time-series metrics
+- Free, open-source
+
+**Grafana** - Dashboards
+- Built for Prometheus
+- Professional dashboards out-of-box
+- Free, open-source
+
+**Statsig** - A/B Testing
+- Automatic experiment management
+- Statistical validation included
+- Gradual rollout built-in
+- Free tier available
+
+**simple-statistics (npm)** - Statistical analysis
+- T-tests, p-values, effect sizes
+- 130k+ downloads/week
+- Well-tested, maintained
+
+#### Custom Components (~570 LOC)
+
+**SHIMMetrics** (~100 LOC)
+```typescript
+// Prometheus metric definitions
+class SHIMMetrics {
+  // Crash prevention metrics
+  crash_prediction_accuracy: Gauge;
+  checkpoint_creation_time: Histogram;
+  resume_success_rate: Gauge;
+  
+  // Model routing metrics
+  model_routing_accuracy: Gauge;
+  model_override_rate: Gauge;
+  token_savings_total: Counter;
+  
+  // Multi-chat metrics
+  parallel_tasks_active: Gauge;
+  coordination_overhead: Histogram;
+}
+```
+
+**OpportunityDetector** (~150 LOC)
+```typescript
+// SHIM-specific pattern detection
+class OpportunityDetector {
+  detectPatterns(): Opportunity[] {
+    // "Checkpoint interval=5 causes 12% of crashes"
+    // "Model routing wrong for 'architecture' queries"
+    // "Context pruning saves 2.4M tokens/month"
+  }
+  
+  formHypothesis(pattern: Pattern): Hypothesis {
+    // "Reducing interval to 3 prevents 12% of crashes"
+  }
+  
+  proposeExperiment(hypothesis: Hypothesis): ExperimentProposal {
+    // Design A/B test with variants
+  }
+}
+```
+
+**StatsigIntegration** (~70 LOC)
+```typescript
+// Wrapper around Statsig SDK
+class StatsigIntegration {
+  createExperiment(proposal: ExperimentProposal): Experiment;
+  getVariant(experimentId: string): Variant;
+  logOutcome(experimentId: string, outcome: Outcome): void;
+  checkResults(experimentId: string): ExperimentResults;
+}
+```
+
+**SafetyBounds** (~150 LOC)
+```typescript
+// SHIM-specific safety enforcement
+class SafetyBounds {
+  validateSafety(improvement: Improvement): boolean {
+    // Cost bounds (max $20/week increase)
+    if (improvement.costIncrease > 20) return false;
+    
+    // Performance bounds (max 100ms latency increase)
+    if (improvement.latencyIncrease > 100) return false;
+    
+    // Quality bounds (never sacrifice accuracy)
+    if (improvement.accuracyDecrease > 0) return false;
+    
+    return true;
+  }
+  
+  monitorDeployment(improvement: Improvement): void {
+    // Automatic rollback if regression detected
+  }
+}
+```
+
+**EventEmitter** (~100 LOC)
+```typescript
+// Domain event emission
+class EventEmitter {
+  trackEvent(event: SHIMEvent): void {
+    // Wrap existing operations with events
+    // Feed into Prometheus metrics
+  }
+}
+```
+
+#### Kaizen Loop (Fully Automatic)
+
+```
+1. SHIM operates normally
+   ↓ Emit metrics (prom-client)
+   
+2. Prometheus stores metrics
+   ↓ OpportunityDetector queries
+   
+3. Detect patterns
+   ↓ Form hypothesis
+   
+4. Design experiment
+   ↓ Statsig creates A/B test
+   
+5. Run experiment (automatic)
+   ↓ 50% control, 50% treatment
+   
+6. Validate results
+   ↓ simple-statistics (t-test, p-value)
+   
+7. Check safety
+   ↓ SafetyBounds enforcement
+   
+8. Gradual rollout (automatic)
+   ↓ 10% → 50% → 100%
+   
+9. Monitor for regression
+   ↓ Auto-rollback if needed
+   
+10. Deploy or rollback
+    ↓ Log improvement
+    
+[LOOP - Zero human intervention]
+```
+
+#### User Control (Override Mechanism)
+
+```typescript
+// User sets bounds (optional)
+shimConfig.autoImprovement = {
+  enabled: true,
+  maxCostIncrease: 20,  // $/week
+  maxLatencyIncrease: 100,  // ms
+  requireApproval: ['model_routing_changes'],
+  autoApprove: ['checkpoint_tuning', 'compression']
+};
+
+// User sees monthly report
+SHIM Auto-Improvements This Month:
+✓ Checkpoint interval optimized (-12% crash rate)
+✓ Model routing improved (+25% accuracy)
+✓ Context pruning enhanced (2.4M tokens saved)
+
+Net benefit: $119 + 8.5 hours saved
+```
+
+**Default:** Automatic within safety bounds. User can override/rollback anytime.
+
+---
+
+### Component 2: Intelligent Model Routing (NEW)
+
+**Status:** Designed (Phase 2)
+
+**Purpose:** Automatic model selection with token optimization.
+
+**Problem Solved:**
+- User manually picks Opus vs Sonnet for each chat
+- Wastes expensive tokens on simple tasks
+- Wastes time with cheaper models on complex tasks
+- No learning from user behavior
+
+**Solution:** Automatic routing to cheapest capable model + learning system.
+
+#### Architecture
+
+```
+User Prompt
+     ↓
+┌─────────────────────────────────────┐
+│   PromptAnalyzer (~150 LOC)         │
+│   - Complexity detection            │
+│   - Keyword extraction              │
+│   - Task classification             │
+└───────────────┬─────────────────────┘
+                ↓
+┌─────────────────────────────────────┐
+│   ModelRouter (~200 LOC)            │
+│   - Routing heuristics              │
+│   - Confidence scoring              │
+│   - Cost estimation                 │
+└───────────────┬─────────────────────┘
+                ↓
+┌─────────────────────────────────────┐
+│   Recommended Model                 │
+│   (Haiku / Sonnet / Opus)           │
+└───────────────┬─────────────────────┘
+                ↓
+┌─────────────────────────────────────┐
+│   User Override? (optional)         │
+│   @opus, @sonnet, @haiku            │
+└───────────────┬─────────────────────┘
+                ↓
+┌─────────────────────────────────────┐
+│   OverrideLearningSystem (~100 LOC) │
+│   - Track patterns                  │
+│   - Update heuristics (via Statsig) │
+└─────────────────────────────────────┘
+```
+
+#### Components (~400 LOC custom)
+
+**PromptAnalyzer** (~150 LOC)
+```typescript
+interface PromptAnalysis {
+  complexity: 'simple' | 'medium' | 'complex';
+  requiresReasoning: boolean;
+  requiresCreativity: boolean;
+  hasCodeGeneration: boolean;
+  contextSize: number;
+  keywords: string[];
+}
+
+class PromptAnalyzer {
+  analyze(prompt: string): PromptAnalysis {
+    // Keyword detection
+    // Complexity scoring
+    // Task classification
+  }
+}
+```
+
+**ModelRouter** (~200 LOC)
+```typescript
+interface ModelRoutingDecision {
+  model: 'opus' | 'sonnet' | 'haiku';
+  confidence: number;
+  reasoning: string;
+  estimatedTokens: number;
+  costEstimate: number;
+}
+
+class ModelRouter {
+  route(prompt: string): ModelRoutingDecision {
+    // Initial heuristics:
+    // Haiku: Simple ops, CRUD, formatting
+    // Sonnet: Code, refactoring, tests
+    // Opus: Architecture, complex debugging
+  }
+}
+```
+
+**OverrideLearningSystem** (~100 LOC)
+```typescript
+class OverrideLearningSystem {
+  recordOverride(
+    original: Model,
+    override: Model,
+    prompt: string
+  ): void {
+    // Track user corrections
+  }
+  
+  detectPatterns(): RoutingPattern[] {
+    // "User always forces Opus for 'architecture'"
+  }
+  
+  updateHeuristics(pattern: RoutingPattern): void {
+    // Via Statsig A/B test
+    // Validate improvement
+    // Auto-deploy if proven
+  }
+}
+```
+
+**TokenEstimator** (~50 LOC)
+```typescript
+class TokenEstimator {
+  estimate(prompt: string): number {
+    // Using tiktoken library
+  }
+  
+  calculateCost(tokens: number, model: Model): number {
+    // Opus: $15/$75 per 1M tokens
+    // Sonnet: $3/$15 per 1M tokens
+    // Haiku: $0.25/$1.25 per 1M tokens
+  }
+}
+```
+
+#### Token Optimization Strategies
+
+**From GREGORE lessons:**
+1. Structured data > prose (JSON index vs markdown = 12x faster)
+2. Aggressive checkpointing (every 2-3 tool calls)
+3. Smart context pruning (keep only relevant history)
+
+**New SHIM features:**
+4. Model routing (automatic model selection)
+5. Token budget enforcement (per-task limits)
+6. Learning system (improve routing over time)
+
+#### Integration with Analytics
+
+**Metrics emitted:**
+```typescript
+// Model routing decision
+analytics.track({
+  type: 'model_routing_decision',
+  data: {
+    recommended: 'sonnet',
+    confidence: 0.87,
+    factors: { complexity: 'medium', hasCode: true }
+  }
+});
+
+// User override
+analytics.track({
+  type: 'model_override',
+  data: {
+    original: 'sonnet',
+    override: 'opus',
+    reason: 'needs strategic thinking'
+  }
+});
+```
+
+**Auto-improvement via Statsig:**
+- Detect: "40% override rate for 'architecture' prompts"
+- Hypothesis: "Auto-select Opus for architecture"
+- Test: A/B test for 7 days
+- Validate: Override rate drops to 15%
+- Deploy: Automatically if statistically significant
+
+---
+
+### Component 3: Multi-Chat Coordination Protocol
+
+**Status:** Designed (Phase 3)
+
+**Infrastructure:** Redis + BullMQ (LEAN-OUT)
 
 **Key Features:**
-- Shared state via KERNL database
-- Work delegation with task queue
+- Shared state via Redis
+- Work delegation with BullMQ job queues
 - Supervisor/Worker coordination pattern
-- Cross-chat communication via file-based message bus
+- Cross-chat communication via Redis Pub/Sub
 
 **Architecture Pattern:**
 ```
@@ -57,7 +502,7 @@
 │  SUPERVISOR     │ (Project-level orchestration)
 │  Claude Chat    │
 └────────┬────────┘
-         │ Task assignment via shared DB
+         │ Task assignment via BullMQ
          ▼
 ┌────────────────────────────────┐
 │  WORKER POOL                   │
@@ -65,98 +510,94 @@
 │  │Chat 1│ │Chat 2│ │Chat 3│   │
 │  └──────┘ └──────┘ └──────┘   │
 └────────────────────────────────┘
-         │ Progress updates
+         │ Progress updates (Redis Pub/Sub)
          ▼
 ┌─────────────────┐
-│  KERNL DB       │ (Shared state)
-│  Task Queue     │
-│  Checkpoints    │
+│  REDIS + BullMQ │ (Shared infrastructure)
+│  - Job queues   │
+│  - Pub/Sub      │
+│  - Locks        │
+└─────────────────┘
+         │
+         ▼
+┌─────────────────┐
+│  SQLite         │ (Local persistence)
+│  - Checkpoints  │
+│  - Analytics    │
 └─────────────────┘
 ```
 
+**LEAN-OUT Analysis:**
+```
+PROBLEM: Job queue, message bus, locks
+CUSTOM: Build from scratch (BAD - 1,500 LOC)
+LEAN-OUT: Redis + BullMQ (GOOD - 300 LOC wrappers)
+
+Savings: 1,200 LOC eliminated
+```
+
+**Custom Wrappers (~300 LOC):**
+- ChatRegistry (~100 LOC)
+- TaskQueue wrapper (~100 LOC)
+- MessageBus wrapper (~100 LOC)
+
 ---
 
-### Component 3: Self-Evolution Engine
+### Component 4: Self-Evolution Engine (Expanded)
 
-**Status:** ✅ Designed
+**Status:** Designed (Phase 4)
 
-**Purpose:** System observes itself, identifies improvements, and implements them.
+**Purpose:** Expand auto-experimentation to all components.
 
-#### 3.1 Observation Layer
+**Builds on Phase 1.5 Analytics Infrastructure:**
+- Phase 1.5: Basic Kaizen loop (checkpoint tuning, model routing)
+- Phase 4: Advanced experiments (cross-component, user modeling)
 
+#### Advanced Experimentation
+
+**Cross-Component Learning:**
 ```typescript
-interface ObservationMetrics {
-  // Performance metrics
-  toolSuccessRates: Map<string, number>;      // Per-tool success rate
-  avgResponseLatency: number;                  // Mean response time
-  crashFrequency: number;                      // Crashes per session
-  contextRecoveryTime: number;                 // Time to resume after crash
-  
-  // Workflow metrics  
-  manualInterventions: number;                 // Count per session
-  repetitivePatterns: PatternMatch[];          // Detected repeated work
-  blockerTypes: Map<string, number>;           // What causes blocks
-  
-  // User satisfaction proxies
-  conversationLength: number;                  // Longer = more value?
-  followUpQuestions: number;                   // Fewer = better answers?
-  frustrationSignals: string[];                // Detected frustration language
-}
+// Example: Optimize entire workflow
+experiment = {
+  name: 'crash_prevention_workflow',
+  hypothesis: 'Combined improvements across components',
+  variants: {
+    control: {
+      checkpointInterval: 5,
+      modelRouting: 'conservative',
+      contextPruning: 'minimal'
+    },
+    treatment: {
+      checkpointInterval: 3,
+      modelRouting: 'aggressive',
+      contextPruning: 'smart'
+    }
+  },
+  metrics: ['crash_rate', 'cost', 'user_satisfaction']
+};
 ```
 
-#### 3.2 Analysis Engine
-
+**User Behavior Modeling:**
 ```typescript
-interface EvolutionAnalysis {
-  // Pattern detection
-  identifyBottlenecks(): Bottleneck[];
-  detectRepetitiveWork(): RepetitivePattern[];
-  findFailureClusters(): FailureCluster[];
-  
-  // Improvement proposals
-  proposeOptimizations(): Optimization[];
-  prioritizeByROI(): PrioritizedList;
-  estimateImplementationCost(): Estimate;
-}
+// Learn personal preferences
+userModel = {
+  preferredModels: {
+    'architecture': 'opus',
+    'implementation': 'sonnet',
+    'tests': 'haiku'
+  },
+  workPatterns: {
+    morningFocus: 'strategic',
+    afternoonFocus: 'implementation'
+  },
+  tolerances: {
+    maxLatency: 200,  // ms
+    maxCost: 30  // $/week
+  }
+};
 ```
 
-#### 3.3 Implementation Pipeline
-
-```
-┌──────────────┐     ┌──────────────┐     ┌──────────────┐
-│  OBSERVE     │ --> │  ANALYZE     │ --> │  PROPOSE     │
-│              │     │              │     │              │
-│  Collect     │     │  Pattern     │     │  Generate    │
-│  metrics     │     │  detection   │     │  improvements│
-└──────────────┘     └──────────────┘     └──────────────┘
-                                                 │
-                                                 ▼
-┌──────────────┐     ┌──────────────┐     ┌──────────────┐
-│  VERIFY      │ <-- │  TEST        │ <-- │  IMPLEMENT   │
-│              │     │              │     │              │
-│  Measure     │     │  Sandbox     │     │  Auto-build  │
-│  improvement │     │  validation  │     │  or delegate │
-└──────────────┘     └──────────────┘     └──────────────┘
-```
-
-#### 3.4 Self-Evolution Types
-
-**Level 1: Configuration Evolution (Automatic)**
-- Adjust checkpoint frequency based on crash patterns
-- Tune tool timeout thresholds
-- Optimize search patterns based on success rates
-
-**Level 2: Workflow Evolution (Semi-Automatic)**
-- Detect repetitive manual steps → Propose automation
-- Identify common blockers → Suggest workarounds
-- Pattern library updates
-
-**Level 3: Capability Evolution (Human-Approved)**
-- New tool proposals
-- Architecture changes
-- MCP server modifications
-
-#### 3.5 Guardrails
+#### Guardrails
 
 ```typescript
 interface EvolutionGuardrails {
@@ -177,13 +618,15 @@ interface EvolutionGuardrails {
 
 ---
 
-### Component 4: Autonomous Development Engine
+### Component 5: Autonomous Development Engine
 
-**Status:** ✅ Designed
+**Status:** Designed (Phase 5)
 
 **Purpose:** Execute development workflows without human intervention.
 
-#### 4.1 Autonomous Workflow Types
+**Dependencies:** Multi-chat + Self-evolution
+
+#### Autonomous Workflow Types
 
 **Type A: Code Implementation (Supervised)**
 ```
@@ -234,97 +677,124 @@ User: "Implement feature X"
 └─────────────────────────────────────────────┘
 ```
 
-#### 4.2 Escalation Protocol
+---
 
-```typescript
-interface EscalationTriggers {
-  // MUST escalate
-  ambiguousRequirements: true;
-  architecturalDecisions: true;
-  securitySensitive: true;
-  destructiveOperations: true;  // rm -rf, DROP TABLE
-  
-  // MAY escalate (configurable)
-  testFailures: 'after_3_attempts';
-  buildFailures: 'after_3_attempts';
-  toolFailures: 'after_fallback_exhausted';
-  
-  // NEVER escalate
-  typeErrors: false;  // Fix automatically
-  lintErrors: false;  // Fix automatically
-  formatIssues: false;  // Fix automatically
-}
+## Complete System Architecture
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│                     USER INTERFACE                           │
+│              (Claude Desktop + MCP)                          │
+└────────────────────────────┬─────────────────────────────────┘
+                             │
+                             ▼
+┌──────────────────────────────────────────────────────────────┐
+│                  SHIM CORE LAYER                             │
+│  ┌────────────┐  ┌────────────┐  ┌────────────┐            │
+│  │ Crash      │  │ Model      │  │ Multi-Chat │            │
+│  │ Prevention │  │ Routing    │  │ Coord      │            │
+│  └────────────┘  └────────────┘  └────────────┘            │
+└────────────────────────────┬─────────────────────────────────┘
+                             │ Emit events/metrics
+                             ▼
+┌──────────────────────────────────────────────────────────────┐
+│           ANALYTICS & AUTO-EXPERIMENTATION                   │
+│  ┌───────────┐  ┌──────────┐  ┌────────────┐               │
+│  │Prometheus │  │ Statsig  │  │simple-stats│ (Battle-Tested)│
+│  └───────────┘  └──────────┘  └────────────┘               │
+│  ┌──────────────┐  ┌──────────────┐                        │
+│  │ Opportunity  │  │ SafetyBounds │ (Custom ~300 LOC)      │
+│  │ Detector     │  │              │                         │
+│  └──────────────┘  └──────────────┘                        │
+└────────────────────────────┬─────────────────────────────────┘
+                             │ Improvements (validated)
+                             └──► Auto-apply to SHIM Core
+                                  (Kaizen loop)
+                                  
+┌──────────────────────────────────────────────────────────────┐
+│              INFRASTRUCTURE (Battle-Tested)                  │
+│  ┌────────────┐  ┌──────────┐  ┌────────────┐              │
+│  │   Redis    │  │  BullMQ  │  │   SQLite   │              │
+│  └────────────┘  └──────────┘  └────────────┘              │
+└──────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## KERNL INTEGRATION POINTS
+## LOC Breakdown (LEAN-OUT)
 
-**Leverage KERNL for:**
-- ✅ State persistence (checkpoints, session state)
-- ✅ Cross-project patterns (pattern recording, suggestions)
-- ✅ Backlog management (epic tracking)
-- ✅ Semantic search (code understanding)
-- ✅ Research documentation
+### Custom Code (~2,770 LOC)
 
-**Keep Separate:**
-- ❌ UI enhancements (Electron modification)
-- ❌ Browser automation (Chrome DevTools Protocol)
-- ❌ Platform crash detection (OS-level monitoring)
-- ❌ Multi-tab architecture (Claude app modification)
+**Phase 1: Crash Prevention (~1,000 LOC)**
+- SignalCollector: 238 LOC ✅
+- SignalHistoryRepository: 314 LOC ✅
+- CheckpointRepository: 600+ LOC ✅
+- CheckpointManager: 218 LOC ✅
+- ResumeDetector: 213 LOC ✅
+- SessionRestorer: 296 LOC ✅
+- SessionStarter: ~100 LOC ✅
+- SupervisorDaemon: ~300 LOC (next)
 
----
+**Phase 1.5: Analytics (~570 LOC)**
+- SHIMMetrics: ~100 LOC
+- OpportunityDetector: ~150 LOC
+- StatsigIntegration: ~70 LOC
+- SafetyBounds: ~150 LOC
+- EventEmitter: ~100 LOC
 
-## TECHNICAL ARCHITECTURE
+**Phase 2: Model Routing (~400 LOC)**
+- PromptAnalyzer: ~150 LOC
+- ModelRouter: ~200 LOC
+- TokenEstimator: ~50 LOC
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                        SHIM SYSTEM                              │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐              │
-│  │   CRASH     │  │  MULTI-CHAT │  │    SELF-    │              │
-│  │ PREVENTION  │  │ COORDINATOR │  │  EVOLUTION  │              │
-│  │             │  │             │  │   ENGINE    │              │
-│  │ • Predict   │  │ • Delegate  │  │ • Observe   │              │
-│  │ • Serialize │  │ • Sync      │  │ • Analyze   │              │
-│  │ • Resume    │  │ • Route     │  │ • Improve   │              │
-│  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘              │
-│         │                │                │                      │
-│         └────────────────┼────────────────┘                      │
-│                          ▼                                       │
-│  ┌─────────────────────────────────────────────────────────┐    │
-│  │                    KERNL DATABASE                        │    │
-│  │  • Checkpoints  • Patterns  • Metrics  • Task Queue     │    │
-│  └─────────────────────────────────────────────────────────┘    │
-│                          ▲                                       │
-│         ┌────────────────┼────────────────┐                      │
-│         │                │                │                      │
-│  ┌──────┴──────┐  ┌──────┴──────┐  ┌──────┴──────┐              │
-│  │  AUTONOMOUS │  │   TOOL      │  │  WORKFLOW   │              │
-│  │   ENGINE    │  │  ROUTER     │  │  EXECUTOR   │              │
-│  │             │  │             │  │             │              │
-│  │ • Execute   │  │ • Fallback  │  │ • Git ops   │              │
-│  │ • Monitor   │  │ • Retry     │  │ • Build     │              │
-│  │ • Escalate  │  │ • Unified   │  │ • Test      │              │
-│  └─────────────┘  └─────────────┘  └─────────────┘              │
-│                                                                  │
-└─────────────────────────────────────────────────────────────────┘
-```
+**Phase 3: Multi-Chat (~800 LOC)**
+- ChatRegistry: ~100 LOC
+- TaskQueue wrapper: ~100 LOC
+- MessageBus wrapper: ~100 LOC
+- ChatCoordinator: ~200 LOC
+- TaskDistributor: ~200 LOC
+- WorkerAutomation: ~200 LOC
+- StateSync: ~300 LOC
+
+**Total: ~2,770 LOC**
+
+### Eliminated Code (via LEAN-OUT)
+
+**Without LEAN-OUT (estimated):**
+- Custom analytics: ~1,250 LOC
+- Custom A/B testing: ~1,050 LOC
+- Custom job queue: ~1,500 LOC
+- **Total: ~6,570 LOC**
+
+**With LEAN-OUT:**
+- Custom code: ~2,770 LOC
+- **Savings: 3,800 LOC (58% reduction)**
+
+**Maintenance burden eliminated:** ~3,800 LOC × years
 
 ---
 
-## IMPLEMENTATION ESTIMATES
+## Technology Stack
 
-| Component | MVP | Full | Dependencies |
-|-----------|-----|------|--------------|
-| Crash Prevention | 3-4 weeks | 8-12 weeks | KERNL |
-| Multi-Chat Coordination | 4-6 weeks | 10-14 weeks | Crash Prevention |
-| Self-Evolution Engine | 6-8 weeks | 16-20 weeks | Multi-Chat |
-| Autonomous Development | 4-6 weeks | 12-16 weeks | All above |
+**Battle-Tested Infrastructure:**
+- Redis + BullMQ (job queues, messaging, locks)
+- Prometheus + Grafana (metrics, dashboards)
+- Statsig (A/B testing, experiments)
+- simple-statistics (statistical validation)
+- SQLite (local persistence)
+- tiktoken (token estimation)
 
-**Total:** 4-6 months for full system
+**Custom Components:**
+- TypeScript (strict mode, ESLint)
+- Jest (testing framework)
+- Domain-specific intelligence (~2,770 LOC)
+
+**Result:** Focus on intelligence, not plumbing
 
 ---
 
-*Architecture designed for modularity - each component can be implemented and monetized independently.*
+*This architecture follows LEAN-OUT principles: battle-tested tools for infrastructure, custom code only for domain-specific logic.*
+
+*Total custom code: ~2,770 LOC (vs 6,570 without LEAN-OUT)*  
+*Savings: 3,800 LOC eliminated (58% reduction in maintenance burden)*  
+*Focus: Build intelligence, not plumbing*

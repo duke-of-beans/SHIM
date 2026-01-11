@@ -1,8 +1,8 @@
 # SHIM Implementation Roadmap
 
 **Project:** SHIM  
-**Version:** 0.1.0  
-**Last Updated:** January 10, 2026
+**Version:** 0.2.0 (Analytics & Model Routing Added)
+**Last Updated:** January 11, 2026
 
 ---
 
@@ -19,23 +19,42 @@ SHIM implementation follows a dependency-ordered approach where each phase enabl
                              │
                              ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│  PHASE 2: MULTI-CHAT COORDINATION                                │
+│  PHASE 1.5: ANALYTICS & AUTO-EXPERIMENTATION (NEW)               │
+│  Self-improvement infrastructure - built ALONGSIDE Phase 1       │
+│  Duration: 2-3 weeks (parallel with Phase 1 Weeks 5-8)           │
+│  LEAN-OUT: Prometheus + Statsig + Grafana (~570 LOC)            │
+└────────────────────────────┬────────────────────────────────────┘
+                             │
+                             ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  PHASE 2: INTELLIGENT MODEL ROUTING (NEW)                        │
+│  Token optimization - automatic model selection                  │
+│  Duration: 2-3 weeks                                             │
+│  Dependencies: Analytics infrastructure (Phase 1.5)              │
+└────────────────────────────┬────────────────────────────────────┘
+                             │
+                             ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  PHASE 3: MULTI-CHAT COORDINATION                                │
 │  Parallel execution - enables delegation and autonomy            │
 │  Duration: 4-6 weeks                                             │
+│  Dependencies: Crash Prevention, Model Routing                   │
 └────────────────────────────┬────────────────────────────────────┘
                              │
                              ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│  PHASE 3: SELF-EVOLUTION ENGINE                                  │
-│  Intelligence - system improves itself over time                 │
-│  Duration: 6-8 weeks                                             │
+│  PHASE 4: SELF-EVOLUTION ENGINE                                  │
+│  Advanced intelligence - expand auto-experimentation            │
+│  Duration: 4-6 weeks                                             │
+│  Dependencies: All above phases                                  │
 └────────────────────────────┬────────────────────────────────────┘
                              │
                              ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│  PHASE 4: AUTONOMOUS OPERATION                                   │
+│  PHASE 5: AUTONOMOUS OPERATION                                   │
 │  Capstone - AI executes while human sleeps                       │
 │  Duration: 4-6 weeks                                             │
+│  Dependencies: Multi-chat + Self-evolution                       │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -46,7 +65,7 @@ SHIM implementation follows a dependency-ordered approach where each phase enabl
 **Duration:** 4-6 weeks  
 **Dependencies:** KERNL MCP server
 
-### Week 1-2: Observable Signals & Metrics
+### Week 1-2: Observable Signals & Metrics ✅ COMPLETE
 
 - [x] Define crash signal interfaces (Day 1-2)
 - [x] Implement tool call metrics collection (Day 3-4)
@@ -61,23 +80,7 @@ SHIM implementation follows a dependency-ordered approach where each phase enabl
 
 **Components Delivered:**
 1. **SignalCollector** (238 LOC, 53 tests)
-   - Real-time crash risk scoring (Critical/Moderate/Low)
-   - Tool call frequency & error rate tracking
-   - Session duration & message count monitoring
-   - Response behavior analysis (timeouts, interruptions)
-   - Automatic risk level escalation logic
-
 2. **SignalHistoryRepository** (314 LOC, 18 tests)
-   - SQLite storage with WAL mode for concurrency
-   - Automatic snapshot numbering per session
-   - Time-range and risk-level queries
-   - Retention-based cleanup (auto-delete old snapshots)
-   - Batch insert optimization (60x faster: 35s → 0.6s for 1000 snapshots)
-
-**Key Lessons Learned:**
-1. **Race Conditions in Async Code:** `forEach()` with async callbacks executes concurrently. For database operations requiring sequential execution (like auto-incrementing), use recursive processing or `for...of` loops.
-2. **Option B Perfection:** Implemented BOTH single-save and batch-save methods rather than choosing one approach.
-3. **Transaction Batching:** Single transactions around bulk operations provide massive SQLite performance gains (60x improvement).
 
 ### Week 3-4: Checkpoint System ✅ COMPLETE
 
@@ -89,46 +92,11 @@ SHIM implementation follows a dependency-ordered approach where each phase enabl
 - [x] E2E checkpoint workflow testing (Day 9)
 
 **Status:** ✅ COMPLETE (2 days)  
-**Test Coverage:** 100% (50/121 tests for checkpoint components)  
-**Performance:** All benchmarks met
+**Test Coverage:** 100% (50/121 tests for checkpoint components)
 
 **Components Delivered:**
 1. **CheckpointRepository** (600+ LOC, 24 tests)
-   - Complete checkpoint data model with 6 state categories
-   - Gzip compression (typical 3-5x ratio)
-   - Auto-increment checkpoint numbers per session
-   - Resume event tracking
-   - Retention-based cleanup
-   - Query by risk level, session, restoration status
-   - Composite sorting (timestamp + checkpoint_number)
-   - WAL mode for concurrent access
-
 2. **CheckpointManager** (218 LOC, 19 tests)
-   - Multi-trigger detection (danger zone, warning zone, tool call interval, time interval)
-   - Priority-based triggering (danger > warning > intervals)
-   - Automatic checkpoint creation with full state capture
-   - Counter/timer resets after checkpointing
-   - Auto-checkpoint workflow API (single method call)
-   - Checkpoint statistics API
-   - Performance: Trigger checks <10ms, Creation <150ms
-
-**Key Implementation Details:**
-
-**CheckpointRepository:**
-- Serializes 6 state categories separately (conversation, task, file, tool, signals, preferences)
-- Each category compressed independently for optimal compression
-- Supports both explicit checkpoint numbers and auto-increment
-- UNIQUE constraint on (session_id, checkpoint_number)
-- Resume events stored separately with foreign key to checkpoints
-- Cleanup by retention period (configurable days)
-
-**CheckpointManager:**
-- Four trigger types: danger_zone (risk='danger'), warning_zone (risk='warning'), tool_call_interval (default 5 calls), time_interval (default 10 minutes)
-- Priority system ensures critical triggers override routine intervals
-- Integrates with SignalCollector for risk assessment
-- Full state capture includes conversation, task, file, tool states plus signals and preferences
-- Automatic counter/timer resets prevent duplicate triggering
-- Auto-checkpoint workflow combines trigger check + creation in single API call
 
 ### Week 5-6: Resume Protocol ✅ COMPLETE
 
@@ -139,351 +107,490 @@ SHIM implementation follows a dependency-ordered approach where each phase enabl
 - [x] End-to-end crash→resume testing (Day 11)
 
 **Status:** ✅ COMPLETE (2 days)  
-**Test Coverage:** 100% (44/165 tests for resume components)  
-**Performance:** All benchmarks met
+**Test Coverage:** 100% (44/165 tests for resume components)
 
 **Components Delivered:**
 1. **ResumeDetector** (213 LOC, 18 tests)
-   - Resume detection from unrestored checkpoints
-   - Interruption reason classification (crash, timeout, manual_exit, unknown)
-   - Confidence scoring (danger: 0.95, warning: 0.85, timeout: 0.85, exit: 0.9)
-   - Resume prompt generation with 7 structured sections
-   - Recency-based confidence adjustments (±0.1-0.2)
-   - Performance: <100ms detection, <50ms prompt generation
-
 2. **SessionRestorer** (296 LOC, 13 tests)
-   - Checkpoint loading by ID or most recent for session
-   - State reconstruction (conversation, task, files, tools)
-   - Fidelity tracking (per-component restoration success)
-   - Resume event recording with metadata
-   - Checkpoint marking (restored_at, success, fidelity)
-   - Performance: <50ms load, <100ms restore
-
 3. **SessionStarter** (8 tests)
-   - Auto-detect crash on session initialization
-   - Integration with ResumeDetector
-   - Startup flow orchestration
-   - Performance: <100ms startup check
-
 4. **E2E Testing** (5 tests)
-   - Full crash→recovery→resume workflow
-   - Manual exit scenario (progress=1.0)
-   - Timeout scenario (session>90 min)
-   - Warning-level interruption
-   - Performance validation (<200ms end-to-end)
 
-**Key Implementation Details:**
+### Week 7-8: Supervisor Daemon 🎯 NEXT
 
-**Interruption Classification Logic:**
-- Complete task (progress ≥ 1.0) → manual_exit (confidence: 0.9)
-- Danger/warning risk → crash (confidence: 0.95/0.85)
-- Session >90 minutes → timeout (confidence: 0.85)
-- Otherwise → unknown (confidence: 0.3)
+- [ ] Process monitoring (PID tracking)
+- [ ] Crash detection (process exit events)
+- [ ] Auto-restart Claude Desktop
+- [ ] Auto-navigate to crashed chat
+- [ ] MCP integration (trigger auto-resume)
+- [ ] Windows service deployment (NSSM)
+- [ ] E2E testing (crash → auto-restart → auto-resume)
 
-**Confidence Adjustments:**
-- Recent interruption (<5 min) → +0.1 confidence
-- Old interruption (>60 min) → -0.2 confidence
+**Components to Build:**
+1. **ProcessMonitor** (~150 LOC)
+   - Monitor Claude Desktop process
+   - Detect unexpected exits
+   - Track recent checkpoint times
+   
+2. **AutoRestarter** (~150 LOC)
+   - Launch Claude Desktop
+   - Navigate to specific chat URL
+   - Trigger MCP resume command
+   
+3. **SupervisorDaemon** (~300 LOC)
+   - Main daemon loop
+   - Configuration management
+   - Logging and error handling
+   - Windows service integration
 
-**Resume Prompt Structure (7 sections):**
-1. Situation - Interruption reason and context
-2. Progress - Task state and completion percentage
-3. Context - Conversation summary and key decisions
-4. Next Steps - Planned actions from checkpoint
-5. Active Files - Files being worked on
-6. Recent Tools - Tool usage history
-7. Blockers - Known obstacles
+**Architecture:**
+```
+SupervisorDaemon (Windows Service)
+  ↓
+ProcessMonitor (watches Claude Desktop)
+  ↓
+Crash Detected (process exit + recent checkpoint)
+  ↓
+AutoRestarter
+  ↓ 1. Launch Claude Desktop
+  ↓ 2. Navigate to chat URL
+  ↓ 3. Call SHIM MCP: check_resume_needed()
+  ↓
+Resume Happens Automatically (via existing components)
+```
 
-**Fidelity Tracking:**
-- Per-component success flags (conversation, task, files, tools)
-- Overall fidelity score (0.0-1.0)
-- Stored in resume events for analysis
-
-**Deliverable:** ✅ Working crash recovery from any interruption
+**Deliverable:** Zero-intervention crash recovery
 
 ---
 
 ## Phase 1 Summary
 
-**Status:** ✅ COMPLETE  
-**Duration:** 11 days (ahead of 4-6 week estimate)  
+**Status:** ✅ COMPLETE (except Week 7-8)  
+**Duration:** 11 days for Weeks 1-6 (ahead of schedule)  
 **Tests:** 164/165 passing (99.4% pass rate)  
 **Coverage:** 98%+  
 **Components:** 9 core components, 3 test suites
 
-**Phase 1 Achievements:**
-- Observable crash signals with real-time risk scoring
-- Automatic checkpoint system with intelligent triggering
-- Complete crash recovery with resume prompts
-- Full E2E testing across all crash scenarios
-- Performance benchmarks met across all components
-- Zero technical debt (all tests passing, no mocks/stubs)
-
-**Ready for Phase 2: Multi-Chat Coordination**
+**Ready for Phase 1.5: Analytics Infrastructure**
 
 ---
 
-## Phase 2: Multi-Chat Coordination
+## Phase 1.5: Analytics & Auto-Experimentation (NEW)
+
+**Duration:** 2-3 weeks (parallel with Phase 1 Week 7-8)  
+**Dependencies:** Phase 1 Weeks 1-6 complete ✅  
+**Philosophy:** LEAN-OUT - Use battle-tested tools, ~570 LOC custom code
+
+### Architecture (LEAN-OUT)
+
+```
+SHIM Components
+  ↓ Emit metrics
+Prometheus (metrics storage - BATTLE-TESTED)
+  ↓ Query metrics
+OpportunityDetector (~150 LOC - CUSTOM)
+  ↓ Patterns detected
+Statsig (A/B testing - BATTLE-TESTED)
+  ↓ Experiments run
+simple-statistics (validation - BATTLE-TESTED)
+  ↓ Results validated
+SafetyBounds (~150 LOC - CUSTOM)
+  ↓ Deploy or rollback
+Auto-applied to SHIM (Kaizen loop - AUTOMATIC)
+```
+
+### Battle-Tested Tools (Zero LOC)
+
+**Prometheus** - Metrics collection and time-series storage
+- Industry standard (10+ years)
+- Node.js client: `prom-client`
+- Free, open-source
+- Perfect for SHIM metrics
+
+**Grafana** - Dashboards and visualization
+- Built for Prometheus
+- Professional dashboards out-of-box
+- Free, open-source
+
+**Statsig** - A/B testing and experimentation
+- Automatic experiment management
+- Statistical validation included
+- Gradual rollout built-in
+- Free tier available
+
+**simple-statistics** - Statistical analysis (npm)
+- T-tests, p-values, effect sizes
+- 130k+ downloads/week
+- Well-tested, maintained
+
+### Week 1: Foundation
+
+- [ ] Install and configure Prometheus
+- [ ] Install and configure Grafana
+- [ ] Set up Statsig account (free tier)
+- [ ] Install prom-client, simple-statistics (npm)
+- [ ] Create basic dashboard templates
+
+**Deliverable:** Infrastructure ready
+
+### Week 2: Instrumentation
+
+- [ ] Implement SHIMMetrics (~100 LOC)
+  - Prometheus metric definitions
+  - Metric emission from SignalCollector
+  - Metric emission from CheckpointManager
+  - Metric emission from ResumeDetector
+  
+- [ ] Implement EventEmitter (~100 LOC)
+  - Domain event definitions
+  - Event emission wrapper
+  - Integration with existing components
+
+**Components:**
+1. **SHIMMetrics** (~100 LOC)
+   ```typescript
+   // Expose SHIM metrics to Prometheus
+   - crash_prediction_accuracy (gauge)
+   - model_routing_accuracy (gauge)
+   - checkpoint_creation_time (histogram)
+   - resume_success_rate (gauge)
+   - token_savings_total (counter)
+   ```
+
+2. **EventEmitter** (~100 LOC)
+   ```typescript
+   // Wrap existing operations with events
+   analytics.trackEvent({
+     type: 'checkpoint_created',
+     data: { checkpointId, size, trigger }
+   });
+   ```
+
+**Deliverable:** Metrics flowing into Prometheus
+
+### Week 3: Auto-Experimentation Engine
+
+- [ ] Implement OpportunityDetector (~150 LOC)
+  - Pattern detection from Prometheus metrics
+  - Hypothesis generation
+  - Experiment proposals
+  
+- [ ] Implement StatsigIntegration (~70 LOC)
+  - Experiment creation API
+  - Variant assignment
+  - Outcome logging
+  
+- [ ] Implement SafetyBounds (~150 LOC)
+  - SHIM-specific safety rules
+  - Bounds enforcement
+  - Rollback triggers
+  
+- [ ] End-to-end testing (Kaizen loop)
+  - Pattern detection → Experiment → Deploy
+  - Rollback on regression
+  - User override mechanism
+
+**Components:**
+1. **OpportunityDetector** (~150 LOC)
+   ```typescript
+   // SHIM-specific pattern detection
+   detectPatterns(): Opportunity[] {
+     // "Checkpoint interval=5 causes 12% of crashes"
+     // "Model routing wrong for 'architecture' queries"
+   }
+   ```
+
+2. **StatsigIntegration** (~70 LOC)
+   ```typescript
+   // Wrapper around Statsig SDK
+   createExperiment(opportunity: Opportunity): Experiment
+   getVariant(experimentId: string): Variant
+   logOutcome(experimentId: string, outcome: Outcome): void
+   ```
+
+3. **SafetyBounds** (~150 LOC)
+   ```typescript
+   // SHIM-specific safety enforcement
+   validateSafety(improvement: Improvement): boolean {
+     // Check cost bounds
+     // Check performance bounds
+     // Check quality bounds
+   }
+   ```
+
+**Deliverable:** Fully automatic Kaizen loop
+
+---
+
+## Phase 1.5 Summary
+
+**Custom Code:** ~570 LOC  
+**Eliminated Code:** ~1,730 LOC (by using battle-tested tools)  
+**Savings:** 75% reduction in maintenance burden
+
+**Deliverable:** Self-improving SHIM that gets better automatically
+
+---
+
+## Phase 2: Intelligent Model Routing (NEW)
+
+**Duration:** 2-3 weeks  
+**Dependencies:** Analytics infrastructure (Phase 1.5)
+
+### Week 1: Core Routing Logic
+
+- [ ] Implement PromptAnalyzer (~150 LOC)
+  - Complexity detection
+  - Keyword extraction
+  - Task classification
+  
+- [ ] Implement ModelRouter (~200 LOC)
+  - Routing heuristics
+  - Confidence scoring
+  - Cost estimation
+  
+- [ ] Implement TokenEstimator (~50 LOC)
+  - Token counting (tiktoken)
+  - Cost calculation
+  - Savings tracking
+
+**Components:**
+1. **PromptAnalyzer** (~150 LOC)
+   ```typescript
+   analyzePrompt(prompt: string): PromptAnalysis {
+     complexity: 'simple' | 'medium' | 'complex';
+     requiresReasoning: boolean;
+     requiresCreativity: boolean;
+     hasCodeGeneration: boolean;
+     keywords: string[];
+   }
+   ```
+
+2. **ModelRouter** (~200 LOC)
+   ```typescript
+   routeToModel(prompt: string): ModelRoutingDecision {
+     model: 'opus' | 'sonnet' | 'haiku';
+     confidence: number;
+     reasoning: string;
+     estimatedCost: number;
+   }
+   ```
+
+**Initial Heuristics:**
+- **Haiku:** Simple file ops, CRUD, formatting, tests
+- **Sonnet:** Code implementation, refactoring, documentation
+- **Opus:** Architecture, complex debugging, strategic analysis
+
+### Week 2: Learning System
+
+- [ ] Implement OverrideLearningSystem (~100 LOC)
+  - Track user overrides
+  - Detect patterns
+  - Update routing heuristics
+  
+- [ ] Integration with Statsig
+  - A/B test routing changes
+  - Validate improvements
+  - Auto-deploy better heuristics
+
+**Components:**
+1. **OverrideLearningSystem** (~100 LOC)
+   ```typescript
+   recordOverride(original: Model, override: Model, prompt: string)
+   detectPatterns(): RoutingPattern[]
+   updateHeuristics(pattern: RoutingPattern): void
+   ```
+
+**Deliverable:** Model routing that learns from user behavior
+
+### Week 3: Token Optimization
+
+- [ ] Implement token budget enforcement
+- [ ] Context pruning strategies
+- [ ] Automatic fallback (Opus → Sonnet if budget exceeded)
+- [ ] Monthly savings reporting
+
+**Deliverable:** Automatic cost optimization
+
+---
+
+## Phase 2 Summary
+
+**Custom Code:** ~400 LOC  
+**Integration:** Analytics infrastructure (Phase 1.5)
+
+**Value Proposition:**
+- Automatic model selection
+- Token cost optimization
+- Learning from user behavior
+- Monthly cost savings reports
+
+---
+
+## Phase 3: Multi-Chat Coordination
 
 **Duration:** 4-6 weeks  
-**Dependencies:** Phase 1 complete ✅, Redis
+**Dependencies:** Crash Prevention (Phase 1), Model Routing (Phase 2)  
+**Infrastructure:** Redis + BullMQ (LEAN-OUT)
 
-### Week 1-2: Infrastructure
+### Week 1-2: Infrastructure (LEAN-OUT)
 
 - [ ] Set up Redis server
-- [ ] Install BullMQ, ioredis
-- [ ] Implement chat registry
-- [ ] Create task queue wrappers
-- [ ] Build message bus (Redis Pub/Sub)
+- [ ] Install BullMQ, ioredis (npm)
+- [ ] Implement chat registry (~100 LOC - CUSTOM)
+- [ ] Wrap BullMQ queues (~100 LOC - CUSTOM)
+- [ ] Wrap Redis Pub/Sub (~100 LOC - CUSTOM)
+
+**LEAN-OUT Analysis:**
+```
+PROBLEM: Job queue, message bus, distributed locks
+CUSTOM: Build from scratch (BAD - 1,500 LOC)
+LEAN-OUT: Redis + BullMQ (GOOD - 300 LOC wrappers)
+```
+
+**Battle-Tested Tools:**
+- **Redis** - In-memory data structure store
+- **BullMQ** - Queue management with Redis backend
+- **ioredis** - Redis client for Node.js
+
+**Custom Wrappers (~300 LOC):**
+- ChatRegistry (~100 LOC)
+- TaskQueue wrapper (~100 LOC)
+- MessageBus wrapper (~100 LOC)
 
 ### Week 3-4: Supervisor Pattern
 
-- [ ] Implement supervisor initialization
-- [ ] Build task decomposition logic
-- [ ] Create worker registration
-- [ ] Implement task assignment
-- [ ] Build progress aggregation
+- [ ] Implement ChatCoordinator (~200 LOC)
+- [ ] Build task decomposition logic (~150 LOC)
+- [ ] Create task assignment (~100 LOC)
+- [ ] Build progress aggregation (~100 LOC)
+
+**Components:**
+1. **ChatCoordinator** (~200 LOC)
+   - Supervisor chat orchestration
+   - Task decomposition
+   - Worker assignment
+   
+2. **TaskDistributor** (~200 LOC)
+   - Task queue management
+   - Load balancing
+   - Priority handling
 
 ### Week 5-6: Worker Automation
 
-- [ ] Implement worker loop
-- [ ] Build task claiming logic
-- [ ] Create execution reporting
-- [ ] Implement crash recovery for workers
-- [ ] Integration testing
+- [ ] Implement worker loop (~200 LOC)
+- [ ] Build task claiming logic (~100 LOC)
+- [ ] Create execution reporting (~100 LOC)
+- [ ] Build state synchronization (~300 LOC)
 
-**Deliverable:** Parallel chat execution with coordination
+**Components:**
+1. **WorkerAutomation** (~200 LOC)
+   - Autonomous task execution
+   - Result reporting
+   - Error handling
+   
+2. **StateSync** (~300 LOC)
+   - Shared state management
+   - Conflict resolution
+   - Consistency guarantees
 
----
-
-## Phase 3: Self-Evolution Engine
-
-**Duration:** 6-8 weeks  
-**Dependencies:** Phase 2 complete
-
-### Week 1-2: Observation Layer
-
-- [ ] Define evolution metrics
-- [ ] Implement pattern detection
-- [ ] Build bottleneck identification
-- [ ] Create failure clustering
-- [ ] Historical analysis system
-
-### Week 3-4: Analysis Engine
-
-- [ ] Implement improvement detection
-- [ ] Build proposal generation
-- [ ] Create ROI estimation
-- [ ] Implement prioritization
-- [ ] Guardrails system
-
-### Week 5-6: Implementation Pipeline
-
-- [ ] Level 1: Auto-configuration
-- [ ] Level 2: Workflow suggestions
-- [ ] Level 3: Human-approved changes
-- [ ] Rollback mechanisms
-- [ ] Audit trail
-
-### Week 7-8: Learning Loop
-
-- [ ] Feedback collection
-- [ ] Model refinement
-- [ ] Cross-project learning
-- [ ] Pattern library
-- [ ] Continuous improvement
-
-**Deliverable:** Self-improving system
+**Deliverable:** Parallel AI execution
 
 ---
 
-## Phase 4: Autonomous Operation
+## Phase 3 Summary
+
+**Custom Code:** ~1,100 LOC  
+**Battle-Tested Tools:** Redis + BullMQ  
+**Eliminated Code:** ~1,400 LOC (by using BullMQ vs custom queue)
+
+---
+
+## Phase 4: Self-Evolution Engine
 
 **Duration:** 4-6 weeks  
-**Dependencies:** Phase 3 complete
+**Dependencies:** All above phases  
+**Goal:** Expand auto-experimentation to all components
 
-### Week 1-2: Supervised Autonomy
+### Week 1-2: Cross-Component Learning
 
-- [ ] Implement Type A (code implementation)
-- [ ] Build escalation protocol
-- [ ] Create decision boundaries
-- [ ] Human notification system
-- [ ] Safety guardrails
+- [ ] Multi-component pattern detection
+- [ ] Holistic optimization experiments
+- [ ] User behavior modeling
 
-### Week 3-4: Background Operations
+### Week 3-4: Advanced Experiments
 
-- [ ] Implement Type B (monitoring)
-- [ ] File watcher integration
-- [ ] Build status alerting
-- [ ] Pattern observation
-- [ ] Optimization suggestions
+- [ ] Complex parameter tuning
+- [ ] Strategy comparison (A/B/C/D testing)
+- [ ] Ensemble methods
 
-### Week 5-6: Auto-Recovery
+### Week 5-6: User Intelligence
 
-- [ ] Implement Type C (recovery)
-- [ ] Self-healing workflows
-- [ ] Zero-intervention recovery
-- [ ] Performance optimization
-- [ ] End-to-end autonomous testing
+- [ ] Personal preference learning
+- [ ] Custom heuristic generation
+- [ ] Predictive suggestions
 
-**Deliverable:** Zero-intervention development sessions
+**Deliverable:** Advanced self-improvement capabilities
 
 ---
 
-## Development Velocity Insights
+## Phase 5: Autonomous Operation
 
-### The Compound Acceleration Pattern
+**Duration:** 4-6 weeks  
+**Dependencies:** Multi-chat + Self-evolution
 
-**HISTORICAL VELOCITY TRAJECTORY:**
+### Week 1-2: Goal Management
 
-**Consensus:** 7.5 weeks (52.5 days) - D:\app-repository\consensus
-- First major project
-- Learning patterns from scratch
-- Building foundations
-- Establishing workflows
+- [ ] Goal decomposition
+- [ ] Sub-goal tracking
+- [ ] Progress reporting
 
-**GREGORE:** 12 days - D:\GREGORE  
-- **4.4x speedup** from Consensus
-- Established instruction system
-- Defined TDD workflow
-- Created quality standards
-- Built foundation patterns
+### Week 3-4: Autonomous Execution
 
-**KERNL:** 1.5 days - D:\KERNL
-- **8x speedup** from GREGORE
-- **35x speedup** from Consensus
-- Leveraged GREGORE patterns
-- Added Desktop Commander integration
-- MCP server architecture
-- 95 tools across 17 categories
+- [ ] Overnight operation
+- [ ] Decision-making under uncertainty
+- [ ] Recovery from failures
 
-**SHIM Week 3-4:** One evening (~4-6 hours)
-- **~12x speedup** from KERNL (per equivalent scope)
-- **~96x speedup** from GREGORE
-- **~420x speedup** from Consensus 🚀
-- Standing on shoulders of all three
-- Fully automated workflows
-- Zero friction development
-- Revolutionary velocity
+### Week 5-6: Human Review
 
-### The Exponential Curve
+- [ ] Work review interface
+- [ ] Approval workflows
+- [ ] Feedback integration
 
-```
-Consensus (52.5 days) 
-    ↓ 4.4x faster
-GREGORE (12 days)
-    ↓ 8x faster  
-KERNL (1.5 days)
-    ↓ 12x faster
-SHIM (0.125 days per equivalent scope)
-    ↓ ?x faster
-[Future projects approaching INSTANT]
-```
-
-**The Pattern:** Each project captures learnings that make the next exponentially faster.
-
-**The Mechanism:**
-1. **Consensus:** Raw discovery (7.5 weeks)
-2. **GREGORE:** First systematization (12 days)
-3. **KERNL:** Tooling automation (1.5 days)
-4. **SHIM:** Compound automation (one evening)
-5. **Future:** Approaching instantaneous development?
-
-**Key Insight:** This isn't linear improvement - it's COMPOUND ACCELERATION. Each project builds infrastructure that eliminates entire categories of friction for the next.
-
-### What This Means
-
-**If the pattern continues:**
-- SHIM Phase 1 (estimated 4 weeks) → Could complete in **3-4 days**
-- SHIM complete (estimated 24 weeks) → Could complete in **2-3 weeks**
-- Next project after SHIM → Could be **instantaneous prototyping**
-
-**This validates the Goliath-fighting principle:**
-> "Fight never-ending Goliaths to make things easier."
-
-Each "mountain to climb" (Consensus → GREGORE → KERNL → SHIM) creates infrastructure that makes the next mountain 10x smaller.
-
-**The Ultimate Outcome:** Development velocity approaching human thought speed. 🚀
-
-### Week 3-4 Achievement: Single Evening Completion
-
-**Date:** January 10, 2026  
-**Duration:** One evening session (~4-6 hours)  
-**Output:**
-- 4 complete components (114 tests, 98%+ coverage)
-- SignalCollector: 238 LOC, 53 tests
-- SignalHistoryRepository: 314 LOC, 18 tests  
-- CheckpointRepository: 600+ LOC, 24 tests
-- CheckpointManager: 218 LOC, 19 tests
-- Complete instruction system
-- Automated workflows (git, documentation)
-- 5 production commits with quality enforcement
-
-**Productivity Factors:**
-1. **TDD Workflow:** RED→GREEN→COMMIT rhythm prevents backtracking
-2. **Bootstrap System:** 30-second session start eliminates ramp-up time
-3. **Automated Git:** Zero friction commits (Desktop Commander integration)
-4. **Clear Instructions:** Disk-based source of truth prevents re-explanation
-5. **Quality Gates:** Comprehensive tests prevent technical debt accumulation
-6. **Performance Budgets:** Clear benchmarks prevent premature optimization
-7. **Authority Protocol:** Systematic problem detection prevents wheel-spinning
-
-**Velocity Metrics:**
-- ~1,370 lines of production code in one session
-- ~114 comprehensive tests with full coverage
-- Zero bugs, zero rework, zero technical debt
-- All performance benchmarks met on first implementation
-- Complete documentation maintained throughout
-
-**Key Insight:** Proper infrastructure (instructions, automation, workflows) enables **revolutionary velocity** without sacrificing quality. This validates SHIM's core thesis - eliminate friction, achieve 10x productivity.
-
-**Comparison to Traditional Development:**
-- Traditional estimate: 2-3 weeks for equivalent output
-- Actual: One evening (~4-6 hours)
-- **Speedup: 4-6x faster**
-
-**Success Pattern Identified:**
-```
-Clear Instructions + TDD + Automation + Quality Gates = Revolutionary Velocity
-```
-
-This achievement demonstrates that SHIM's crash prevention goals are achievable within the ambitious timeline. The infrastructure investment paid for itself in the first real work session.
+**Deliverable:** AI that works while you sleep
 
 ---
 
-## Success Metrics
+## Total Project Timeline
 
-| Metric | Current | Phase 1 | Phase 2 | Phase 3 | Phase 4 |
-|--------|---------|---------|---------|---------|---------|
-| Crashes/10 hrs | ~3-5 | Recoverable | Recoverable | <1 | <0.5 |
-| Recovery time | 10-30 min | <2 min | <1 min | <30 sec | <10 sec |
-| Context loss | 100% | <10% | <5% | <1% | 0% |
-| Parallel chats | 1 | 1 | 3-5 | 5+ | 5+ |
-| Manual intervention | Every msg | Every msg | Major only | Rare | Exceptions |
+**Phase 1:** 4-6 weeks (11 days actual for Weeks 1-6)  
+**Phase 1.5:** 2-3 weeks (parallel with Phase 1 Week 7-8)  
+**Phase 2:** 2-3 weeks  
+**Phase 3:** 4-6 weeks  
+**Phase 4:** 4-6 weeks  
+**Phase 5:** 4-6 weeks
 
----
+**Total:** 18-26 weeks (~4-6 months)
 
-## Risk Assessment
-
-| Risk | Probability | Impact | Mitigation |
-|------|-------------|--------|------------|
-| Platform changes break signals | Medium | High | Abstract signal layer |
-| Redis complexity | Low | Medium | Start with SQLite fallback |
-| Crash prediction inaccurate | Medium | Medium | Heuristic first, ML later |
-| Multi-chat UX friction | High | Medium | Minimize manual setup |
-| Self-evolution safety | Low | High | Strict guardrails, human approval |
+**LEAN-OUT Savings:**
+- Custom code: ~2,770 LOC (vs ~5,000+ LOC without)
+- Maintenance burden: 45% reduction
+- Development hours: ~200 hours saved
+- Ongoing maintenance: ~100 hours/year saved
 
 ---
 
-## MVP Definition
+## Success Criteria
 
-**Minimum Viable SHIM (Phase 1 only):**
-- Crash prediction (heuristic)
-- Automatic checkpointing
-- One-click resume
-- Full context recovery
-
-**Value proposition:** "Never lose your work again"
+**Phase 1:** Zero context loss from crashes  
+**Phase 1.5:** System improves itself monthly  
+**Phase 2:** 30%+ token cost reduction  
+**Phase 3:** 3+ parallel AI workstreams  
+**Phase 4:** 10+ automatic improvements deployed  
+**Phase 5:** 8+ hours of autonomous work daily
 
 ---
 
-*Roadmap will be updated as implementation progresses.*
+*This roadmap follows LEAN-OUT principles: battle-tested tools for infrastructure, custom code only for domain-specific logic.*
+
+*Total custom code: ~2,770 LOC (vs 5,000+ without LEAN-OUT)*  
+*Focus: Build intelligence, not plumbing*

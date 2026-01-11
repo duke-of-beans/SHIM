@@ -1,10 +1,10 @@
 # SHIM: Source of Truth Document
 
 **Project:** SHIM (thin layer that intercepts and enhances AI platform capabilities)
-**Version:** 0.3.0 (Development Philosophy Added)
+**Version:** 0.4.0 (Analytics & Auto-Experimentation Architecture)
 **Created:** January 9, 2026  
 **Last Updated:** January 11, 2026  
-**Status:** Phase 1 Implementation (Week 3-4)
+**Status:** Phase 1 Implementation + Analytics Infrastructure Design
 
 ---
 
@@ -19,12 +19,19 @@
 
 ## What SHIM Is
 
-A system that eliminates friction in AI-assisted development by enabling:
+A **self-improving** system that eliminates friction in AI-assisted development by enabling:
 
 1. **Crash Prevention & Recovery** - Never lose context again
-2. **Multi-Chat Coordination** - Parallel AI workstreams  
-3. **Self-Evolution** - System improves itself over time
-4. **Autonomous Operation** - AI executes while human sleeps
+2. **Intelligent Model Routing** - Automatic model selection with token optimization
+3. **Self-Evolution** - System improves itself automatically over time (Kaizen)
+4. **Multi-Chat Coordination** - Parallel AI workstreams  
+5. **Autonomous Operation** - AI executes while human sleeps
+
+**NEW: Fully Automatic Self-Improvement**
+- Continuous A/B testing without human intervention
+- Statistical validation and gradual rollout
+- Automatic parameter tuning within safety bounds
+- Zero manual improvement application required
 
 ---
 
@@ -59,7 +66,13 @@ See `docs\CLAUDE_INSTRUCTIONS_PROJECT.md` §0 for complete enforcement rules.
 - Let user decide if worth doing
 - Comprehensive solutions are normal, not "overkill"
 
-**5. Banned Vocabulary**
+**5. LEAN-OUT Infrastructure**
+- Use battle-tested tools for generic problems
+- Custom code only for domain-specific logic
+- Don't rebuild what production tools provide
+- Focus development on differentiators
+
+**6. Banned Vocabulary**
 ```
 ❌ NEVER: slow, fast, hours, days, weeks, hard, easy, overkill, for now, later
 ✅ USE: simple, comprehensive, minimal, complete, straightforward, involved
@@ -71,11 +84,9 @@ See `docs\CLAUDE_INSTRUCTIONS_PROJECT.md` §0 for complete enforcement rules.
 - ❌ WRONG: "Path A: Fast (auto-resume). Path B: Slow (300 LOC daemon)"
 - ✅ RIGHT: "Supervisor daemon eliminates crashes completely. Implementation includes process monitoring, MCP integration, Windows service. This is the correct solution."
 
-**Example: Architecture Choices**
-- Don't frame "simple vs complex"
-- Frame "incomplete vs complete"
-- Always recommend complete solution
-- User decides trade-offs
+**Example: Analytics Architecture**
+- ❌ WRONG: "Build custom analytics (2,300 LOC)"
+- ✅ RIGHT: "Use Prometheus + Statsig (570 LOC). Battle-tested, maintained, free tier available."
 
 ---
 
@@ -104,41 +115,40 @@ See `docs\CLAUDE_INSTRUCTIONS_PROJECT.md` §0 for complete enforcement rules.
 | `specs/SPEC_CRASH_PREVENTION.md` | Crash prevention technical specification | ✅ Complete |
 | `specs/DATA_MODELS.md` | TypeScript interfaces and database schemas | ✅ Complete |
 | `specs/IMPLEMENTATION_PLAN.md` | Week-by-week development plan for Phase 1 | ✅ Complete |
+| `specs/SPEC_ANALYTICS.md` | Analytics & auto-experimentation specification | 🔜 Next |
+| `specs/SPEC_MODEL_ROUTING.md` | Intelligent model routing specification | 🔜 Next |
 
 ---
 
 ## Research Summary
 
-### The Three Fundamental Root Causes
+### The Four Fundamental Root Causes
 
-After analyzing 32 friction points, three architectural issues explain ~80% of observed friction:
+After analyzing 32 friction points plus recent insights, four architectural issues explain ~85% of observed friction:
 
 **ROOT CAUSE #1: Ephemeral Context Architecture (HIGHEST LEVERAGE)**
 - Platform treats conversations as ephemeral
 - No native persistence primitive between tool calls
 - Everything lives in volatile context window memory
-- Fix: Continuous state serialization with predictive checkpointing
+- **Fix:** Continuous state serialization with predictive checkpointing
 
-**ROOT CAUSE #2: Single-Chat Constraint**
+**ROOT CAUSE #2: Manual Model Selection**
+- User manually picks Opus vs Sonnet for each chat
+- Wastes expensive tokens on simple tasks
+- Wastes time with cheaper models on complex tasks
+- **Fix:** Intelligent model routing with automatic token optimization
+
+**ROOT CAUSE #3: Single-Chat Constraint**
 - Platform enforces 1:1 human:chat model
 - No primitive for chat instances to communicate
 - Fundamentally blocks autonomous operation
-- Fix: Multi-chat coordination layer via shared database
+- **Fix:** Multi-chat coordination layer via shared database
 
-**ROOT CAUSE #3: Tool Permission Fragmentation**
-- Tools exist in silos with different permissions
-- No unified capability model
-- Fix: Meta-layer reasoning about tool selection with automatic fallback
-
-### Highest-Leverage Intervention
-
-**Continuous State Serialization with Predictive Checkpointing**
-
-If one thing could be implemented, it would be a system that:
-1. Serializes ALL conversation state every N tool calls
-2. Predicts crash likelihood based on observable signals
-3. Auto-pauses before predicted crash
-4. Enables instant resume with full context reconstruction
+**ROOT CAUSE #4: Static System (No Learning)**
+- No feedback loop for improvement
+- Parameters remain fixed regardless of effectiveness
+- No learning from user behavior
+- **Fix:** Automatic experimentation and self-improvement (Kaizen)
 
 ---
 
@@ -146,16 +156,121 @@ If one thing could be implemented, it would be a system that:
 
 > "Build intelligence, not plumbing. Use battle-tested tools for generic problems."
 
-**Infrastructure (Battle-tested):**
-- Redis + BullMQ - Job queues, messaging, locks
-- SQLite - Checkpoints, analytics, persistence
-- File System - Large payloads
+### Infrastructure (Battle-Tested Tools)
 
-**Custom Code (Domain-specific only):**
-- Crash Prediction (~200 LOC)
-- Checkpoint Manager (~150 LOC)
-- Supervisor Logic (~300 LOC)
-- Worker Logic (~200 LOC)
+**Core Infrastructure:**
+- **Redis + BullMQ** - Job queues, messaging, distributed locks
+- **SQLite** - Checkpoints, local persistence
+- **File System** - Large payloads (>100KB)
+
+**Analytics & Learning (NEW):**
+- **Prometheus** - Metrics collection and time-series storage
+  - Industry standard, 10+ years battle-tested
+  - Node.js client: `prom-client`
+  - Free, open-source
+  
+- **Grafana** - Dashboards and visualization
+  - Built for Prometheus
+  - Professional dashboards out-of-box
+  - Free, open-source
+  
+- **Statsig** - A/B testing and experimentation
+  - Built for automatic experiments
+  - Statistical validation included
+  - Gradual rollout built-in
+  - Free tier available
+  
+- **simple-statistics (npm)** - Statistical analysis
+  - T-tests, p-values, effect sizes
+  - 130k+ downloads/week
+  - Well-tested, maintained
+
+**Process Monitoring:**
+- Node.js `process` API - Monitor Claude Desktop
+- Windows Service API (NSSM) - Auto-restart daemon
+
+### Custom Code (Domain-Specific Only)
+
+**Phase 1: Crash Prevention (~1,000 LOC)**
+- SignalCollector - Crash prediction (~200 LOC) ✅
+- CheckpointManager - Trigger detection (~150 LOC)
+- SessionRestorer - Context restoration (~150 LOC)
+- Supervisor Daemon - Process monitoring (~300 LOC)
+- CheckpointRepository - Storage (~200 LOC) ✅
+
+**Phase 1.5: Analytics & Auto-Improvement (~570 LOC)**
+- SHIMMetrics - Prometheus integration (~100 LOC)
+- OpportunityDetector - Pattern detection (~150 LOC)
+- SafetyBounds - Domain-specific safety (~150 LOC)
+- StatsigIntegration - Experiment management (~70 LOC)
+- EventEmitter - Domain events (~100 LOC)
+
+**Phase 2: Model Routing (~400 LOC)**
+- ModelRouter - Routing decisions (~200 LOC)
+- PromptAnalyzer - Complexity detection (~150 LOC)
+- TokenEstimator - Cost calculation (~50 LOC)
+
+**Phase 3: Multi-Chat Coordination (~800 LOC)**
+- ChatCoordinator - Chat orchestration (~300 LOC)
+- TaskDistributor - Work allocation (~200 LOC)
+- StateSync - Shared state (~300 LOC)
+
+**Total Custom Code: ~2,770 LOC** (vs 5,000+ LOC without LEAN-OUT)
+
+**Savings: 2,230 LOC eliminated** by using battle-tested tools
+
+---
+
+## New Architecture: Self-Improving Kaizen Model
+
+### Fully Automatic Improvement Loop
+
+```
+1. SHIM operates normally
+   ↓
+2. Emit metrics (Prometheus)
+   ↓
+3. Detect patterns (OpportunityDetector - custom)
+   ↓
+4. Design experiment (Statsig - battle-tested)
+   ↓
+5. Run A/B test (Statsig - automatic)
+   ↓
+6. Validate results (simple-statistics - automatic)
+   ↓
+7. Gradual rollout (Statsig - automatic)
+   ↓
+8. Monitor for regression (SafetyBounds - custom)
+   ↓
+9. Deploy or rollback (automatic)
+   ↓
+10. Log improvement (Prometheus)
+    ↓
+[LOOP - Zero human intervention]
+```
+
+### User Control (Override Mechanism)
+
+```typescript
+// User sets bounds (optional)
+shimConfig.autoImprovement = {
+  enabled: true,
+  maxCostIncrease: 20,  // $/week
+  maxLatencyIncrease: 100,  // ms
+  requireApproval: ['model_routing_changes'],
+  autoApprove: ['checkpoint_tuning', 'compression']
+};
+
+// User sees monthly report
+SHIM Auto-Improvements This Month:
+✓ Checkpoint interval optimized (-12% crash rate)
+✓ Model routing improved (+25% accuracy)
+✓ Context pruning enhanced (2.4M tokens saved)
+
+Net benefit: $119 + 8.5 hours saved
+```
+
+**Default:** Automatic within safety bounds. User can override/rollback anytime.
 
 ---
 
@@ -179,11 +294,46 @@ If one thing could be implemented, it would be a system that:
 - SessionRestorer
 - E2E testing
 
-**Week 7-8: Supervisor Daemon (CORRECT SOLUTION)**
+**Week 7-8: Supervisor Daemon**
 - Process monitoring
 - Auto-restart on crash
 - MCP integration for auto-resume
 - Windows service deployment
+
+### Phase 1.5: Analytics Infrastructure (NEW - DESIGNED)
+
+**Foundation (Parallel with Phase 1):**
+- Prometheus + Grafana setup
+- SHIMMetrics implementation (~100 LOC)
+- Event emission from existing components
+- Basic dashboards
+
+**Auto-Experimentation Engine:**
+- OpportunityDetector (~150 LOC)
+- Statsig integration (~70 LOC)
+- SafetyBounds enforcement (~150 LOC)
+- Statistical validation (simple-statistics)
+
+**Timeline:** Built in parallel with Phase 1 Week 5-8
+
+### Phase 2: Intelligent Model Routing (DESIGNED)
+
+**Components:**
+- ModelRouter (~200 LOC)
+- PromptAnalyzer (~150 LOC)
+- Token optimization strategies
+- Override learning system
+
+**Dependencies:** Analytics infrastructure (Phase 1.5)
+
+### Phase 3: Multi-Chat Coordination
+
+**Components:**
+- Chat orchestration
+- Task distribution
+- Shared state management
+
+**Dependencies:** Crash prevention (Phase 1), Model routing (Phase 2)
 
 ---
 
@@ -191,7 +341,10 @@ If one thing could be implemented, it would be a system that:
 
 **KERNL:** SHIM builds on KERNL's infrastructure (SQLite, session management, file operations)
 
-**GREGORE:** SHIM was researched within GREGORE project context; developed as separate project
+**GREGORE:** 
+- SHIM researched within GREGORE context
+- Token optimization strategies borrowed from GREGORE
+- Developed as separate project
 
 ---
 
@@ -207,9 +360,29 @@ If one thing could be implemented, it would be a system that:
 - Revolutionary solutions, not incremental
 - No timeline bias in recommendations
 - Always recommend right solution
+- LEAN-OUT: Use battle-tested tools for generic problems
+
+---
+
+## Competitive Differentiation
+
+**What competitors offer:**
+- Analytics dashboards (requires human analysis)
+- Recommendations (requires human approval)
+- Configuration options (requires human tuning)
+
+**What SHIM offers:**
+- **Fully automatic Kaizen** (self-improvement without human intervention)
+- **Intelligent model routing** (automatic cost optimization)
+- **Zero-intervention crash recovery** (supervisor daemon)
+- **Compound intelligence** (gets smarter every day)
+
+**This is the moat:** Self-improving architecture that learns from every user.
 
 ---
 
 *This document is the canonical source of truth for SHIM. All development should reference this first.*
 
-*Development Philosophy: Revolutionary quality. No timelines. Right solution always. User builds enterprise software in weeks.*
+*Development Philosophy: Revolutionary quality. No timelines. Right solution always. LEAN-OUT infrastructure. User builds enterprise software in weeks.*
+
+*Architecture: Self-improving Kaizen model with automatic experimentation and deployment within safety bounds.*
