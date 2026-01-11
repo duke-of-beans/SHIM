@@ -1,7 +1,7 @@
 # SHIM: Source of Truth Document
 
 **Project:** SHIM (thin layer that intercepts and enhances AI platform capabilities)
-**Version:** 0.4.0 (Analytics & Auto-Experimentation Architecture)
+**Version:** 0.5.0 (Open Source Strategy & Business Model)
 **Created:** January 9, 2026  
 **Last Updated:** January 11, 2026  
 **Status:** Phase 1 Implementation + Analytics Infrastructure Design
@@ -97,6 +97,141 @@ See `docs\CLAUDE_INSTRUCTIONS_PROJECT.md` §0 for complete enforcement rules.
 - Values technical correctness over shipping speed
 - Willing to climb mountains (steep learning curves) for genuine payoff
 - Philosophy: "Generic intelligence is commodity, contextual intelligence is monopoly"
+
+---
+
+## Business Model & Distribution Strategy
+
+**License:** MIT (fully open source)  
+**Distribution:** GitHub (public repository)  
+**Support:** Community-driven (Discord + GitHub Issues)  
+**Monetization:** GREGORE conversion funnel (not SHIM subscriptions)
+
+### Strategic Positioning: Three-Tier Funnel
+
+```
+KERNL (Open Source - MIT)
+  │ Value: MCP project automation tools
+  │ Market: Hobbyists, tinkerers, developers
+  │ Users: Target 50,000+
+  │ Price: FREE
+  │ Purpose: Entry point, developer credibility
+  ↓ 20% adoption rate
+  
+SHIM (Open Source - MIT) ← THIS PROJECT
+  │ Value: Crash prevention, model routing, self-improvement
+  │ Market: Serious Claude Desktop users
+  │ Users: Target 10,000+
+  │ Price: FREE
+  │ Purpose: Solve critical pain, build ecosystem
+  ↓ 5% conversion rate
+  
+GREGORE (Proprietary - Closed Source)
+  │ Value: Multi-LLM orchestration, parallel chats, enterprise
+  │ Market: Professional developers, teams
+  │ Users: Target 500+
+  │ Price: $99-199/mo
+  │ Purpose: Revenue generation, premium tier
+```
+
+### Why SHIM is Open Source
+
+**Economic Analysis:**
+- Open source: 10,000 users → 5% convert → 500 GREGORE @ $99/mo = **$49,500/mo**
+- Paid tier: 500 users (paywall kills adoption) → 10% convert → 50 GREGORE = **$4,950/mo**
+- **Open source wins by 10x** (and gets stronger over time)
+
+**The Real Moat:**
+> "You can't fork an ecosystem."
+
+Someone can clone SHIM code, but they can't clone:
+- 10,000+ active users
+- 50,000+ community patterns
+- 3 years of usage insights
+- Brand recognition & developer trust
+- Network effects
+
+**Historical Precedent:**
+- GitLab: Open core → $15B valuation
+- MongoDB: Community → $1.6B revenue/year
+- Docker: Open source → $600M+ acquisition
+- Elastic: Free tier → $1.1B revenue/year
+
+All followed same pattern: Massive adoption → Premium scale/convenience → Ecosystem moat
+
+### No Backend Costs = No Reason to Charge
+
+**SHIM Architecture is 100% Self-Hosted:**
+- Redis: Docker container (local)
+- Prometheus: Docker container (local)
+- Statsig: Free tier (external SaaS)
+- SQLite: Local file database
+- All analytics: Runs locally
+
+**Monthly backend costs: $0**
+
+No expensive cloud infrastructure = No justification for fees
+
+### Value Differentiation
+
+| Product | Status | Core Value | Backend |
+|---------|--------|------------|---------|
+| **KERNL** | Open | MCP automation tools | Self-hosted |
+| **SHIM** | Open | Never lose work to crashes | Self-hosted |
+| **GREGORE** | Closed | Multi-LLM orchestration at scale | Managed cloud |
+
+**Upgrade trigger points:**
+- SHIM user hits single-LLM limits (manual chat switching)
+- Needs parallel workstreams (supervisor/worker patterns)
+- Wants multi-provider coordination (Claude + GPT-4 + Gemini)
+- Requires enterprise features (team coordination, audit logs)
+
+### Community & Network Effects
+
+**What Makes SHIM Valuable:**
+1. **Pattern Library** - Users contribute crash prevention patterns
+2. **Usage Insights** - 10,000 users generate rich analytics data
+3. **Community Support** - Distributed help via Discord/GitHub
+4. **Brand Recognition** - "10,000 developers use SHIM daily"
+5. **Developer Trust** - Open source = transparency + credibility
+
+**Growth Flywheel:**
+```
+More users → More patterns → More value → More users
+     ↓
+More usage data → Better product → Higher quality
+     ↓
+More GREGORE conversions → More revenue → Better SHIM
+```
+
+**Network effects create genuine moat** - impossible for competitors to replicate without matching user base.
+
+### Distribution Strategy
+
+**Phase 1: GitHub Launch**
+- Public repository (MIT license)
+- Documentation site (GitHub Pages)
+- Community Discord server
+- Marketing: Reddit, HN, Twitter/X
+
+**Phase 2: Community Growth**
+- Pattern library and sharing
+- Weekly community calls
+- Conference talks and blog posts
+- Organic SEO (GitHub stars, social media)
+
+**Phase 3: GREGORE Conversion**
+- In-app upgrade prompts at limit points
+- "First 100 SHIM users get 50% off GREGORE"
+- Seamless migration (one-click export)
+- Premium support included
+
+**Success Metrics:**
+- 1,000 GitHub stars (3 months)
+- 5,000 active users (6 months)
+- 10,000 active users (12 months)
+- 250 GREGORE conversions (5% of 5,000)
+- $24,750/mo revenue at 6 months
 
 ---
 
