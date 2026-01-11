@@ -108,21 +108,35 @@ describe('EvolutionCoordinator', () => {
   
   describe('Concurrent Experiments', () => {
     it('should enforce max concurrent limit', async () => {
-      await coordinator.registerArea({
+      // Create coordinator with shorter gap for this test
+      const testCoordinator = new EvolutionCoordinator({
+        maxConcurrentExperiments: 3,
+        minExperimentGap: 100 // 100ms between experiments
+      });
+      
+      await testCoordinator.registerArea({
         name: 'area1',
         currentVersion: '1.0.0',
         metrics: ['m1']
       });
       
-      // Start max experiments (3)
-      await coordinator.startExperiment('area1', { hypothesis: 'H1', treatment: {} });
-      await coordinator.startExperiment('area1', { hypothesis: 'H2', treatment: {} });
-      await coordinator.startExperiment('area1', { hypothesis: 'H3', treatment: {} });
+      // Helper to wait
+      const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+      
+      // Start max experiments (3) with delays
+      await testCoordinator.startExperiment('area1', { hypothesis: 'H1', treatment: {} });
+      await wait(150);
+      await testCoordinator.startExperiment('area1', { hypothesis: 'H2', treatment: {} });
+      await wait(150);
+      await testCoordinator.startExperiment('area1', { hypothesis: 'H3', treatment: {} });
+      await wait(150);
       
       // Should reject 4th
       await expect(
-        coordinator.startExperiment('area1', { hypothesis: 'H4', treatment: {} })
+        testCoordinator.startExperiment('area1', { hypothesis: 'H4', treatment: {} })
       ).rejects.toThrow('Maximum concurrent experiments');
+      
+      await testCoordinator.stop();
     });
   });
   
