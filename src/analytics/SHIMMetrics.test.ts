@@ -30,8 +30,8 @@ describe('SHIMMetrics', () => {
       expect(registry).toBeDefined();
     });
     
-    it('should register default SHIM metrics', () => {
-      const metricNames = metrics.getMetricNames();
+    it('should register default SHIM metrics', async () => {
+      const metricNames = await metrics.getMetricNames();
       
       // Should include core SHIM metrics
       expect(metricNames).toContain('shim_crash_prediction_accuracy');
@@ -41,10 +41,10 @@ describe('SHIMMetrics', () => {
   });
   
   describe('Crash Prevention Metrics', () => {
-    it('should record crash prediction accuracy', () => {
+    it('should record crash prediction accuracy', async () => {
       metrics.recordCrashPredictionAccuracy(0.92);
       
-      const value = metrics.getMetricValue('shim_crash_prediction_accuracy');
+      const value = await metrics.getMetricValue('shim_crash_prediction_accuracy');
       expect(value).toBe(0.92);
     });
     
@@ -64,30 +64,30 @@ describe('SHIMMetrics', () => {
       expect(rate).toBeCloseTo(0.667, 2);
     });
     
-    it('should track checkpoint size metrics', () => {
+    it('should track checkpoint size metrics', async () => {
       metrics.recordCheckpointSize({
         uncompressed: 250000,
         compressed: 45000,
         compressionRatio: 0.18
       });
       
-      const compressed = metrics.getMetricValue('shim_checkpoint_compressed_bytes');
+      const compressed = await metrics.getMetricValue('shim_checkpoint_compressed_bytes');
       expect(compressed).toBe(45000);
     });
   });
   
   describe('Model Routing Metrics', () => {
-    it('should record model routing accuracy', () => {
+    it('should record model routing accuracy', async () => {
       metrics.recordModelRoutingAccuracy(0.85);
       
-      const value = metrics.getMetricValue('shim_model_routing_accuracy');
+      const value = await metrics.getMetricValue('shim_model_routing_accuracy');
       expect(value).toBe(0.85);
     });
     
-    it('should track token savings', () => {
+    it('should track token savings', async () => {
       metrics.recordTokenSavings(15000);
       
-      const total = metrics.getMetricValue('shim_token_savings_total');
+      const total = await metrics.getMetricValue('shim_token_savings_total');
       expect(total).toBeGreaterThanOrEqual(15000);
     });
     
@@ -127,25 +127,25 @@ describe('SHIMMetrics', () => {
   });
   
   describe('System Health Metrics', () => {
-    it('should track active sessions count', () => {
+    it('should track active sessions count', async () => {
       metrics.setActiveSessions(3);
       
-      const value = metrics.getMetricValue('shim_active_sessions');
+      const value = await metrics.getMetricValue('shim_active_sessions');
       expect(value).toBe(3);
     });
     
-    it('should record uptime', () => {
+    it('should record uptime', async () => {
       metrics.setUptime(3600000); // 1 hour in milliseconds
       
-      const value = metrics.getMetricValue('shim_uptime_seconds');
+      const value = await metrics.getMetricValue('shim_uptime_seconds');
       expect(value).toBe(3600);
     });
     
-    it('should track error rate', () => {
+    it('should track error rate', async () => {
       metrics.recordError('checkpoint_creation');
       metrics.recordError('resume_failed');
       
-      const count = metrics.getMetricValue('shim_errors_total');
+      const count = await metrics.getMetricValue('shim_errors_total');
       expect(count).toBeGreaterThanOrEqual(2);
     });
   });
@@ -178,19 +178,19 @@ describe('SHIMMetrics', () => {
   });
   
   describe('Registry Management', () => {
-    it('should support custom metric registration', () => {
+    it('should support custom metric registration', async () => {
       metrics.registerCustomGauge('custom_metric', 'Custom test metric');
       
-      const names = metrics.getMetricNames();
+      const names = await metrics.getMetricNames();
       expect(names).toContain('custom_metric');
     });
     
-    it('should support custom labels', () => {
+    it('should support custom labels', async () => {
       metrics.registerCustomCounter('labeled_metric', 'Metric with labels', ['status', 'type']);
       
       metrics.incrementCounter('labeled_metric', { status: 'success', type: 'test' });
       
-      const value = metrics.getCounterValue('labeled_metric', { status: 'success', type: 'test' });
+      const value = await metrics.getCounterValue('labeled_metric', { status: 'success', type: 'test' });
       expect(value).toBeGreaterThan(0);
     });
     
@@ -271,8 +271,8 @@ describe('SHIMMetrics', () => {
       }).not.toThrow();
     });
     
-    it('should handle non-existent metric queries', () => {
-      const value = metrics.getMetricValue('non_existent_metric');
+    it('should handle non-existent metric queries', async () => {
+      const value = await metrics.getMetricValue('non_existent_metric');
       expect(value).toBeUndefined();
     });
     
