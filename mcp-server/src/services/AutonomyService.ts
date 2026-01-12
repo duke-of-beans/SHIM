@@ -35,7 +35,12 @@ export class AutonomyService {
       this.orchestrator = new AutonomousOrchestrator();
     }
     
-    return await this.orchestrator.execute(goal, context);
+    // TODO: AutonomousOrchestrator.start() expects Goal object, not string
+    // Need to create Goal object from string, or add execute() method to backend
+    return {
+      success: false,
+      error: 'Not yet implemented - needs Goal object creation'
+    };
   }
 
   /**
@@ -61,7 +66,12 @@ export class AutonomyService {
       this.decisionEngine = new DecisionEngine();
     }
     
-    return await this.decisionEngine.decide(context, options);
+    // TODO: DecisionEngine doesn't have decide() method
+    // Need to add method to backend or map to existing API
+    return {
+      success: false,
+      error: 'Not yet implemented - method missing from backend'
+    };
   }
 
   /**
@@ -72,7 +82,12 @@ export class AutonomyService {
       throw new Error('No decisions made yet - call makeDecision first');
     }
     
-    return await this.decisionEngine.explain(decisionId);
+    // TODO: DecisionEngine doesn't have explain() method
+    // Need to add method to backend
+    return {
+      success: false,
+      error: 'Not yet implemented - method missing from backend'
+    };
   }
 
   /**
@@ -83,7 +98,12 @@ export class AutonomyService {
       this.failureRecovery = new FailureRecovery();
     }
     
-    return await this.failureRecovery.recover(failure);
+    // TODO: FailureRecovery doesn't have recover() method
+    // Need to add method to backend
+    return {
+      success: false,
+      error: 'Not yet implemented - method missing from backend'
+    };
   }
 
   /**
@@ -97,7 +117,13 @@ export class AutonomyService {
       };
     }
     
-    return await this.failureRecovery.getHistory();
+    // TODO: FailureRecovery doesn't have getHistory() method
+    // Need to add method to backend
+    return {
+      recoveries: [],
+      successRate: 0,
+      error: 'Not yet implemented - method missing from backend'
+    };
   }
 
   /**
@@ -108,7 +134,12 @@ export class AutonomyService {
       this.feedbackProcessor = new FeedbackProcessor();
     }
     
-    return await this.feedbackProcessor.process(feedback);
+    // TODO: FeedbackProcessor doesn't have process() method
+    // Need to add method to backend
+    return {
+      success: false,
+      error: 'Not yet implemented - method missing from backend'
+    };
   }
 
   /**
@@ -122,7 +153,13 @@ export class AutonomyService {
       };
     }
     
-    return await this.feedbackProcessor.getInsights();
+    // TODO: FeedbackProcessor doesn't have getInsights() method
+    // Need to add method to backend
+    return {
+      insights: [],
+      totalFeedback: 0,
+      error: 'Not yet implemented - method missing from backend'
+    };
   }
 
   /**
@@ -133,7 +170,16 @@ export class AutonomyService {
       this.goalDecomposer = new GoalDecomposer();
     }
     
-    return await this.goalDecomposer.decompose(goal);
+    // GoalDecomposer.decompose() expects Goal object, not string
+    // Create basic Goal object from string with proper types
+    const goalObj = {
+      id: `goal_${Date.now()}`,
+      description: goal,
+      type: 'development' as const,
+      priority: 2 as const  // 1=high, 2=medium, 3=low
+    };
+    
+    return await this.goalDecomposer.decompose(goalObj);
   }
 
   /**
@@ -144,7 +190,12 @@ export class AutonomyService {
       throw new Error('No goals decomposed yet - call decomposeGoal first');
     }
     
-    return await this.goalDecomposer.getDecomposition(goalId);
+    // TODO: GoalDecomposer doesn't have getDecomposition() method
+    // Need to add method to backend
+    return {
+      success: false,
+      error: 'Not yet implemented - method missing from backend'
+    };
   }
 
   /**
@@ -155,7 +206,12 @@ export class AutonomyService {
       this.goalReporter = new GoalReporter();
     }
     
-    return await this.goalReporter.report(taskId);
+    // TODO: GoalReporter doesn't have report() method
+    // Need to add method to backend
+    return {
+      success: false,
+      error: 'Not yet implemented - method missing from backend'
+    };
   }
 
   /**
@@ -166,7 +222,12 @@ export class AutonomyService {
       this.progressTracker = new ProgressTracker();
     }
     
-    return await this.progressTracker.track(taskId, update);
+    // TODO: ProgressTracker doesn't have track() method
+    // Need to add method to backend or map to existing API
+    return {
+      success: false,
+      error: 'Not yet implemented - method missing from backend'
+    };
   }
 
   /**
@@ -192,7 +253,12 @@ export class AutonomyService {
       this.workReviewer = new WorkReviewer();
     }
     
-    return await this.workReviewer.review(workProduct);
+    // TODO: WorkReviewer doesn't have review() method
+    // Need to add method to backend
+    return {
+      success: false,
+      error: 'Not yet implemented - method missing from backend'
+    };
   }
 
   /**
@@ -203,7 +269,12 @@ export class AutonomyService {
       this.workReviewer = new WorkReviewer();
     }
     
-    return await this.workReviewer.getCriteria();
+    // TODO: WorkReviewer doesn't have getCriteria() method
+    // Need to add method to backend
+    return {
+      success: false,
+      error: 'Not yet implemented - method missing from backend'
+    };
   }
 }
 

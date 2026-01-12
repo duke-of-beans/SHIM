@@ -45,11 +45,18 @@ export class MLService {
         };
       }
       
-      const status = await this.predictor.getStatus();
+      // TODO: MLPredictor doesn't have getStatus() method
+      // Need to add method to backend
+      const status = {
+        training: false,
+        accuracy: 0,
+        error: 'Not yet implemented'
+      };
       
       return {
-        success: true,
-        status
+        success: false,
+        status,
+        error: 'Not yet implemented - method missing from backend'
       };
     } catch (error) {
       return {

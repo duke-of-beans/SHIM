@@ -38,7 +38,7 @@ export class SessionService {
 
       try {
         const files = await fs.readdir(CHECKPOINT_DIR);
-        const checkpointFiles = files.filter(f => f.endsWith('.json'));
+        const checkpointFiles = files.filter((f: string) => f.endsWith('.json'));
         checkpointsCount = checkpointFiles.length;
 
         if (checkpointFiles.length > 0) {

@@ -1744,7 +1744,7 @@ class ShimMcpServer {
   }
 
   private async handleAnalyzeSignalPatterns(args: any) {
-    const result = await this.infrastructure.analyzeSignalPatterns(args.options);
+    const result = await this.infrastructure.analyzeSignalPatterns();
     return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
   }
 
@@ -1755,7 +1755,7 @@ class ShimMcpServer {
   }
 
   private async handleQueryDatabase(args: any) {
-    const result = await this.infrastructure.queryDatabase(args.query, args.params);
+    const result = await this.infrastructure.queryDatabase(args.query);
     return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
   }
 

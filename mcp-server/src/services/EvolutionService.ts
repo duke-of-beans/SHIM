@@ -39,7 +39,12 @@ export class EvolutionService {
       this.advancedAnalyzer = new AdvancedCodeAnalyzer();
     }
     
-    return await this.advancedAnalyzer.analyze(directory, { depth });
+    // TODO: AdvancedCodeAnalyzer doesn't have analyze() method
+    // Need to add method to backend
+    return {
+      success: false,
+      error: 'Not yet implemented - method missing from backend'
+    };
   }
 
   /**
@@ -50,7 +55,12 @@ export class EvolutionService {
       this.advancedAnalyzer = new AdvancedCodeAnalyzer();
     }
     
-    return await this.advancedAnalyzer.analyzePatterns(directory);
+    // TODO: AdvancedCodeAnalyzer doesn't have analyzePatterns() method
+    // Need to add method to backend
+    return {
+      success: false,
+      error: 'Not yet implemented - method missing from backend'
+    };
   }
 
   /**
@@ -61,7 +71,13 @@ export class EvolutionService {
       this.astAnalyzer = new ASTAnalyzer();
     }
     
-    return await this.astAnalyzer.parse(filePath);
+    // ASTAnalyzer.parse() expects (code: string, language: string)
+    // Need to read file first
+    const fs = await import('fs');
+    const code = await fs.promises.readFile(filePath, 'utf-8');
+    const language = filePath.endsWith('.ts') ? 'typescript' : 'javascript';
+    
+    return this.astAnalyzer.parse(code, language);
   }
 
   /**
@@ -72,7 +88,12 @@ export class EvolutionService {
       this.codeGenerator = new CodeGenerator();
     }
     
-    return await this.codeGenerator.generate(opportunity);
+    // TODO: CodeGenerator doesn't have generate() method
+    // Need to add method to backend
+    return {
+      success: false,
+      error: 'Not yet implemented - method missing from backend'
+    };
   }
 
   /**
@@ -83,7 +104,12 @@ export class EvolutionService {
       this.codeGenerator = new CodeGenerator();
     }
     
-    return await this.codeGenerator.preview(improvementId);
+    // TODO: CodeGenerator doesn't have preview() method
+    // Need to add method to backend
+    return {
+      success: false,
+      error: 'Not yet implemented - method missing from backend'
+    };
   }
 
   /**
@@ -94,7 +120,12 @@ export class EvolutionService {
       this.deploymentManager = new DeploymentManager();
     }
     
-    return await this.deploymentManager.deploy(improvementId);
+    // DeploymentManager.deploy() expects DeploymentConfig, not string
+    // TODO: Create proper DeploymentConfig from improvementId
+    return {
+      success: false,
+      error: 'Not yet implemented - needs DeploymentConfig type'
+    };
   }
 
   /**
@@ -105,6 +136,7 @@ export class EvolutionService {
       this.deploymentManager = new DeploymentManager();
     }
     
+    // DeploymentManager.rollback() expects (deploymentId, reason?)
     return await this.deploymentManager.rollback(deploymentId);
   }
 
@@ -116,7 +148,13 @@ export class EvolutionService {
       this.deploymentManager = new DeploymentManager();
     }
     
-    return await this.deploymentManager.getHistory();
+    // DeploymentManager.getHistory() expects 2 arguments
+    // TODO: Check backend method signature
+    return {
+      deployments: [],
+      total: 0,
+      error: 'Not yet implemented - method signature mismatch'
+    };
   }
 
   /**
@@ -124,10 +162,13 @@ export class EvolutionService {
    */
   async startEvolution(config?: any) {
     if (!this.evolutionCoordinator) {
-      this.evolutionCoordinator = new EvolutionCoordinator();
+      // EvolutionCoordinator constructor expects 1 argument
+      // TODO: Check backend constructor signature and provide proper config
+      this.evolutionCoordinator = new EvolutionCoordinator(null as any);
     }
     
-    return await this.evolutionCoordinator.start(config);
+    // EvolutionCoordinator.start() expects 0 arguments, not config
+    return await this.evolutionCoordinator.start();
   }
 
   /**
@@ -142,7 +183,14 @@ export class EvolutionService {
       };
     }
     
-    return await this.evolutionCoordinator.getStatus();
+    // TODO: EvolutionCoordinator doesn't have getStatus() method
+    // Need to add method to backend
+    return {
+      running: false,
+      cycles: 0,
+      improvements: 0,
+      error: 'Not yet implemented - method missing from backend'
+    };
   }
 
   /**
@@ -153,7 +201,12 @@ export class EvolutionService {
       this.experimentGenerator = new ExperimentGenerator();
     }
     
-    return await this.experimentGenerator.generate(opportunity);
+    // TODO: ExperimentGenerator doesn't have generate() method
+    // Need to add method to backend
+    return {
+      success: false,
+      error: 'Not yet implemented - method missing from backend'
+    };
   }
 
   /**
@@ -167,7 +220,13 @@ export class EvolutionService {
       };
     }
     
-    return await this.experimentGenerator.list();
+    // TODO: ExperimentGenerator doesn't have list() method
+    // Need to add method to backend
+    return {
+      experiments: [],
+      total: 0,
+      error: 'Not yet implemented - method missing from backend'
+    };
   }
 
   /**
@@ -178,7 +237,12 @@ export class EvolutionService {
       this.improvementIdentifier = new ImprovementIdentifier();
     }
     
-    return await this.improvementIdentifier.identify(directory);
+    // TODO: ImprovementIdentifier doesn't have identify() method
+    // Need to add method to backend
+    return {
+      success: false,
+      error: 'Not yet implemented - method missing from backend'
+    };
   }
 
   /**
@@ -189,7 +253,12 @@ export class EvolutionService {
       this.improvementIdentifier = new ImprovementIdentifier();
     }
     
-    return await this.improvementIdentifier.prioritize(improvements);
+    // TODO: ImprovementIdentifier doesn't have prioritize() method
+    // Need to add method to backend
+    return {
+      success: false,
+      error: 'Not yet implemented - method missing from backend'
+    };
   }
 
   /**
@@ -200,7 +269,12 @@ export class EvolutionService {
       this.performanceAnalyzer = new PerformanceAnalyzer();
     }
     
-    return await this.performanceAnalyzer.profile(directory);
+    // TODO: PerformanceAnalyzer doesn't have profile() method
+    // Need to add method to backend
+    return {
+      success: false,
+      error: 'Not yet implemented - method missing from backend'
+    };
   }
 
   /**
@@ -211,7 +285,12 @@ export class EvolutionService {
       throw new Error('No profiling session found - call profilePerformance first');
     }
     
-    return await this.performanceAnalyzer.getReport(profileId);
+    // TODO: PerformanceAnalyzer doesn't have getReport() method
+    // Need to add method to backend
+    return {
+      success: false,
+      error: 'Not yet implemented - method missing from backend'
+    };
   }
 
   /**
@@ -222,7 +301,12 @@ export class EvolutionService {
       this.performanceOptimizer = new PerformanceOptimizer();
     }
     
-    return await this.performanceOptimizer.optimize(filePath, optimization);
+    // TODO: PerformanceOptimizer doesn't have optimize() method
+    // Need to add method to backend
+    return {
+      success: false,
+      error: 'Not yet implemented - method missing from backend'
+    };
   }
 
   /**
@@ -233,7 +317,12 @@ export class EvolutionService {
       this.performanceOptimizer = new PerformanceOptimizer();
     }
     
-    return await this.performanceOptimizer.suggest(filePath);
+    // TODO: PerformanceOptimizer doesn't have suggest() method
+    // Need to add method to backend
+    return {
+      success: false,
+      error: 'Not yet implemented - method missing from backend'
+    };
   }
 
   /**
@@ -244,7 +333,12 @@ export class EvolutionService {
       this.selfDeployer = new SelfDeployer();
     }
     
-    return await this.selfDeployer.deploy(change);
+    // TODO: SelfDeployer doesn't have deploy() method
+    // Need to add method to backend
+    return {
+      success: false,
+      error: 'Not yet implemented - method missing from backend'
+    };
   }
 
   /**
@@ -258,7 +352,13 @@ export class EvolutionService {
       };
     }
     
-    return await this.selfDeployer.getHistory();
+    // TODO: SelfDeployer doesn't have getHistory() method
+    // Need to add method to backend
+    return {
+      deployments: [],
+      total: 0,
+      error: 'Not yet implemented - method missing from backend'
+    };
   }
 }
 

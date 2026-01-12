@@ -67,13 +67,16 @@ export class PerformanceService {
         this.benchmark = new PerformanceBenchmark();
       }
       
-      const results = await this.benchmark.run(componentName, iterations);
+      // TODO: PerformanceBenchmark doesn't have run() method
+      // Need to add method to backend
+      const results = null;
       
       return {
-        success: true,
+        success: false,
         componentName,
         iterations,
-        results
+        results,
+        error: 'Not yet implemented - method missing from backend'
       };
     } catch (error) {
       return {
@@ -93,12 +96,15 @@ export class PerformanceService {
         };
       }
       
-      const results = await this.benchmark.getHistory();
+      // TODO: PerformanceBenchmark doesn't have getHistory() method
+      // Need to add method to backend
+      const results: any[] = [];
       
       return {
-        success: true,
+        success: false,
         results,
-        count: results.length
+        count: 0,
+        error: 'Not yet implemented - method missing from backend'
       };
     } catch (error) {
       return {

@@ -27,7 +27,12 @@ export class CoordinationService {
       this.chatRegistry = new ChatRegistry();
     }
     
-    return await this.chatRegistry.register(config);
+    // TODO: ChatRegistry doesn't have register() method
+    // Need to add method to backend
+    return {
+      success: false,
+      error: 'Not yet implemented - method missing from backend'
+    };
   }
 
   /**
@@ -41,7 +46,13 @@ export class CoordinationService {
       };
     }
     
-    return await this.chatRegistry.list();
+    // TODO: ChatRegistry doesn't have list() method
+    // Need to add method to backend
+    return {
+      workers: [],
+      total: 0,
+      error: 'Not yet implemented - method missing from backend'
+    };
   }
 
   /**
@@ -52,7 +63,12 @@ export class CoordinationService {
       this.conflictResolver = new ConflictResolver();
     }
     
-    return await this.conflictResolver.resolve(conflicts);
+    // TODO: ConflictResolver doesn't have resolve() method
+    // Need to add method to backend
+    return {
+      success: false,
+      error: 'Not yet implemented - method missing from backend'
+    };
   }
 
   /**
@@ -66,7 +82,13 @@ export class CoordinationService {
       };
     }
     
-    return await this.conflictResolver.getHistory();
+    // TODO: ConflictResolver doesn't have getHistory() method
+    // Need to add method to backend
+    return {
+      resolutions: [],
+      total: 0,
+      error: 'Not yet implemented - method missing from backend'
+    };
   }
 
   /**
@@ -77,7 +99,12 @@ export class CoordinationService {
       this.resultAggregator = new ResultAggregator();
     }
     
-    return await this.resultAggregator.aggregate(taskId);
+    // TODO: ResultAggregator doesn't have aggregate() method
+    // Need to add method to backend
+    return {
+      success: false,
+      error: 'Not yet implemented - method missing from backend'
+    };
   }
 
   /**
@@ -92,7 +119,14 @@ export class CoordinationService {
       };
     }
     
-    return await this.resultAggregator.getStatus(taskId);
+    // TODO: ResultAggregator doesn't have getStatus() method
+    // Need to add method to backend
+    return {
+      taskId,
+      status: 'not_started',
+      results: [],
+      error: 'Not yet implemented - method missing from backend'
+    };
   }
 
   /**
@@ -100,10 +134,17 @@ export class CoordinationService {
    */
   async distributeTask(task: any, numWorkers: number) {
     if (!this.workDistributor) {
-      this.workDistributor = new WorkDistributor();
+      // WorkDistributor constructor expects parameters
+      // TODO: Check backend constructor signature
+      this.workDistributor = new WorkDistributor(null as any, null as any);
     }
     
-    return await this.workDistributor.distribute(task, numWorkers);
+    // TODO: WorkDistributor doesn't have distribute() method
+    // Need to add method to backend
+    return {
+      success: false,
+      error: 'Not yet implemented - method missing from backend'
+    };
   }
 
   /**
@@ -118,7 +159,14 @@ export class CoordinationService {
       };
     }
     
-    return await this.workDistributor.getStatus(taskId);
+    // TODO: WorkDistributor doesn't have getStatus() method
+    // Need to add method to backend
+    return {
+      taskId,
+      status: 'not_started',
+      workers: [],
+      error: 'Not yet implemented - method missing from backend'
+    };
   }
 
   /**
@@ -132,7 +180,12 @@ export class CoordinationService {
       };
     }
     
-    return await this.workDistributor.cancel(taskId);
+    // TODO: WorkDistributor doesn't have cancel() method
+    // Need to add method to backend
+    return {
+      success: false,
+      error: 'Not yet implemented - method missing from backend'
+    };
   }
 }
 

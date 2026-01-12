@@ -16,7 +16,8 @@ export class MonitoringService {
   async startMonitoring(config?: any): Promise<any> {
     try {
       if (!this.monitor) {
-        this.monitor = new HealthMonitor(config);
+        // HealthMonitor constructor expects 0 arguments
+        this.monitor = new HealthMonitor();
       }
       
       await this.monitor.start();
