@@ -294,12 +294,12 @@ export class CheckpointRepository {
       checkpoint.checkpointNumber,
       checkpoint.createdAt,
       checkpoint.triggeredBy,
-      conversationStateCompressed.toString('base64'),
-      taskStateCompressed.toString('base64'),
-      fileStateCompressed.toString('base64'),
-      toolStateCompressed.toString('base64'),
-      signalsCompressed.toString('base64'),
-      userPreferencesCompressed?.toString('base64') || null,
+      (conversationStateCompressed as any).toString('base64'),
+      (taskStateCompressed as any).toString('base64'),
+      (fileStateCompressed as any).toString('base64'),
+      (toolStateCompressed as any).toString('base64'),
+      (signalsCompressed as any).toString('base64'),
+      userPreferencesCompressed ? (userPreferencesCompressed as any).toString('base64') : null,
       checkpoint.signals.crashRisk,
       checkpoint.taskState.progress,
       checkpoint.taskState.operation,
@@ -471,27 +471,27 @@ export class CheckpointRepository {
   private rowToCheckpoint(row: CheckpointRow): Checkpoint {
     // Decompress each state section
     const conversationState = JSON.parse(
-      zlib.gunzipSync(Buffer.from(row.conversation_state, 'base64') as Uint8Array).toString('utf-8')
+      (zlib.gunzipSync(Buffer.from(row.conversation_state, 'base64') as Uint8Array) as any).toString('utf-8')
     );
     
     const taskState = JSON.parse(
-      zlib.gunzipSync(Buffer.from(row.task_state, 'base64') as Uint8Array).toString('utf-8')
+      (zlib.gunzipSync(Buffer.from(row.task_state, 'base64') as Uint8Array) as any).toString('utf-8')
     );
     
     const fileState = JSON.parse(
-      zlib.gunzipSync(Buffer.from(row.file_state, 'base64') as Uint8Array).toString('utf-8')
+      (zlib.gunzipSync(Buffer.from(row.file_state, 'base64') as Uint8Array) as any).toString('utf-8')
     );
     
     const toolState = JSON.parse(
-      zlib.gunzipSync(Buffer.from(row.tool_state, 'base64') as Uint8Array).toString('utf-8')
+      (zlib.gunzipSync(Buffer.from(row.tool_state, 'base64') as Uint8Array) as any).toString('utf-8')
     );
     
     const signals = JSON.parse(
-      zlib.gunzipSync(Buffer.from(row.signals, 'base64') as Uint8Array).toString('utf-8')
+      (zlib.gunzipSync(Buffer.from(row.signals, 'base64') as Uint8Array) as any).toString('utf-8')
     );
     
     const userPreferences = row.user_preferences 
-      ? JSON.parse(zlib.gunzipSync(Buffer.from(row.user_preferences, 'base64') as Uint8Array).toString('utf-8'))
+      ? JSON.parse((zlib.gunzipSync(Buffer.from(row.user_preferences, 'base64') as Uint8Array) as any).toString('utf-8'))
       : {};
 
     return {

@@ -468,11 +468,11 @@ export class SHIMMetrics {
         }
       });
       
-      this.server.listen(port, () => {
+      this.server!.listen(port, () => {
         resolve(port);
       });
       
-      this.server.on('error', reject);
+      this.server!.on('error', reject);
     });
   }
   

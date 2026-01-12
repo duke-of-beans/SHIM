@@ -5,6 +5,7 @@
  * Part of Advanced CodeAnalyzer enhancements.
  */
 
+// @ts-ignore - TypeScript module available at runtime but not in MCP build
 import * as ts from 'typescript';
 
 export interface ASTNode {
@@ -245,7 +246,7 @@ export class ASTAnalyzer {
   private convertToASTNode(node: ts.Node): ASTNode {
     const children: ASTNode[] = [];
 
-    ts.forEachChild(node, (child) => {
+    ts.forEachChild(node, (child: ts.Node) => {
       children.push(this.convertToASTNode(child));
     });
 

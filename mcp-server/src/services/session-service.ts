@@ -7,6 +7,7 @@
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
+// @ts-ignore - CommonJS build doesn't support import.meta
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
