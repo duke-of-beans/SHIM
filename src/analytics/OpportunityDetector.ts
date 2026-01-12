@@ -52,7 +52,7 @@ export interface Pattern {
   expired: boolean;
 }
 
-interface DetectorConfig {
+export interface DetectorConfig {
   minConfidence: number;                 // Minimum confidence threshold
   minImpact: number;                     // Minimum impact threshold
   minSampleSize: number;                 // Minimum samples required

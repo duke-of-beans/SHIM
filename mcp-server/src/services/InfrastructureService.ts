@@ -16,6 +16,7 @@ import { StateManager } from '@shim/infrastructure/StateManager';
 import { CheckpointRepository } from '@shim/core/CheckpointRepository';
 import { SignalHistoryRepository } from '@shim/core/SignalHistoryRepository';
 import { Database } from '@shim/infrastructure/database/Database';
+import { RedisConnectionManager } from '@shim/core/RedisConnectionManager';
 
 export class InfrastructureService {
   private messageBus?: MessageBusWrapper;
@@ -24,8 +25,27 @@ export class InfrastructureService {
   private checkpointRepo?: CheckpointRepository;
   private signalRepo?: SignalHistoryRepository;
   private database?: Database;
+  
+  // Shared dependencies
+  private redisManager?: RedisConnectionManager;
+  private readonly dbPath: string;
 
-  constructor() {}
+  constructor() {
+    // Default database path - should be configurable via environment/config
+    this.dbPath = process.env.SHIM_DB_PATH || './data/shim.db';
+  }
+
+  // ============================================================================
+  // PRIVATE: Dependency Management
+  // ============================================================================
+
+  private async getRedisManager(): Promise<RedisConnectionManager> {
+    if (!this.redisManager) {
+      this.redisManager = new RedisConnectionManager();
+      await this.redisManager.connect();
+    }
+    return this.redisManager;
+  }
 
   // ============================================================================
   // MESSAGE BUS OPERATIONS (4 methods)
@@ -34,7 +54,8 @@ export class InfrastructureService {
   async initializeRedis(config?: { host?: string; port?: number }): Promise<any> {
     try {
       if (!this.messageBus) {
-        this.messageBus = new MessageBusWrapper(config);
+        const redisManager = await this.getRedisManager();
+        this.messageBus = new MessageBusWrapper(redisManager);
       }
       
       await this.messageBus.connect();
@@ -129,7 +150,8 @@ export class InfrastructureService {
   async registerWorker(workerId: string, metadata: any): Promise<any> {
     try {
       if (!this.workerRegistry) {
-        this.workerRegistry = new WorkerRegistry();
+        const redisManager = await this.getRedisManager();
+        this.workerRegistry = new WorkerRegistry(redisManager);
       }
       
       await this.workerRegistry.register(workerId, metadata);
@@ -150,7 +172,8 @@ export class InfrastructureService {
   async listWorkers(): Promise<any> {
     try {
       if (!this.workerRegistry) {
-        this.workerRegistry = new WorkerRegistry();
+        const redisManager = await this.getRedisManager();
+        this.workerRegistry = new WorkerRegistry(redisManager);
       }
       
       const workers = await this.workerRegistry.listAll();
@@ -171,7 +194,8 @@ export class InfrastructureService {
   async getWorkerHealth(workerId: string): Promise<any> {
     try {
       if (!this.workerRegistry) {
-        this.workerRegistry = new WorkerRegistry();
+        const redisManager = await this.getRedisManager();
+        this.workerRegistry = new WorkerRegistry(redisManager);
       }
       
       const health = await this.workerRegistry.getHealth(workerId);
@@ -263,7 +287,8 @@ export class InfrastructureService {
   async listCheckpoints(filters?: { limit?: number; offset?: number }): Promise<any> {
     try {
       if (!this.checkpointRepo) {
-        this.checkpointRepo = new CheckpointRepository();
+        this.checkpointRepo = new CheckpointRepository(this.dbPath);
+        await this.checkpointRepo.initialize();
       }
       
       const checkpoints = await this.checkpointRepo.list(filters);
@@ -284,7 +309,8 @@ export class InfrastructureService {
   async restoreCheckpoint(checkpointId: string): Promise<any> {
     try {
       if (!this.checkpointRepo) {
-        this.checkpointRepo = new CheckpointRepository();
+        this.checkpointRepo = new CheckpointRepository(this.dbPath);
+        await this.checkpointRepo.initialize();
       }
       
       const checkpoint = await this.checkpointRepo.restore(checkpointId);
@@ -306,7 +332,8 @@ export class InfrastructureService {
   async deleteCheckpoint(checkpointId: string): Promise<any> {
     try {
       if (!this.checkpointRepo) {
-        this.checkpointRepo = new CheckpointRepository();
+        this.checkpointRepo = new CheckpointRepository(this.dbPath);
+        await this.checkpointRepo.initialize();
       }
       
       await this.checkpointRepo.delete(checkpointId);
@@ -331,7 +358,8 @@ export class InfrastructureService {
   async getSignalHistory(filters?: any): Promise<any> {
     try {
       if (!this.signalRepo) {
-        this.signalRepo = new SignalHistoryRepository();
+        this.signalRepo = new SignalHistoryRepository(this.dbPath);
+        await this.signalRepo.initialize();
       }
       
       const signals = await this.signalRepo.query(filters);
@@ -352,7 +380,8 @@ export class InfrastructureService {
   async analyzeSignalPatterns(): Promise<any> {
     try {
       if (!this.signalRepo) {
-        this.signalRepo = new SignalHistoryRepository();
+        this.signalRepo = new SignalHistoryRepository(this.dbPath);
+        await this.signalRepo.initialize();
       }
       
       const patterns = await this.signalRepo.analyzePatterns();
@@ -372,7 +401,8 @@ export class InfrastructureService {
   async clearSignals(olderThan?: Date): Promise<any> {
     try {
       if (!this.signalRepo) {
-        this.signalRepo = new SignalHistoryRepository();
+        this.signalRepo = new SignalHistoryRepository(this.dbPath);
+        await this.signalRepo.initialize();
       }
       
       const deleted = await this.signalRepo.clearOld(olderThan);

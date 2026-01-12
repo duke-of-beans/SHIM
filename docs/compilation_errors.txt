@@ -1,0 +1,161 @@
+﻿
+> shim-mcp@1.0.0 build
+> tsc
+
+src/index.ts(1747,68): error TS2554: Expected 0 arguments, but got 1.
+src/index.ts(1758,72): error TS2554: Expected 1 arguments, but got 2.
+src/index.ts(1905,3): error TS2580: Cannot find name 'process'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node`.
+src/services/AnalyticsService.ts(30,17): error TS2339: Property 'safetyBounds' does not exist on type 'Partial<EngineConfig>'.
+src/services/AnalyticsService.ts(31,9): error TS2554: Expected 1 arguments, but got 3.
+src/services/AnalyticsService.ts(32,17): error TS2339: Property 'opportunityDetector' does not exist on type 'Partial<EngineConfig>'.
+src/services/AnalyticsService.ts(90,33): error TS2339: Property 'experiments' does not exist on type 'EngineStatus'.
+src/services/AnalyticsService.ts(104,27): error TS2339: Property 'totalExperiments' does not exist on type 'EngineStatus'.
+src/services/AnalyticsService.ts(105,40): error TS2339: Property 'totalExperiments' does not exist on type 'EngineStatus'.
+src/services/AnalyticsService.ts(116,9): error TS2353: Object literal may only specify known properties, and 'minImprovement' does not exist in type 'SHIMMetrics'.
+src/services/AnalyticsService.ts(121,43): error TS2339: Property 'detect' does not exist on type 'OpportunityDetector'.
+src/services/AnalyticsService.ts(135,43): error TS2339: Property 'getHistory' does not exist on type 'OpportunityDetector'.
+src/services/AnalyticsService.ts(144,9): error TS2559: Type 'number' has no properties in common with type '{ max?: number | undefined; min?: number | undefined; maxIncrease?: number | undefined; critical?: number | undefined; }'.
+src/services/AnalyticsService.ts(145,9): error TS2559: Type 'number' has no properties in common with type '{ max?: number | undefined; min?: number | undefined; maxIncrease?: number | undefined; critical?: number | undefined; }'.
+src/services/AnalyticsService.ts(146,9): error TS2559: Type 'number' has no properties in common with type '{ max?: number | undefined; min?: number | undefined; maxIncrease?: number | undefined; critical?: number | undefined; }'.
+src/services/AnalyticsService.ts(150,53): error TS2554: Expected 1 arguments, but got 2.
+src/services/AnalyticsService.ts(159,9): error TS2559: Type 'number' has no properties in common with type '{ max?: number | undefined; min?: number | undefined; maxIncrease?: number | undefined; critical?: number | undefined; }'.
+src/services/AnalyticsService.ts(160,9): error TS2559: Type 'number' has no properties in common with type '{ max?: number | undefined; min?: number | undefined; maxIncrease?: number | undefined; critical?: number | undefined; }'.
+src/services/AnalyticsService.ts(161,9): error TS2559: Type 'number' has no properties in common with type '{ max?: number | undefined; min?: number | undefined; maxIncrease?: number | undefined; critical?: number | undefined; }'.
+src/services/AnalyticsService.ts(176,35): error TS2339: Property 'collect' does not exist on type 'SHIMMetrics'.
+src/services/AnalyticsService.ts(187,35): error TS2339: Property 'export' does not exist on type 'SHIMMetrics'.
+src/services/AnalyticsService.ts(198,35): error TS2339: Property 'getSummary' does not exist on type 'SHIMMetrics'.
+src/services/AnalyticsService.ts(207,22): error TS2580: Cannot find name 'process'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node`.
+src/services/AnalyticsService.ts(225,31): error TS2339: Property 'getResults' does not exist on type 'StatsigIntegration'.
+src/services/AnalyticsService.ts(234,22): error TS2580: Cannot find name 'process'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node`.
+src/services/AnalyticsService.ts(241,31): error TS2339: Property 'getFeatureFlags' does not exist on type 'StatsigIntegration'.
+src/services/AutonomyService.ts(38,36): error TS2339: Property 'execute' does not exist on type 'AutonomousOrchestrator'.
+src/services/AutonomyService.ts(64,38): error TS2339: Property 'decide' does not exist on type 'DecisionEngine'.
+src/services/AutonomyService.ts(75,38): error TS2339: Property 'explain' does not exist on type 'DecisionEngine'.
+src/services/AutonomyService.ts(86,39): error TS2339: Property 'recover' does not exist on type 'FailureRecovery'.
+src/services/AutonomyService.ts(100,39): error TS2339: Property 'getHistory' does not exist on type 'FailureRecovery'.
+src/services/AutonomyService.ts(111,41): error TS2339: Property 'process' does not exist on type 'FeedbackProcessor'.
+src/services/AutonomyService.ts(125,41): error TS2339: Property 'getInsights' does not exist on type 'FeedbackProcessor'.
+src/services/AutonomyService.ts(136,48): error TS2345: Argument of type 'string' is not assignable to parameter of type 'Goal'.
+src/services/AutonomyService.ts(147,38): error TS2339: Property 'getDecomposition' does not exist on type 'GoalDecomposer'.
+src/services/AutonomyService.ts(158,36): error TS2339: Property 'report' does not exist on type 'GoalReporter'.
+src/services/AutonomyService.ts(169,39): error TS2339: Property 'track' does not exist on type 'ProgressTracker'.
+src/services/AutonomyService.ts(195,36): error TS2339: Property 'review' does not exist on type 'WorkReviewer'.
+src/services/AutonomyService.ts(206,36): error TS2339: Property 'getCriteria' does not exist on type 'WorkReviewer'.
+src/services/checkpoint-service.ts(7,31): error TS2307: Cannot find module 'node:url' or its corresponding type declarations.
+src/services/checkpoint-service.ts(8,31): error TS2307: Cannot find module 'node:path' or its corresponding type declarations.
+src/services/checkpoint-service.ts(10,34): error TS1343: The 'import.meta' meta-property is only allowed when the '--module' option is 'es2020', 'es2022', 'esnext', 'system', 'node16', 'node18', 'node20', or 'nodenext'.
+src/services/checkpoint-service.ts(55,29): error TS2307: Cannot find module 'node:fs/promises' or its corresponding type declarations.
+src/services/code-analysis-service.ts(23,31): error TS2307: Cannot find module 'fs/promises' or its corresponding type declarations.
+src/services/code-analysis-service.ts(24,33): error TS2307: Cannot find module 'path' or its corresponding type declarations.
+src/services/code-analysis-service.ts(65,29): error TS2307: Cannot find module 'fs/promises' or its corresponding type declarations.
+src/services/code-analysis-service.ts(66,31): error TS2307: Cannot find module 'path' or its corresponding type declarations.
+src/services/CoordinationService.ts(30,36): error TS2339: Property 'register' does not exist on type 'ChatRegistry'.
+src/services/CoordinationService.ts(44,36): error TS2339: Property 'list' does not exist on type 'ChatRegistry'.
+src/services/CoordinationService.ts(55,40): error TS2339: Property 'resolve' does not exist on type 'ConflictResolver'.
+src/services/CoordinationService.ts(69,40): error TS2339: Property 'getHistory' does not exist on type 'ConflictResolver'.
+src/services/CoordinationService.ts(80,40): error TS2339: Property 'aggregate' does not exist on type 'ResultAggregator'.
+src/services/CoordinationService.ts(95,40): error TS2339: Property 'getStatus' does not exist on type 'ResultAggregator'.
+src/services/CoordinationService.ts(103,30): error TS2554: Expected 1-2 arguments, but got 0.
+src/services/CoordinationService.ts(106,39): error TS2339: Property 'distribute' does not exist on type 'WorkDistributor'.
+src/services/CoordinationService.ts(121,39): error TS2339: Property 'getStatus' does not exist on type 'WorkDistributor'.
+src/services/CoordinationService.ts(135,39): error TS2339: Property 'cancel' does not exist on type 'WorkDistributor'.
+src/services/EvolutionService.ts(42,40): error TS2339: Property 'analyze' does not exist on type 'AdvancedCodeAnalyzer'.
+src/services/EvolutionService.ts(53,40): error TS2339: Property 'analyzePatterns' does not exist on type 'AdvancedCodeAnalyzer'.
+src/services/EvolutionService.ts(64,35): error TS2554: Expected 2 arguments, but got 1.
+src/services/EvolutionService.ts(75,37): error TS2339: Property 'generate' does not exist on type 'CodeGenerator'.
+src/services/EvolutionService.ts(86,37): error TS2339: Property 'preview' does not exist on type 'CodeGenerator'.
+src/services/EvolutionService.ts(97,48): error TS2345: Argument of type 'string' is not assignable to parameter of type 'DeploymentConfig'.
+src/services/EvolutionService.ts(127,35): error TS2554: Expected 1 arguments, but got 0.
+src/services/EvolutionService.ts(130,50): error TS2554: Expected 0 arguments, but got 1.
+src/services/EvolutionService.ts(145,44): error TS2339: Property 'getStatus' does not exist on type 'EvolutionCoordinator'.
+src/services/EvolutionService.ts(156,43): error TS2339: Property 'generate' does not exist on type 'ExperimentGenerator'.
+src/services/EvolutionService.ts(170,43): error TS2339: Property 'list' does not exist on type 'ExperimentGenerator'.
+src/services/EvolutionService.ts(181,45): error TS2339: Property 'identify' does not exist on type 'ImprovementIdentifier'.
+src/services/EvolutionService.ts(192,45): error TS2339: Property 'prioritize' does not exist on type 'ImprovementIdentifier'.
+src/services/EvolutionService.ts(203,43): error TS2339: Property 'profile' does not exist on type 'PerformanceAnalyzer'.
+src/services/EvolutionService.ts(214,43): error TS2339: Property 'getReport' does not exist on type 'PerformanceAnalyzer'.
+src/services/EvolutionService.ts(225,44): error TS2339: Property 'optimize' does not exist on type 'PerformanceOptimizer'.
+src/services/EvolutionService.ts(236,44): error TS2339: Property 'suggest' does not exist on type 'PerformanceOptimizer'.
+src/services/EvolutionService.ts(247,36): error TS2339: Property 'deploy' does not exist on type 'SelfDeployer'.
+src/services/EvolutionService.ts(261,36): error TS2339: Property 'getHistory' does not exist on type 'SelfDeployer'.
+src/services/InfrastructureService.ts(37,49): error TS2345: Argument of type '{ host?: string | undefined; port?: number | undefined; } | undefined' is not assignable to parameter of type 'RedisConnectionManager'.
+  Type 'undefined' is not assignable to type 'RedisConnectionManager'.
+src/services/InfrastructureService.ts(40,29): error TS2339: Property 'connect' does not exist on type 'MessageBusWrapper'.
+src/services/InfrastructureService.ts(109,44): error TS2339: Property 'getStatus' does not exist on type 'MessageBusWrapper'.
+src/services/InfrastructureService.ts(132,31): error TS2554: Expected 1 arguments, but got 0.
+src/services/InfrastructureService.ts(135,33): error TS2339: Property 'register' does not exist on type 'WorkerRegistry'.
+src/services/InfrastructureService.ts(153,31): error TS2554: Expected 1 arguments, but got 0.
+src/services/InfrastructureService.ts(156,49): error TS2339: Property 'listAll' does not exist on type 'WorkerRegistry'.
+src/services/InfrastructureService.ts(174,31): error TS2554: Expected 1 arguments, but got 0.
+src/services/InfrastructureService.ts(177,48): error TS2339: Property 'getHealth' does not exist on type 'WorkerRegistry'.
+src/services/InfrastructureService.ts(266,31): error TS2554: Expected 1 arguments, but got 0.
+src/services/InfrastructureService.ts(269,53): error TS2339: Property 'list' does not exist on type 'CheckpointRepository'.
+src/services/InfrastructureService.ts(287,31): error TS2554: Expected 1 arguments, but got 0.
+src/services/InfrastructureService.ts(290,52): error TS2339: Property 'restore' does not exist on type 'CheckpointRepository'.
+src/services/InfrastructureService.ts(309,31): error TS2554: Expected 1 arguments, but got 0.
+src/services/InfrastructureService.ts(312,33): error TS2339: Property 'delete' does not exist on type 'CheckpointRepository'.
+src/services/InfrastructureService.ts(334,27): error TS2554: Expected 1 arguments, but got 0.
+src/services/InfrastructureService.ts(337,45): error TS2339: Property 'query' does not exist on type 'SignalHistoryRepository'.
+src/services/InfrastructureService.ts(355,27): error TS2554: Expected 1 arguments, but got 0.
+src/services/InfrastructureService.ts(358,46): error TS2339: Property 'analyzePatterns' does not exist on type 'SignalHistoryRepository'.
+src/services/InfrastructureService.ts(375,27): error TS2554: Expected 1 arguments, but got 0.
+src/services/InfrastructureService.ts(378,45): error TS2339: Property 'clearOld' does not exist on type 'SignalHistoryRepository'.
+src/services/LoggingService.ts(44,34): error TS2345: Argument of type 'string' is not assignable to parameter of type 'LogLevel'.
+src/services/MLService.ts(48,43): error TS2339: Property 'getStatus' does not exist on type 'MLPredictor'.
+src/services/ModelsService.ts(25,42): error TS2339: Property 'listAll' does not exist on type 'ModelRegistry'.
+src/services/ModelsService.ts(46,40): error TS2339: Property 'getInfo' does not exist on type 'ModelRegistry'.
+src/services/ModelsService.ts(106,26): error TS2554: Expected 1 arguments, but got 0.
+src/services/ModelsService.ts(109,65): error TS2554: Expected 1 arguments, but got 2.
+src/services/MonitoringService.ts(19,42): error TS2554: Expected 0 arguments, but got 1.
+src/services/PerformanceService.ts(70,44): error TS2339: Property 'run' does not exist on type 'PerformanceBenchmark'.
+src/services/PerformanceService.ts(96,44): error TS2339: Property 'getHistory' does not exist on type 'PerformanceBenchmark'.
+src/services/recovery-service.ts(7,31): error TS2307: Cannot find module 'node:url' or its corresponding type declarations.
+src/services/recovery-service.ts(8,31): error TS2307: Cannot find module 'node:path' or its corresponding type declarations.
+src/services/recovery-service.ts(10,34): error TS1343: The 'import.meta' meta-property is only allowed when the '--module' option is 'es2020', 'es2022', 'esnext', 'system', 'node16', 'node18', 'node20', or 'nodenext'.
+src/services/recovery-service.ts(26,31): error TS2307: Cannot find module 'node:fs/promises' or its corresponding type declarations.
+src/services/session-service.ts(7,31): error TS2307: Cannot find module 'node:url' or its corresponding type declarations.
+src/services/session-service.ts(8,31): error TS2307: Cannot find module 'node:path' or its corresponding type declarations.
+src/services/session-service.ts(10,34): error TS1343: The 'import.meta' meta-property is only allowed when the '--module' option is 'es2020', 'es2022', 'esnext', 'system', 'node16', 'node18', 'node20', or 'nodenext'.
+src/services/session-service.ts(32,31): error TS2307: Cannot find module 'fs/promises' or its corresponding type declarations.
+src/services/session-service.ts(41,46): error TS7006: Parameter 'f' implicitly has an 'any' type.
+../src/analytics/AutoExperimentEngine.ts(30,30): error TS2307: Cannot find module 'events' or its corresponding type declarations.
+../src/analytics/AutoExperimentEngine.ts(115,28): error TS2503: Cannot find namespace 'NodeJS'.
+../src/analytics/AutoExperimentEngine.ts(116,25): error TS2503: Cannot find namespace 'NodeJS'.
+../src/analytics/AutoExperimentEngine.ts(117,27): error TS2503: Cannot find namespace 'NodeJS'.
+../src/analytics/SafetyBounds.ts(21,30): error TS2307: Cannot find module 'events' or its corresponding type declarations.
+../src/analytics/SafetyBounds.ts(110,16): error TS2339: Property 'emit' does not exist on type 'SafetyBounds'.
+../src/analytics/SafetyBounds.ts(113,18): error TS2339: Property 'emit' does not exist on type 'SafetyBounds'.
+../src/analytics/SafetyBounds.ts(127,16): error TS2339: Property 'emit' does not exist on type 'SafetyBounds'.
+../src/analytics/SafetyBounds.ts(130,18): error TS2339: Property 'emit' does not exist on type 'SafetyBounds'.
+../src/analytics/SafetyBounds.ts(143,16): error TS2339: Property 'emit' does not exist on type 'SafetyBounds'.
+../src/analytics/SafetyBounds.ts(146,18): error TS2339: Property 'emit' does not exist on type 'SafetyBounds'.
+../src/analytics/SafetyBounds.ts(160,16): error TS2339: Property 'emit' does not exist on type 'SafetyBounds'.
+../src/analytics/SafetyBounds.ts(179,12): error TS2339: Property 'emit' does not exist on type 'SafetyBounds'.
+../src/analytics/SHIMMetrics.ts(16,23): error TS2307: Cannot find module 'http' or its corresponding type declarations.
+../src/analytics/SHIMMetrics.ts(460,46): error TS7006: Parameter 'req' implicitly has an 'any' type.
+../src/analytics/SHIMMetrics.ts(460,51): error TS7006: Parameter 'res' implicitly has an 'any' type.
+../src/autonomy/AutonomousOrchestrator.ts(45,27): error TS2503: Cannot find namespace 'NodeJS'.
+../src/config/redis.ts(11,9): error TS2580: Cannot find name 'process'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node`.
+../src/config/redis.ts(12,18): error TS2580: Cannot find name 'process'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node`.
+../src/config/redis.ts(13,16): error TS2580: Cannot find name 'process'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node`.
+../src/config/redis.ts(16,13): error TS2580: Cannot find name 'process'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node`.
+../src/core/CheckpointRepository.ts(15,30): error TS7016: Could not find a declaration file for module 'uuid'. 'D:/SHIM/node_modules/uuid/dist/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/uuid` if it exists or add a new declaration (.d.ts) file containing `declare module 'uuid';`
+../src/core/CheckpointRepository.ts(16,23): error TS2307: Cannot find module 'zlib' or its corresponding type declarations.
+../src/core/CheckpointRepository.ts(474,23): error TS2580: Cannot find name 'Buffer'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node`.
+../src/core/CheckpointRepository.ts(478,23): error TS2580: Cannot find name 'Buffer'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node`.
+../src/core/CheckpointRepository.ts(482,23): error TS2580: Cannot find name 'Buffer'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node`.
+../src/core/CheckpointRepository.ts(486,23): error TS2580: Cannot find name 'Buffer'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node`.
+../src/core/CheckpointRepository.ts(490,23): error TS2580: Cannot find name 'Buffer'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node`.
+../src/core/CheckpointRepository.ts(494,36): error TS2580: Cannot find name 'Buffer'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node`.
+../src/core/SignalHistoryRepository.ts(3,30): error TS7016: Could not find a declaration file for module 'uuid'. 'D:/SHIM/node_modules/uuid/dist/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/uuid` if it exists or add a new declaration (.d.ts) file containing `declare module 'uuid';`
+../src/evolution/ASTAnalyzer.ts(8,21): error TS2307: Cannot find module 'typescript' or its corresponding type declarations.
+../src/evolution/ASTAnalyzer.ts(248,28): error TS7006: Parameter 'child' implicitly has an 'any' type.
+../src/evolution/CodeAnalyzer.ts(11,21): error TS2307: Cannot find module 'fs' or its corresponding type declarations.
+../src/evolution/CodeAnalyzer.ts(12,23): error TS2307: Cannot find module 'path' or its corresponding type declarations.
+../src/evolution/ExperimentGenerator.ts(14,30): error TS7016: Could not find a declaration file for module 'uuid'. 'D:/SHIM/node_modules/uuid/dist/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/uuid` if it exists or add a new declaration (.d.ts) file containing `declare module 'uuid';`
+../src/infrastructure/database/Database.ts(6,23): error TS2307: Cannot find module 'path' or its corresponding type declarations.
+../src/infrastructure/database/Database.ts(7,21): error TS2307: Cannot find module 'fs' or its corresponding type declarations.
+../src/infrastructure/database/Database.ts(15,39): error TS2580: Cannot find name 'process'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node`.
