@@ -5,9 +5,9 @@
   "type": "module",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc --watch",
-    "start": "node dist/mcp-server/src/index.js",
+    "build": "npx esbuild@latest src/index.ts --bundle --platform=node --target=node18 --format=esm --outfile=dist/index.js --sourcemap --external:@modelcontextprotocol/sdk --external:zod --packages=external",
+    "dev": "npx esbuild@latest src/index.ts --bundle --platform=node --target=node18 --format=esm --outfile=dist/index.js --sourcemap --external:@modelcontextprotocol/sdk --external:zod --packages=external --watch",
+    "start": "node dist/index.js",
     "clean": "rimraf dist"
   },
   "dependencies": {
@@ -17,6 +17,7 @@
   "devDependencies": {
     "@types/node": "^22.19.5",
     "@types/uuid": "^10.0.0",
+    "esbuild": "^0.24.2",
     "rimraf": "^6.1.2",
     "typescript": "^5.9.3"
   },
