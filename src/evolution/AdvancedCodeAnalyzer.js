@@ -1,13 +1,10 @@
-"use strict";
 /**
  * AdvancedCodeAnalyzer
  *
  * Enhanced code analysis using AST parsing and advanced metrics.
  * Extends base CodeAnalyzer capabilities.
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.AdvancedCodeAnalyzer = void 0;
-class AdvancedCodeAnalyzer {
+export class AdvancedCodeAnalyzer {
     parseAST(code, language) {
         // Simple AST representation for testing
         if (code.includes('return 42')) {
@@ -100,5 +97,4 @@ class AdvancedCodeAnalyzer {
         return common / total;
     }
 }
-exports.AdvancedCodeAnalyzer = AdvancedCodeAnalyzer;
 //# sourceMappingURL=AdvancedCodeAnalyzer.js.map

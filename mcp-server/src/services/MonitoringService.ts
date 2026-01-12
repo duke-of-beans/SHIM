@@ -6,7 +6,7 @@
  * - Get monitoring status
  */
 
-import { HealthMonitor } from '@shim/monitoring/HealthMonitor';
+import { HealthMonitor } from '../../../src/monitoring/HealthMonitor.js';
 
 export class MonitoringService {
   private monitor?: HealthMonitor;

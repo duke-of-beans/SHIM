@@ -1,13 +1,10 @@
-"use strict";
 /**
  * ResultAggregator
  *
  * Aggregate and merge results from distributed tasks.
  * Part of Phase 4: Multi-Chat Coordination
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.ResultAggregator = void 0;
-class ResultAggregator {
+export class ResultAggregator {
     results;
     constructor() {
         this.results = new Map();
@@ -59,5 +56,4 @@ class ResultAggregator {
         };
     }
 }
-exports.ResultAggregator = ResultAggregator;
 //# sourceMappingURL=ResultAggregator.js.map

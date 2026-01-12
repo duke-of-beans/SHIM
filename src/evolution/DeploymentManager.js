@@ -1,4 +1,3 @@
-"use strict";
 /**
  * DeploymentManager
  *
@@ -12,14 +11,12 @@
  * - Deployment history tracking
  * - Rollback plan creation
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.DeploymentManager = void 0;
 /**
  * DeploymentManager
  *
  * Orchestrates safe deployment of experiment winners.
  */
-class DeploymentManager {
+export class DeploymentManager {
     deployments = new Map();
     errorRates = new Map();
     currentConfig = {};
@@ -142,5 +139,4 @@ class DeploymentManager {
         return Array.from(this.deployments.values());
     }
 }
-exports.DeploymentManager = DeploymentManager;
 //# sourceMappingURL=DeploymentManager.js.map

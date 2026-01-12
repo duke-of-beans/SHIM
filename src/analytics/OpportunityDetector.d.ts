@@ -37,7 +37,7 @@ export interface Pattern {
     count: number;
     expired: boolean;
 }
-interface DetectorConfig {
+export interface DetectorConfig {
     minConfidence: number;
     minImpact: number;
     minSampleSize: number;

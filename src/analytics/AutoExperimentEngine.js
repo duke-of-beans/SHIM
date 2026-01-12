@@ -1,4 +1,3 @@
-"use strict";
 /**
  * AutoExperimentEngine - Autonomous experiment orchestration
  *
@@ -27,10 +26,8 @@
  *
  * Zero human intervention required!
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.AutoExperimentEngine = void 0;
-const events_1 = require("events");
-class AutoExperimentEngine extends events_1.EventEmitter {
+import { EventEmitter } from 'events';
+export class AutoExperimentEngine extends EventEmitter {
     metrics;
     detector;
     statsig;
@@ -489,5 +486,4 @@ class AutoExperimentEngine extends events_1.EventEmitter {
         return 0;
     }
 }
-exports.AutoExperimentEngine = AutoExperimentEngine;
 //# sourceMappingURL=AutoExperimentEngine.js.map

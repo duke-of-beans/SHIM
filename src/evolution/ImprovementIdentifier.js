@@ -1,4 +1,3 @@
-"use strict";
 /**
  * ImprovementIdentifier
  *
@@ -8,9 +7,7 @@
  * Part of Phase 6: Self-Evolution Engine
  * Component 2/4
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.ImprovementIdentifier = void 0;
-class ImprovementIdentifier {
+export class ImprovementIdentifier {
     config;
     idCounter;
     constructor(config) {
@@ -269,5 +266,4 @@ class ImprovementIdentifier {
         return 4;
     }
 }
-exports.ImprovementIdentifier = ImprovementIdentifier;
 //# sourceMappingURL=ImprovementIdentifier.js.map

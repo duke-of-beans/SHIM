@@ -1,13 +1,9 @@
-"use strict";
 /**
  * Redis Configuration for SHIM
  *
  * Default configuration for local development with Docker
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.REDIS_TEST_CONFIG = exports.REDIS_CONFIG = void 0;
-exports.createTestRedisConfig = createTestRedisConfig;
-exports.REDIS_CONFIG = {
+export const REDIS_CONFIG = {
     // Connection (matches docker-compose.yml)
     host: process.env.REDIS_HOST || 'localhost',
     port: parseInt(process.env.REDIS_PORT || '6379', 10),
@@ -28,8 +24,8 @@ exports.REDIS_CONFIG = {
 /**
  * Test configuration (faster retries, shorter timeouts)
  */
-exports.REDIS_TEST_CONFIG = {
-    ...exports.REDIS_CONFIG,
+export const REDIS_TEST_CONFIG = {
+    ...REDIS_CONFIG,
     retryStrategy: (times) => {
         if (times > 3)
             return null; // Give up after 3 tries
@@ -40,9 +36,9 @@ exports.REDIS_TEST_CONFIG = {
 /**
  * Create a test Redis configuration with optional overrides
  */
-function createTestRedisConfig(overrides) {
+export function createTestRedisConfig(overrides) {
     return {
-        ...exports.REDIS_TEST_CONFIG,
+        ...REDIS_TEST_CONFIG,
         ...overrides,
     };
 }

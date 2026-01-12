@@ -1,19 +1,16 @@
-"use strict";
 /**
  * MessageBusWrapper
  *
  * Redis Pub/Sub wrapper for event broadcasting in SHIM multi-chat coordination.
  * Provides channel-based messaging and pattern subscriptions.
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.MessageBusWrapper = void 0;
 /**
  * MessageBusWrapper
  *
  * Wraps Redis Pub/Sub for SHIM event broadcasting.
  * Supports channel subscriptions and pattern matching.
  */
-class MessageBusWrapper {
+export class MessageBusWrapper {
     connection;
     publisher;
     subscriber;
@@ -228,5 +225,4 @@ class MessageBusWrapper {
         await this.subscriber.quit();
     }
 }
-exports.MessageBusWrapper = MessageBusWrapper;
 //# sourceMappingURL=MessageBusWrapper.js.map

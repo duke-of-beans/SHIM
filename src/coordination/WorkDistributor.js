@@ -1,13 +1,10 @@
-"use strict";
 /**
  * WorkDistributor
  *
  * Distribute tasks across multiple chat instances intelligently.
  * Part of Phase 4: Multi-Chat Coordination
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.WorkDistributor = void 0;
-class WorkDistributor {
+export class WorkDistributor {
     registry;
     strategy;
     taskQueue;
@@ -83,5 +80,4 @@ class WorkDistributor {
         });
     }
 }
-exports.WorkDistributor = WorkDistributor;
 //# sourceMappingURL=WorkDistributor.js.map

@@ -7,7 +7,7 @@
  * - Evaluate predictor performance
  */
 
-import { MLPredictor } from '@shim/ml/MLPredictor';
+import { MLPredictor } from '../../../src/ml/MLPredictor.js';
 
 export class MLService {
   private predictor?: MLPredictor;

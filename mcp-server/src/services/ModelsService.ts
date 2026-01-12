@@ -7,8 +7,8 @@
  * - Get model predictions
  */
 
-import { ModelRegistry } from '@shim/models/ModelRegistry';
-import { ModelPredictor } from '@shim/models/ModelPredictor';
+import { ModelRegistry } from '../../../src/models/ModelRegistry.js';
+import { ModelPredictor } from '../../../src/models/ModelPredictor.js';
 
 export class ModelsService {
   private registry?: ModelRegistry;

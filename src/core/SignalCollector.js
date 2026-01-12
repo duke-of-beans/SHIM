@@ -1,4 +1,3 @@
-"use strict";
 /**
  * SignalCollector - TDD Implementation
  *
@@ -6,9 +5,7 @@
  * Spec: docs/specs/SPEC_CRASH_PREVENTION.md
  * Performance Target: <5ms overhead per operation
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.SignalCollector = void 0;
-const tiktoken_1 = require("tiktoken");
+import { encoding_for_model } from 'tiktoken';
 const DEFAULT_THRESHOLDS = {
     warningZone: {
         contextWindowUsage: 0.60,
@@ -26,7 +23,7 @@ const DEFAULT_THRESHOLDS = {
     },
 };
 const CONTEXT_WINDOW_SIZE = 200000; // Claude Sonnet context window
-class SignalCollector {
+export class SignalCollector {
     thresholds;
     encoder;
     // Counters
@@ -47,7 +44,7 @@ class SignalCollector {
     lastResponseTime = Date.now();
     constructor(thresholds = DEFAULT_THRESHOLDS) {
         this.thresholds = thresholds;
-        this.encoder = (0, tiktoken_1.encoding_for_model)('gpt-4');
+        this.encoder = encoding_for_model('gpt-4');
     }
     /**
      * Record a message
@@ -243,5 +240,4 @@ class SignalCollector {
         return factors;
     }
 }
-exports.SignalCollector = SignalCollector;
 //# sourceMappingURL=SignalCollector.js.map

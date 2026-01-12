@@ -1,4 +1,3 @@
-"use strict";
 /**
  * EvolutionCoordinator - Autonomous System Evolution
  *
@@ -40,9 +39,7 @@
  * // System now autonomously improves crash prediction!
  * ```
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.EvolutionCoordinator = void 0;
-class EvolutionCoordinator {
+export class EvolutionCoordinator {
     config;
     areas = new Map();
     experiments = new Map();
@@ -303,5 +300,4 @@ class EvolutionCoordinator {
         }
     }
 }
-exports.EvolutionCoordinator = EvolutionCoordinator;
 //# sourceMappingURL=EvolutionCoordinator.js.map

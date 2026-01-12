@@ -1,12 +1,6 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.SignalHistoryRepository = void 0;
-const sqlite3_1 = __importDefault(require("sqlite3"));
-const uuid_1 = require("uuid");
-class SignalHistoryRepository {
+import sqlite3 from 'sqlite3';
+import { v4 as uuidv4 } from 'uuid';
+export class SignalHistoryRepository {
     dbPath;
     db = null;
     constructor(dbPath) {
@@ -14,7 +8,7 @@ class SignalHistoryRepository {
     }
     async initialize() {
         return new Promise((resolve, reject) => {
-            this.db = new sqlite3_1.default.Database(this.dbPath, (err) => {
+            this.db = new sqlite3.Database(this.dbPath, (err) => {
                 if (err) {
                     reject(err);
                 }
@@ -105,7 +99,7 @@ class SignalHistoryRepository {
                         return;
                     }
                     const snapshotNumber = row?.next_number || 1;
-                    const id = (0, uuid_1.v4)();
+                    const id = uuidv4();
                     const timestamp = new Date().toISOString();
                     // Insert snapshot
                     const insertSQL = `
@@ -170,7 +164,7 @@ class SignalHistoryRepository {
                                 return;
                             }
                             const snapshotNumber = row?.next_number || 1;
-                            const id = (0, uuid_1.v4)();
+                            const id = uuidv4();
                             const timestamp = new Date().toISOString();
                             ids[index] = id;
                             // Insert snapshot
@@ -311,5 +305,4 @@ class SignalHistoryRepository {
         };
     }
 }
-exports.SignalHistoryRepository = SignalHistoryRepository;
 //# sourceMappingURL=SignalHistoryRepository.js.map

@@ -8,7 +8,7 @@
  * - Reset configuration
  */
 
-import { ConfigManager } from '@shim/infrastructure/ConfigManager';
+import { ConfigManager } from '../../../src/infrastructure/ConfigManager.js';
 
 export class ConfigurationService {
   private configManager?: ConfigManager;

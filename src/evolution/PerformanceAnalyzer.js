@@ -1,4 +1,3 @@
-"use strict";
 /**
  * PerformanceAnalyzer
  *
@@ -12,14 +11,12 @@
  * - Recommendation logic (deploy/rollback/continue)
  * - Performance regression detection
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.PerformanceAnalyzer = void 0;
 /**
  * PerformanceAnalyzer
  *
  * Provides rigorous statistical analysis of A/B test results.
  */
-class PerformanceAnalyzer {
+export class PerformanceAnalyzer {
     minSampleSize = 30; // Minimum for valid t-test
     significanceLevel = 0.05; // 95% confidence
     /**
@@ -191,5 +188,4 @@ class PerformanceAnalyzer {
         return { recommendation: 'continue', confidence: 0.30 };
     }
 }
-exports.PerformanceAnalyzer = PerformanceAnalyzer;
 //# sourceMappingURL=PerformanceAnalyzer.js.map

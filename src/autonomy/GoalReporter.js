@@ -1,4 +1,3 @@
-"use strict";
 /**
  * GoalReporter
  *
@@ -8,9 +7,7 @@
  * Part of Phase 5: Autonomous Operation
  * Component 3/8
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.GoalReporter = void 0;
-class GoalReporter {
+export class GoalReporter {
     constructor() {
         // No initialization needed
     }
@@ -198,5 +195,4 @@ class GoalReporter {
         return date.toISOString().split('T')[0]; // YYYY-MM-DD
     }
 }
-exports.GoalReporter = GoalReporter;
 //# sourceMappingURL=GoalReporter.js.map

@@ -1,4 +1,3 @@
-"use strict";
 /**
  * CodeGenerator
  *
@@ -8,9 +7,7 @@
  * Part of Phase 6: Self-Evolution Engine
  * Component 3/4
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.CodeGenerator = void 0;
-class CodeGenerator {
+export class CodeGenerator {
     config;
     modificationCounter;
     history;
@@ -279,5 +276,4 @@ class CodeGenerator {
         return `mod-${++this.modificationCounter}`;
     }
 }
-exports.CodeGenerator = CodeGenerator;
 //# sourceMappingURL=CodeGenerator.js.map

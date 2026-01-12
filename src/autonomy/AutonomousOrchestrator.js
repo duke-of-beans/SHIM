@@ -1,4 +1,3 @@
-"use strict";
 /**
  * AutonomousOrchestrator
  *
@@ -8,12 +7,10 @@
  * Part of Phase 5: Autonomous Operation
  * Component 4/8
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.AutonomousOrchestrator = void 0;
-const GoalDecomposer_1 = require("./GoalDecomposer");
-const ProgressTracker_1 = require("./ProgressTracker");
-const GoalReporter_1 = require("./GoalReporter");
-class AutonomousOrchestrator {
+import { GoalDecomposer } from './GoalDecomposer';
+import { ProgressTracker } from './ProgressTracker';
+import { GoalReporter } from './GoalReporter';
+export class AutonomousOrchestrator {
     state;
     decomposer;
     tracker;
@@ -27,9 +24,9 @@ class AutonomousOrchestrator {
     maxCycles;
     constructor(config = {}) {
         this.state = 'stopped';
-        this.decomposer = new GoalDecomposer_1.GoalDecomposer();
-        this.tracker = new ProgressTracker_1.ProgressTracker();
-        this.reporter = new GoalReporter_1.GoalReporter();
+        this.decomposer = new GoalDecomposer();
+        this.tracker = new ProgressTracker();
+        this.reporter = new GoalReporter();
         this.config = {
             executionIntervalMs: config.executionIntervalMs ?? 100,
         };
@@ -182,5 +179,4 @@ class AutonomousOrchestrator {
         }
     }
 }
-exports.AutonomousOrchestrator = AutonomousOrchestrator;
 //# sourceMappingURL=AutonomousOrchestrator.js.map

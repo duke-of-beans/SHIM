@@ -4,11 +4,11 @@
  * Exposes all analytics capabilities via MCP tools
  */
 
-import { AutoExperimentEngine, EngineConfig } from '@shim/analytics/AutoExperimentEngine';
-import { OpportunityDetector, DetectorConfig } from '@shim/analytics/OpportunityDetector';
-import { SafetyBounds, BoundConfig } from '@shim/analytics/SafetyBounds';
-import { SHIMMetrics } from '@shim/analytics/SHIMMetrics';
-import { StatsigIntegration } from '@shim/analytics/StatsigIntegration';
+import { AutoExperimentEngine, EngineConfig } from '../../../src/analytics/AutoExperimentEngine.js';
+import { OpportunityDetector, DetectorConfig } from '../../../src/analytics/OpportunityDetector.js';
+import { SafetyBounds, BoundConfig } from '../../../src/analytics/SafetyBounds.js';
+import { SHIMMetrics } from '../../../src/analytics/SHIMMetrics.js';
+import { StatsigIntegration } from '../../../src/analytics/StatsigIntegration.js';
 
 export class AnalyticsService {
   private autoExperimentEngine?: AutoExperimentEngine;

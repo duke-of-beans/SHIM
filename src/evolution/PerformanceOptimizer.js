@@ -1,12 +1,9 @@
-"use strict";
 /**
  * PerformanceOptimizer
  *
  * Caching, parallel processing, and performance improvements.
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.PerformanceOptimizer = void 0;
-class PerformanceOptimizer {
+export class PerformanceOptimizer {
     cache;
     cacheHits;
     cacheMisses;
@@ -79,5 +76,4 @@ class PerformanceOptimizer {
         return { taskId: task.id, result, duration };
     }
 }
-exports.PerformanceOptimizer = PerformanceOptimizer;
 //# sourceMappingURL=PerformanceOptimizer.js.map

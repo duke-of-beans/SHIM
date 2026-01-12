@@ -1,4 +1,3 @@
-"use strict";
 /**
  * ExperimentGenerator
  *
@@ -11,9 +10,7 @@
  * - Define success criteria and safety bounds
  * - Configure sample sizes and duration
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.ExperimentGenerator = void 0;
-const uuid_1 = require("uuid");
+import { v4 as uuidv4 } from 'uuid';
 /**
  * ExperimentGenerator
  *
@@ -22,12 +19,12 @@ const uuid_1 = require("uuid");
  * - Statistical rigor
  * - Safety guarantees
  */
-class ExperimentGenerator {
+export class ExperimentGenerator {
     /**
      * Generate experiment from opportunity
      */
     generateExperiment(opportunity) {
-        const id = (0, uuid_1.v4)();
+        const id = uuidv4();
         const timestamp = new Date().toISOString();
         // Generate variants
         const control = this.generateControlVariant(opportunity);
@@ -181,5 +178,4 @@ class ExperimentGenerator {
         };
     }
 }
-exports.ExperimentGenerator = ExperimentGenerator;
 //# sourceMappingURL=ExperimentGenerator.js.map

@@ -1,4 +1,3 @@
-"use strict";
 /**
  * RedisConnectionManager
  *
@@ -10,19 +9,14 @@
  * - Reconnection with exponential backoff
  * - Connection statistics tracking
  */
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.RedisConnectionManager = void 0;
-const ioredis_1 = __importDefault(require("ioredis"));
-const redis_1 = require("../config/redis");
-class RedisConnectionManager {
+import Redis from 'ioredis';
+import { REDIS_CONFIG } from '../config/redis';
+export class RedisConnectionManager {
     client = null;
     config;
     connectedAt = null;
     constructor(config) {
-        this.config = { ...redis_1.REDIS_CONFIG, ...config };
+        this.config = { ...REDIS_CONFIG, ...config };
     }
     /**
      * Connect to Redis server
@@ -32,7 +26,7 @@ class RedisConnectionManager {
             return; // Already connected
         }
         return new Promise((resolve, reject) => {
-            this.client = new ioredis_1.default({
+            this.client = new Redis({
                 host: this.config.host,
                 port: this.config.port,
                 password: this.config.password,
@@ -117,5 +111,4 @@ class RedisConnectionManager {
         return this.client;
     }
 }
-exports.RedisConnectionManager = RedisConnectionManager;
 //# sourceMappingURL=RedisConnectionManager.js.map

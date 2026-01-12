@@ -1,4 +1,3 @@
-"use strict";
 /**
  * SafetyBounds - Safety enforcement for automated experimentation
  *
@@ -18,10 +17,8 @@
  * 3. Triggers rollback on critical violations
  * 4. Prevents unsafe auto-deployments
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.SafetyBounds = void 0;
-const events_1 = require("events");
-class SafetyBounds extends events_1.EventEmitter {
+import { EventEmitter } from 'events';
+export class SafetyBounds extends EventEmitter {
     config;
     baseline = {};
     constructor(config) {
@@ -312,5 +309,4 @@ class SafetyBounds extends events_1.EventEmitter {
         return suggestions[boundType] || null;
     }
 }
-exports.SafetyBounds = SafetyBounds;
 //# sourceMappingURL=SafetyBounds.js.map

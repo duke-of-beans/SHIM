@@ -1,4 +1,3 @@
-"use strict";
 /**
  * FailureRecovery
  *
@@ -8,9 +7,7 @@
  * Part of Phase 5: Autonomous Operation
  * Component 6/8
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.FailureRecovery = void 0;
-class FailureRecovery {
+export class FailureRecovery {
     config;
     history;
     consecutiveFailures;
@@ -178,5 +175,4 @@ class FailureRecovery {
         return new Promise((resolve) => setTimeout(resolve, ms));
     }
 }
-exports.FailureRecovery = FailureRecovery;
 //# sourceMappingURL=FailureRecovery.js.map

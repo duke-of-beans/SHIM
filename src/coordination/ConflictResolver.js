@@ -1,13 +1,10 @@
-"use strict";
 /**
  * ConflictResolver
  *
  * Resolve conflicts from concurrent modifications across chat instances.
  * Part of Phase 4: Multi-Chat Coordination
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.ConflictResolver = void 0;
-class ConflictResolver {
+export class ConflictResolver {
     chatPriorities;
     conflictHistory;
     constructor() {
@@ -94,5 +91,4 @@ class ConflictResolver {
         return Array.from(merged).join('\n');
     }
 }
-exports.ConflictResolver = ConflictResolver;
 //# sourceMappingURL=ConflictResolver.js.map

@@ -4,10 +4,10 @@
  * Exposes all coordination capabilities via MCP tools
  */
 
-import { ChatRegistry } from '@shim/coordination/ChatRegistry';
-import { ConflictResolver } from '@shim/coordination/ConflictResolver';
-import { ResultAggregator } from '@shim/coordination/ResultAggregator';
-import { WorkDistributor } from '@shim/coordination/WorkDistributor';
+import { ChatRegistry } from '../../../src/coordination/ChatRegistry.js';
+import { ConflictResolver } from '../../../src/coordination/ConflictResolver.js';
+import { ResultAggregator } from '../../../src/coordination/ResultAggregator.js';
+import { WorkDistributor } from '../../../src/coordination/WorkDistributor.js';
 
 export class CoordinationService {
   private chatRegistry?: ChatRegistry;

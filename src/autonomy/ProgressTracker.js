@@ -1,4 +1,3 @@
-"use strict";
 /**
  * ProgressTracker
  *
@@ -8,9 +7,7 @@
  * Part of Phase 5: Autonomous Operation
  * Component 2/8
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.ProgressTracker = void 0;
-class ProgressTracker {
+export class ProgressTracker {
     tracking;
     constructor() {
         this.tracking = new Map();
@@ -224,5 +221,4 @@ class ProgressTracker {
         });
     }
 }
-exports.ProgressTracker = ProgressTracker;
 //# sourceMappingURL=ProgressTracker.js.map

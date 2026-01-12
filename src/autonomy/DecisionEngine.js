@@ -1,4 +1,3 @@
-"use strict";
 /**
  * DecisionEngine
  *
@@ -8,9 +7,7 @@
  * Part of Phase 5: Autonomous Operation
  * Component 5/8
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.DecisionEngine = void 0;
-class DecisionEngine {
+export class DecisionEngine {
     config;
     history;
     constructor(config = {}) {
@@ -207,5 +204,4 @@ class DecisionEngine {
         return `Low confidence (${confidence.toFixed(0)}%) requires human review`;
     }
 }
-exports.DecisionEngine = DecisionEngine;
 //# sourceMappingURL=DecisionEngine.js.map

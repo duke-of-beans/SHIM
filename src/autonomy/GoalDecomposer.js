@@ -1,4 +1,3 @@
-"use strict";
 /**
  * GoalDecomposer
  *
@@ -8,14 +7,12 @@
  * Purpose: Enable autonomous operation by breaking high-level goals
  * into manageable, trackable sub-goals with clear dependencies.
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.GoalDecomposer = void 0;
 /**
  * GoalDecomposer
  *
  * Breaks down high-level goals into executable sub-goals.
  */
-class GoalDecomposer {
+export class GoalDecomposer {
     /**
      * Decompose a high-level goal into sub-goals
      */
@@ -268,5 +265,4 @@ class GoalDecomposer {
         return sorted;
     }
 }
-exports.GoalDecomposer = GoalDecomposer;
 //# sourceMappingURL=GoalDecomposer.js.map

@@ -1,4 +1,3 @@
-"use strict";
 /**
  * FeedbackProcessor
  *
@@ -8,9 +7,7 @@
  * Part of Phase 5: Autonomous Operation
  * Component 8/8 - FINAL COMPONENT
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.FeedbackProcessor = void 0;
-class FeedbackProcessor {
+export class FeedbackProcessor {
     history;
     constructor() {
         this.history = [];
@@ -289,5 +286,4 @@ class FeedbackProcessor {
         }
     }
 }
-exports.FeedbackProcessor = FeedbackProcessor;
 //# sourceMappingURL=FeedbackProcessor.js.map

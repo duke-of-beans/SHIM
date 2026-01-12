@@ -1,12 +1,9 @@
-"use strict";
 /**
  * WorkerRegistry
  *
  * Manages worker registration, heartbeat monitoring, and crash detection.
  * Workers are stored in Redis with automatic timeout-based crash detection.
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.WorkerRegistry = void 0;
 /**
  * Worker registration and monitoring system.
  *
@@ -22,7 +19,7 @@ exports.WorkerRegistry = void 0;
  * - Heartbeat: <20ms
  * - Crash detection (100 workers): <100ms
  */
-class WorkerRegistry {
+export class WorkerRegistry {
     redis;
     HEARTBEAT_TIMEOUT = 30000; // 30 seconds
     WORKER_KEY_PREFIX = 'worker:';
@@ -216,5 +213,4 @@ class WorkerRegistry {
         return `${this.WORKER_KEY_PREFIX}${workerId}`;
     }
 }
-exports.WorkerRegistry = WorkerRegistry;
 //# sourceMappingURL=WorkerRegistry.js.map

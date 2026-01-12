@@ -1,13 +1,10 @@
-"use strict";
 /**
  * ChatRegistry
  *
  * Track and manage multiple chat instances for distributed coordination.
  * Part of Phase 4: Multi-Chat Coordination
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.ChatRegistry = void 0;
-class ChatRegistry {
+export class ChatRegistry {
     chats;
     idCounter;
     constructor() {
@@ -95,5 +92,4 @@ class ChatRegistry {
         return `chat-${++this.idCounter}`;
     }
 }
-exports.ChatRegistry = ChatRegistry;
 //# sourceMappingURL=ChatRegistry.js.map

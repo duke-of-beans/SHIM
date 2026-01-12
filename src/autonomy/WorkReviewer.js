@@ -1,4 +1,3 @@
-"use strict";
 /**
  * WorkReviewer
  *
@@ -8,9 +7,7 @@
  * Part of Phase 5: Autonomous Operation
  * Component 7/8
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.WorkReviewer = void 0;
-class WorkReviewer {
+export class WorkReviewer {
     config;
     history;
     constructor(config = {}) {
@@ -264,5 +261,4 @@ class WorkReviewer {
         return recommendations;
     }
 }
-exports.WorkReviewer = WorkReviewer;
 //# sourceMappingURL=WorkReviewer.js.map

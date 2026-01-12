@@ -1,4 +1,3 @@
-"use strict";
 /**
  * StatsigIntegration - Automated A/B testing wrapper
  *
@@ -20,13 +19,8 @@
  * 5. Results analyzed for significance
  * 6. Winners auto-deployed OR rolled back
  */
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.StatsigIntegration = void 0;
-const statsig_node_1 = __importDefault(require("statsig-node"));
-class StatsigIntegration {
+import Statsig from 'statsig-node';
+export class StatsigIntegration {
     apiKey;
     options;
     initialized = false;
@@ -49,7 +43,7 @@ class StatsigIntegration {
             return true;
         }
         try {
-            await statsig_node_1.default.initialize(this.apiKey, {
+            await Statsig.initialize(this.apiKey, {
                 environment: { tier: this.options.environment }
             });
             this.initialized = true;
@@ -110,7 +104,7 @@ class StatsigIntegration {
             await this.initialize();
         }
         try {
-            const experiment = await statsig_node_1.default.getExperiment({
+            const experiment = await Statsig.getExperiment({
                 userID: userId,
                 custom: customAttributes
             }, experimentName);
@@ -137,7 +131,7 @@ class StatsigIntegration {
             await this.initialize();
         }
         try {
-            statsig_node_1.default.logEvent({ userID: userId }, 'experiment_exposure', null, {
+            Statsig.logEvent({ userID: userId }, 'experiment_exposure', null, {
                 experiment: experimentName,
                 variant: variantName
             });
@@ -158,7 +152,7 @@ class StatsigIntegration {
             await this.initialize();
         }
         try {
-            statsig_node_1.default.logEvent({ userID: userId || 'system' }, eventName, null, metadata);
+            Statsig.logEvent({ userID: userId || 'system' }, eventName, null, metadata);
             return true;
         }
         catch (error) {
@@ -173,7 +167,7 @@ class StatsigIntegration {
      */
     async flush() {
         try {
-            await statsig_node_1.default.flush();
+            await Statsig.flush();
             return true;
         }
         catch (error) {
@@ -341,7 +335,7 @@ class StatsigIntegration {
         }
         try {
             await this.flush();
-            await statsig_node_1.default.shutdown();
+            await Statsig.shutdown();
             this.shutdownFlag = true;
             this.initialized = false;
             return true;
@@ -390,5 +384,4 @@ class StatsigIntegration {
         return `exp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     }
 }
-exports.StatsigIntegration = StatsigIntegration;
 //# sourceMappingURL=StatsigIntegration.js.map

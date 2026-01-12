@@ -1,4 +1,3 @@
-"use strict";
 /**
  * SelfDeployer
  *
@@ -8,9 +7,7 @@
  * Part of Phase 6: Self-Evolution Engine
  * Component 4/4 (FINAL)
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.SelfDeployer = void 0;
-class SelfDeployer {
+export class SelfDeployer {
     config;
     deploymentCounter;
     deploymentHistory;
@@ -206,5 +203,4 @@ class SelfDeployer {
         return `deploy-${++this.deploymentCounter}`;
     }
 }
-exports.SelfDeployer = SelfDeployer;
 //# sourceMappingURL=SelfDeployer.js.map

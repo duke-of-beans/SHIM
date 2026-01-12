@@ -7,7 +7,7 @@
  * - Export logs
  */
 
-import { Logger } from '@shim/infrastructure/Logger';
+import { Logger } from '../../../src/infrastructure/Logger.js';
 
 export class LoggingService {
   private logger?: Logger;
