@@ -1,0 +1,11 @@
+{
+  "checkpoint_id": "session-2026-01-12T05-10-22",
+  "timestamp": "2026-01-12T05:10:22.096Z",
+  "current_task": "Testing manual checkpoint feature",
+  "progress": 0,
+  "decisions": [],
+  "active_files": [],
+  "next_steps": [],
+  "tool_calls": 1,
+  "duration_minutes": 1
+}
