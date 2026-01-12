@@ -4,10 +4,10 @@
  * Exposes all coordination capabilities via MCP tools
  */
 
-import { ChatRegistry } from '../../src/coordination/ChatRegistry';
-import { ConflictResolver } from '../../src/coordination/ConflictResolver';
-import { ResultAggregator } from '../../src/coordination/ResultAggregator';
-import { WorkDistributor } from '../../src/coordination/WorkDistributor';
+import { ChatRegistry } from '../../src/coordination/ChatRegistry.js';
+import { ConflictResolver } from '../../src/coordination/ConflictResolver.js';
+import { ResultAggregator } from '../../src/coordination/ResultAggregator.js';
+import { WorkDistributor } from '../../src/coordination/WorkDistributor.js';
 
 export class CoordinationService {
   private chatRegistry?: ChatRegistry;
@@ -16,7 +16,7 @@ export class CoordinationService {
   private workDistributor?: WorkDistributor;
 
   constructor() {
-    // Initialize components lazily
+    // Components initialized lazily on first use
   }
 
   /**
@@ -35,7 +35,10 @@ export class CoordinationService {
    */
   async getWorkerList() {
     if (!this.chatRegistry) {
-      this.chatRegistry = new ChatRegistry();
+      return {
+        workers: [],
+        total: 0
+      };
     }
     
     return await this.chatRegistry.list();
@@ -57,7 +60,10 @@ export class CoordinationService {
    */
   async getConflictHistory() {
     if (!this.conflictResolver) {
-      this.conflictResolver = new ConflictResolver();
+      return {
+        resolutions: [],
+        total: 0
+      };
     }
     
     return await this.conflictResolver.getHistory();
@@ -79,7 +85,11 @@ export class CoordinationService {
    */
   async getAggregationStatus(taskId: string) {
     if (!this.resultAggregator) {
-      this.resultAggregator = new ResultAggregator();
+      return {
+        taskId,
+        status: 'not_started',
+        results: []
+      };
     }
     
     return await this.resultAggregator.getStatus(taskId);
@@ -101,7 +111,11 @@ export class CoordinationService {
    */
   async getDistributionStatus(taskId: string) {
     if (!this.workDistributor) {
-      this.workDistributor = new WorkDistributor();
+      return {
+        taskId,
+        status: 'not_started',
+        workers: []
+      };
     }
     
     return await this.workDistributor.getStatus(taskId);
@@ -112,7 +126,10 @@ export class CoordinationService {
    */
   async cancelDistribution(taskId: string) {
     if (!this.workDistributor) {
-      this.workDistributor = new WorkDistributor();
+      return {
+        success: false,
+        error: 'No active distribution found'
+      };
     }
     
     return await this.workDistributor.cancel(taskId);

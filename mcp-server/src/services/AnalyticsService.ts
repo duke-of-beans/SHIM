@@ -4,11 +4,11 @@
  * Exposes all analytics capabilities via MCP tools
  */
 
-import { AutoExperimentEngine, EngineConfig } from '../../src/analytics/AutoExperimentEngine';
-import { OpportunityDetector, DetectorConfig } from '../../src/analytics/OpportunityDetector';
-import { SafetyBounds, BoundConfig } from '../../src/analytics/SafetyBounds';
-import { SHIMMetrics } from '../../src/analytics/SHIMMetrics';
-import { StatsigIntegration } from '../../src/analytics/StatsigIntegration';
+import { AutoExperimentEngine, EngineConfig } from '../../src/analytics/AutoExperimentEngine.js';
+import { OpportunityDetector, DetectorConfig } from '../../src/analytics/OpportunityDetector.js';
+import { SafetyBounds, BoundConfig } from '../../src/analytics/SafetyBounds.js';
+import { SHIMMetrics } from '../../src/analytics/SHIMMetrics.js';
+import { StatsigIntegration } from '../../src/analytics/StatsigIntegration.js';
 
 export class AnalyticsService {
   private autoExperimentEngine?: AutoExperimentEngine;
@@ -18,7 +18,7 @@ export class AnalyticsService {
   private statsig?: StatsigIntegration;
 
   constructor() {
-    // Initialize components lazily
+    // Components initialized lazily on first use
   }
 
   /**
@@ -26,8 +26,11 @@ export class AnalyticsService {
    */
   async startAutoExperiments(config?: Partial<EngineConfig>) {
     if (!this.autoExperimentEngine) {
-      // Initialize engine with config
-      throw new Error('AutoExperimentEngine not initialized');
+      this.autoExperimentEngine = new AutoExperimentEngine(
+        config?.safetyBounds,
+        config?.statsig,
+        config?.opportunityDetector
+      );
     }
     
     await this.autoExperimentEngine.start();
@@ -42,7 +45,10 @@ export class AnalyticsService {
    */
   async stopAutoExperiments() {
     if (!this.autoExperimentEngine) {
-      throw new Error('AutoExperimentEngine not initialized');
+      return {
+        success: false,
+        error: 'AutoExperimentEngine not running'
+      };
     }
     
     await this.autoExperimentEngine.stop();
@@ -57,7 +63,11 @@ export class AnalyticsService {
    */
   async getExperimentStatus() {
     if (!this.autoExperimentEngine) {
-      throw new Error('AutoExperimentEngine not initialized');
+      return {
+        running: false,
+        experiments: [],
+        totalExperiments: 0
+      };
     }
     
     return await this.autoExperimentEngine.getStatus();
@@ -68,14 +78,32 @@ export class AnalyticsService {
    */
   async getImprovementReport() {
     if (!this.autoExperimentEngine) {
-      throw new Error('AutoExperimentEngine not initialized');
+      return {
+        improvements: [],
+        totalImprovements: 0,
+        averageImprovement: 0,
+        successRate: 0
+      };
     }
     
-    // Return improvement metrics
+    const status = await this.autoExperimentEngine.getStatus();
+    const improvements = status.experiments
+      ?.filter((exp: any) => exp.status === 'deployed' && exp.improvement > 0)
+      ?.map((exp: any) => ({
+        experimentId: exp.id,
+        improvement: exp.improvement,
+        deployedAt: exp.deployedAt
+      })) || [];
+    
     return {
-      improvements: [],
-      totalImprovements: 0,
-      averageImprovement: 0
+      improvements,
+      totalImprovements: improvements.length,
+      averageImprovement: improvements.length > 0
+        ? improvements.reduce((sum: number, imp: any) => sum + imp.improvement, 0) / improvements.length
+        : 0,
+      successRate: status.totalExperiments > 0
+        ? improvements.length / status.totalExperiments
+        : 0
     };
   }
 
@@ -84,7 +112,10 @@ export class AnalyticsService {
    */
   async detectOpportunities(metricsData: any) {
     if (!this.opportunityDetector) {
-      throw new Error('OpportunityDetector not initialized');
+      this.opportunityDetector = new OpportunityDetector({
+        minImprovement: 0.05,
+        minConfidence: 0.7
+      });
     }
     
     return await this.opportunityDetector.detect(metricsData);
@@ -95,7 +126,10 @@ export class AnalyticsService {
    */
   async getOpportunityHistory() {
     if (!this.opportunityDetector) {
-      throw new Error('OpportunityDetector not initialized');
+      return {
+        opportunities: [],
+        totalDetected: 0
+      };
     }
     
     return await this.opportunityDetector.getHistory();
@@ -104,9 +138,13 @@ export class AnalyticsService {
   /**
    * Validate safety bounds
    */
-  async validateSafety(change: any, bounds: BoundConfig) {
+  async validateSafety(change: any, bounds?: BoundConfig) {
     if (!this.safetyBounds) {
-      throw new Error('SafetyBounds not initialized');
+      this.safetyBounds = new SafetyBounds({
+        maxCostIncrease: 0.2,
+        maxPerformanceDecrease: 0.1,
+        maxQualityDecrease: 0.05
+      });
     }
     
     return await this.safetyBounds.validate(change, bounds);
@@ -117,7 +155,11 @@ export class AnalyticsService {
    */
   async getSafetyConfig() {
     if (!this.safetyBounds) {
-      throw new Error('SafetyBounds not initialized');
+      this.safetyBounds = new SafetyBounds({
+        maxCostIncrease: 0.2,
+        maxPerformanceDecrease: 0.1,
+        maxQualityDecrease: 0.05
+      });
     }
     
     return await this.safetyBounds.getConfig();
@@ -128,7 +170,7 @@ export class AnalyticsService {
    */
   async collectMetrics() {
     if (!this.shimMetrics) {
-      throw new Error('SHIMMetrics not initialized');
+      this.shimMetrics = new SHIMMetrics();
     }
     
     return await this.shimMetrics.collect();
@@ -139,7 +181,7 @@ export class AnalyticsService {
    */
   async exportMetrics(format: 'json' | 'prometheus') {
     if (!this.shimMetrics) {
-      throw new Error('SHIMMetrics not initialized');
+      this.shimMetrics = new SHIMMetrics();
     }
     
     return await this.shimMetrics.export(format);
@@ -150,7 +192,7 @@ export class AnalyticsService {
    */
   async getMetricsSummary() {
     if (!this.shimMetrics) {
-      throw new Error('SHIMMetrics not initialized');
+      this.shimMetrics = new SHIMMetrics();
     }
     
     return await this.shimMetrics.getSummary();
@@ -161,7 +203,12 @@ export class AnalyticsService {
    */
   async createExperiment(config: any) {
     if (!this.statsig) {
-      throw new Error('StatsigIntegration not initialized');
+      // Initialize Statsig with API key from env
+      const apiKey = process.env.STATSIG_API_KEY;
+      if (!apiKey) {
+        throw new Error('STATSIG_API_KEY environment variable not set');
+      }
+      this.statsig = new StatsigIntegration(apiKey);
     }
     
     return await this.statsig.createExperiment(config);
@@ -172,7 +219,7 @@ export class AnalyticsService {
    */
   async getExperimentResults(experimentId: string) {
     if (!this.statsig) {
-      throw new Error('StatsigIntegration not initialized');
+      throw new Error('StatsigIntegration not initialized - call createExperiment first');
     }
     
     return await this.statsig.getResults(experimentId);
@@ -183,7 +230,12 @@ export class AnalyticsService {
    */
   async getFeatureFlags() {
     if (!this.statsig) {
-      throw new Error('StatsigIntegration not initialized');
+      // Initialize Statsig with API key from env
+      const apiKey = process.env.STATSIG_API_KEY;
+      if (!apiKey) {
+        throw new Error('STATSIG_API_KEY environment variable not set');
+      }
+      this.statsig = new StatsigIntegration(apiKey);
     }
     
     return await this.statsig.getFeatureFlags();

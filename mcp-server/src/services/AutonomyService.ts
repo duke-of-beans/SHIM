@@ -4,14 +4,14 @@
  * Exposes all autonomy capabilities via MCP tools
  */
 
-import { AutonomousOrchestrator } from '../../src/autonomy/AutonomousOrchestrator';
-import { DecisionEngine } from '../../src/autonomy/DecisionEngine';
-import { FailureRecovery } from '../../src/autonomy/FailureRecovery';
-import { FeedbackProcessor } from '../../src/autonomy/FeedbackProcessor';
-import { GoalDecomposer } from '../../src/autonomy/GoalDecomposer';
-import { GoalReporter } from '../../src/autonomy/GoalReporter';
-import { ProgressTracker } from '../../src/autonomy/ProgressTracker';
-import { WorkReviewer } from '../../src/autonomy/WorkReviewer';
+import { AutonomousOrchestrator } from '../../src/autonomy/AutonomousOrchestrator.js';
+import { DecisionEngine } from '../../src/autonomy/DecisionEngine.js';
+import { FailureRecovery } from '../../src/autonomy/FailureRecovery.js';
+import { FeedbackProcessor } from '../../src/autonomy/FeedbackProcessor.js';
+import { GoalDecomposer } from '../../src/autonomy/GoalDecomposer.js';
+import { GoalReporter } from '../../src/autonomy/GoalReporter.js';
+import { ProgressTracker } from '../../src/autonomy/ProgressTracker.js';
+import { WorkReviewer } from '../../src/autonomy/WorkReviewer.js';
 
 export class AutonomyService {
   private orchestrator?: AutonomousOrchestrator;
@@ -24,7 +24,7 @@ export class AutonomyService {
   private workReviewer?: WorkReviewer;
 
   constructor() {
-    // Initialize components lazily
+    // Components initialized lazily on first use
   }
 
   /**
@@ -43,7 +43,11 @@ export class AutonomyService {
    */
   async getAutonomousStatus() {
     if (!this.orchestrator) {
-      this.orchestrator = new AutonomousOrchestrator();
+      return {
+        active: false,
+        currentGoal: null,
+        progress: 0
+      };
     }
     
     return await this.orchestrator.getStatus();
@@ -65,7 +69,7 @@ export class AutonomyService {
    */
   async explainDecision(decisionId: string) {
     if (!this.decisionEngine) {
-      this.decisionEngine = new DecisionEngine();
+      throw new Error('No decisions made yet - call makeDecision first');
     }
     
     return await this.decisionEngine.explain(decisionId);
@@ -87,7 +91,10 @@ export class AutonomyService {
    */
   async getRecoveryHistory() {
     if (!this.failureRecovery) {
-      this.failureRecovery = new FailureRecovery();
+      return {
+        recoveries: [],
+        successRate: 0
+      };
     }
     
     return await this.failureRecovery.getHistory();
@@ -109,7 +116,10 @@ export class AutonomyService {
    */
   async getFeedbackInsights() {
     if (!this.feedbackProcessor) {
-      this.feedbackProcessor = new FeedbackProcessor();
+      return {
+        insights: [],
+        totalFeedback: 0
+      };
     }
     
     return await this.feedbackProcessor.getInsights();
@@ -131,7 +141,7 @@ export class AutonomyService {
    */
   async getDecomposition(goalId: string) {
     if (!this.goalDecomposer) {
-      this.goalDecomposer = new GoalDecomposer();
+      throw new Error('No goals decomposed yet - call decomposeGoal first');
     }
     
     return await this.goalDecomposer.getDecomposition(goalId);
@@ -164,7 +174,11 @@ export class AutonomyService {
    */
   async getProgress(taskId: string) {
     if (!this.progressTracker) {
-      this.progressTracker = new ProgressTracker();
+      return {
+        taskId,
+        progress: 0,
+        status: 'not_started'
+      };
     }
     
     return await this.progressTracker.getProgress(taskId);

@@ -4,16 +4,16 @@
  * Exposes all evolution capabilities via MCP tools
  */
 
-import { AdvancedCodeAnalyzer } from '../../src/evolution/AdvancedCodeAnalyzer';
-import { ASTAnalyzer } from '../../src/evolution/ASTAnalyzer';
-import { CodeGenerator } from '../../src/evolution/CodeGenerator';
-import { DeploymentManager } from '../../src/evolution/DeploymentManager';
-import { EvolutionCoordinator } from '../../src/evolution/EvolutionCoordinator';
-import { ExperimentGenerator } from '../../src/evolution/ExperimentGenerator';
-import { ImprovementIdentifier } from '../../src/evolution/ImprovementIdentifier';
-import { PerformanceAnalyzer } from '../../src/evolution/PerformanceAnalyzer';
-import { PerformanceOptimizer } from '../../src/evolution/PerformanceOptimizer';
-import { SelfDeployer } from '../../src/evolution/SelfDeployer';
+import { AdvancedCodeAnalyzer } from '../../src/evolution/AdvancedCodeAnalyzer.js';
+import { ASTAnalyzer } from '../../src/evolution/ASTAnalyzer.js';
+import { CodeGenerator } from '../../src/evolution/CodeGenerator.js';
+import { DeploymentManager } from '../../src/evolution/DeploymentManager.js';
+import { EvolutionCoordinator } from '../../src/evolution/EvolutionCoordinator.js';
+import { ExperimentGenerator } from '../../src/evolution/ExperimentGenerator.js';
+import { ImprovementIdentifier } from '../../src/evolution/ImprovementIdentifier.js';
+import { PerformanceAnalyzer } from '../../src/evolution/PerformanceAnalyzer.js';
+import { PerformanceOptimizer } from '../../src/evolution/PerformanceOptimizer.js';
+import { SelfDeployer } from '../../src/evolution/SelfDeployer.js';
 
 export class EvolutionService {
   private advancedAnalyzer?: AdvancedCodeAnalyzer;
@@ -28,7 +28,7 @@ export class EvolutionService {
   private selfDeployer?: SelfDeployer;
 
   constructor() {
-    // Initialize components lazily
+    // Components initialized lazily on first use
   }
 
   /**
@@ -135,7 +135,11 @@ export class EvolutionService {
    */
   async getEvolutionStatus() {
     if (!this.evolutionCoordinator) {
-      this.evolutionCoordinator = new EvolutionCoordinator();
+      return {
+        running: false,
+        cycles: 0,
+        improvements: 0
+      };
     }
     
     return await this.evolutionCoordinator.getStatus();
@@ -157,7 +161,10 @@ export class EvolutionService {
    */
   async listExperiments() {
     if (!this.experimentGenerator) {
-      this.experimentGenerator = new ExperimentGenerator();
+      return {
+        experiments: [],
+        total: 0
+      };
     }
     
     return await this.experimentGenerator.list();
@@ -201,7 +208,7 @@ export class EvolutionService {
    */
   async getPerformanceReport(profileId: string) {
     if (!this.performanceAnalyzer) {
-      this.performanceAnalyzer = new PerformanceAnalyzer();
+      throw new Error('No profiling session found - call profilePerformance first');
     }
     
     return await this.performanceAnalyzer.getReport(profileId);
@@ -245,7 +252,10 @@ export class EvolutionService {
    */
   async getSelfDeployHistory() {
     if (!this.selfDeployer) {
-      this.selfDeployer = new SelfDeployer();
+      return {
+        deployments: [],
+        total: 0
+      };
     }
     
     return await this.selfDeployer.getHistory();
