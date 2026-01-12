@@ -7,7 +7,8 @@
 
 import { BaseHandler, HandlerResult } from './base-handler.js';
 import { CheckpointManager } from '../../core/CheckpointManager.js';
-import { SessionContext } from '../../models/SessionContext.js';
+import { CheckpointRepository } from '../../core/CheckpointRepository.js';
+import { SignalCollector } from '../../core/SignalCollector.js';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -22,8 +23,24 @@ export class ForceCheckpointHandler extends BaseHandler {
   constructor() {
     super();
     
-    const dataDir = path.join(process.cwd(), 'data', 'checkpoints');
-    this.checkpointManager = new CheckpointManager(dataDir);
+    const dbPath = path.join(process.cwd(), 'data', 'shim.db');
+    
+    // Initialize repository
+    const repository = new CheckpointRepository(dbPath);
+    repository.initialize().catch(err => {
+      this.log('Failed to initialize repository', { error: err });
+    });
+    
+    // Initialize signal collector
+    const signalCollector = new SignalCollector();
+    
+    // Initialize checkpoint manager
+    this.checkpointManager = new CheckpointManager({
+      signalCollector,
+      checkpointRepo: repository,
+      toolCallInterval: 5,
+      timeIntervalMs: 10 * 60 * 1000
+    });
     
     // Generate session ID (persists for this MCP server instance)
     this.sessionId = uuidv4();
@@ -37,23 +54,14 @@ export class ForceCheckpointHandler extends BaseHandler {
 
       const reason = args.reason || 'Manual checkpoint requested';
 
-      // Build minimal session context for manual checkpoint
-      const context: SessionContext = {
+      // Create checkpoint using CreateCheckpointInput
+      const checkpoint = await this.checkpointManager.createCheckpoint({
         sessionId: this.sessionId,
-        currentTask: `Manual checkpoint: ${reason}`,
-        progress: 0,
-        decisions: [],
-        activeFiles: [],
-        nextSteps: [],
-        timestamp: new Date().toISOString(),
-        metadata: {
-          checkpointType: 'manual',
-          reason,
-        },
-      };
-
-      // Create checkpoint
-      const checkpoint = await this.checkpointManager.createCheckpoint(context);
+        trigger: 'user_requested',
+        operation: `Manual checkpoint: ${reason}`,
+        progress: 0.5,
+        userPreferences: undefined
+      });
 
       const elapsed = Date.now() - startTime;
 
@@ -67,8 +75,9 @@ export class ForceCheckpointHandler extends BaseHandler {
       return {
         success: true,
         checkpoint_id: checkpoint.id,
+        checkpoint_number: checkpoint.checkpointNumber,
         reason,
-        timestamp: checkpoint.timestamp,
+        created_at: checkpoint.createdAt,
         elapsed_ms: elapsed,
       };
     } catch (error) {

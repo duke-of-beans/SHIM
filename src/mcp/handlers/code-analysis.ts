@@ -2,30 +2,34 @@
  * Code Analysis Handler
  * 
  * Analyzes code quality in a directory.
- * Returns top improvement opportunities ranked by ROI.
+ * Returns top improvement opportunities ranked by severity.
  * 
- * Uses existing AST analyzer and pattern detection from Phase 4.
+ * Uses CodeAnalyzer from evolution package.
  */
 
 import { BaseHandler, HandlerResult } from './base-handler.js';
-import { EvolutionCoordinator } from '../../evolution/EvolutionCoordinator.js';
-import path from 'path';
+import { CodeAnalyzer } from '../../evolution/CodeAnalyzer.js';
+import fs from 'fs';
 
 interface CodeAnalysisArgs {
   directory: string;
-  max_opportunities?: number;
+  max_issues?: number;
+  include_extensions?: string[];
+  exclude_patterns?: string[];
 }
 
 export class CodeAnalysisHandler extends BaseHandler {
-  private evolutionCoordinator: EvolutionCoordinator;
+  private analyzer: CodeAnalyzer;
 
   constructor() {
     super();
     
-    const dataDir = path.join(process.cwd(), 'data', 'evolution');
-    
-    // Initialize evolution coordinator (includes AST analysis)
-    this.evolutionCoordinator = new EvolutionCoordinator(dataDir);
+    // Initialize code analyzer with default config
+    this.analyzer = new CodeAnalyzer({
+      maxComplexity: 10,
+      minCoverage: 80,
+      maxFunctionLength: 50
+    });
     
     this.log('Code Analysis Handler initialized');
   }
@@ -39,40 +43,45 @@ export class CodeAnalysisHandler extends BaseHandler {
         throw new Error('Directory parameter required');
       }
 
-      const maxOpportunities = args.max_opportunities || 10;
+      if (!fs.existsSync(args.directory)) {
+        throw new Error(`Directory not found: ${args.directory}`);
+      }
 
-      // Analyze codebase
+      const maxIssues = args.max_issues || 10;
+
+      // Analyze codebase using CodeAnalyzer.generateReport()
       this.log('Starting code analysis', { directory: args.directory });
       
-      const analysis = await this.evolutionCoordinator.analyzeCodebase(
-        args.directory,
-        maxOpportunities
-      );
+      const report = await this.analyzer.generateReport(args.directory);
 
       const elapsed = Date.now() - startTime;
 
       this.log('Code analysis complete', {
-        filesAnalyzed: analysis.filesAnalyzed,
-        opportunitiesFound: analysis.opportunities.length,
+        filesAnalyzed: report.summary.totalFiles,
+        issuesFound: report.issues.length,
         elapsed: `${elapsed}ms`,
       });
+
+      // Issues are already sorted by severity in generateReport()
+      const topIssues = report.issues.slice(0, maxIssues);
 
       // Return analysis results
       return {
         success: true,
         directory: args.directory,
-        files_analyzed: analysis.filesAnalyzed,
-        total_loc: analysis.totalLinesOfCode,
-        avg_complexity: analysis.avgComplexity,
-        opportunities: analysis.opportunities.slice(0, maxOpportunities).map(opp => ({
-          type: opp.type,
-          file: opp.file,
-          description: opp.description,
-          roi_score: opp.roiScore,
-          estimated_effort_hours: opp.estimatedEffortHours,
-          estimated_value: opp.estimatedValue,
-          priority: opp.priority,
+        summary: {
+          total_files: report.summary.totalFiles,
+          total_loc: report.summary.totalLOC,
+          avg_complexity: report.summary.averageComplexity,
+          maintainability_score: report.summary.maintainabilityScore,
+        },
+        issues: topIssues.map(issue => ({
+          severity: issue.severity,
+          type: issue.type,
+          file: issue.file,
+          description: issue.description,
         })),
+        recommendations: report.recommendations,
         elapsed_ms: elapsed,
       };
     } catch (error) {

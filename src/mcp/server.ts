@@ -51,14 +51,14 @@ class ShimMCPServer {
       }
     );
 
-    // Initialize all handlers
-    this.handlers = new Map([
-      ['shim_auto_checkpoint', new AutoCheckpointHandler()],
-      ['shim_check_recovery', new RecoveryCheckHandler()],
-      ['shim_monitor_signals', new SignalMonitorHandler()],
-      ['shim_analyze_code', new CodeAnalysisHandler()],
-      ['shim_session_status', new SessionStatusHandler()],
-      ['shim_force_checkpoint', new ForceCheckpointHandler()],
+    // Initialize all handlers with explicit type
+    this.handlers = new Map<string, IHandler>([
+      ['shim_auto_checkpoint', new AutoCheckpointHandler() as IHandler],
+      ['shim_check_recovery', new RecoveryCheckHandler() as IHandler],
+      ['shim_monitor_signals', new SignalMonitorHandler() as IHandler],
+      ['shim_analyze_code', new CodeAnalysisHandler() as IHandler],
+      ['shim_session_status', new SessionStatusHandler() as IHandler],
+      ['shim_force_checkpoint', new ForceCheckpointHandler() as IHandler],
     ]);
 
     this.setupHandlers();

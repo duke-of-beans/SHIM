@@ -7,88 +7,75 @@
  * Uses existing SignalCollector from Phase 1.
  */
 
-import { BaseHandler, HandlerResult } from './base-handler.js';
+import { BaseHandler, HandlerResult} from './base-handler.js';
 import { SignalCollector } from '../../core/SignalCollector.js';
 import { SignalHistoryRepository } from '../../core/SignalHistoryRepository.js';
 import path from 'path';
+import { v4 as uuidv4 } from 'uuid';
 
 export class SignalMonitorHandler extends BaseHandler {
   private signalCollector: SignalCollector;
   private signalHistory: SignalHistoryRepository;
-  private readonly RISK_THRESHOLD = 0.7;
+  private sessionId: string;
 
   constructor() {
     super();
     
-    const dataDir = path.join(process.cwd(), 'data', 'signals');
+    const dbPath = path.join(process.cwd(), 'data', 'shim.db');
     
-    // Initialize signal collection
-    this.signalHistory = new SignalHistoryRepository(
-      path.join(dataDir, 'signal-history.db')
-    );
-    this.signalCollector = new SignalCollector(this.signalHistory);
+    // Initialize signal history repository
+    this.signalHistory = new SignalHistoryRepository(dbPath);
+    this.signalHistory.initialize().catch(err => {
+      this.log('Failed to initialize signal history', { error: err });
+    });
+    
+    // Initialize signal collector with default thresholds
+    this.signalCollector = new SignalCollector();
+    
+    // Generate session ID
+    this.sessionId = uuidv4();
     
     this.log('Signal Monitor Handler initialized');
   }
 
-  async execute(args: any): Promise<HandlerResult> {
+  async execute(_args: unknown): Promise<HandlerResult> {
     try {
       const startTime = Date.now();
 
-      // Collect current signals
-      const signals = await this.signalCollector.collectSignals();
+      // Get current signals (synchronous)
+      const signals = this.signalCollector.getSignals();
       
-      // Calculate risk level (weighted average)
-      const riskLevel = this.calculateRiskLevel(signals);
+      // Save snapshot to history
+      await this.signalHistory.saveSnapshot(this.sessionId, signals);
 
       const elapsed = Date.now() - startTime;
 
       this.log('Signals monitored', {
-        riskLevel,
-        signalCount: Object.keys(signals).length,
+        crashRisk: signals.crashRisk,
+        riskFactors: signals.riskFactors,
         elapsed: `${elapsed}ms`,
       });
 
       // Determine if preemptive checkpoint needed
-      const needsCheckpoint = riskLevel > this.RISK_THRESHOLD;
+      const needsCheckpoint = signals.crashRisk === 'danger' || signals.crashRisk === 'warning';
 
-      // SILENT RESPONSE unless high risk
       return {
         success: true,
-        risk_level: riskLevel,
+        crash_risk: signals.crashRisk,
+        risk_factors: signals.riskFactors,
         needs_checkpoint: needsCheckpoint,
-        signals_detected: Object.keys(signals).length,
+        signals: {
+          context_window_usage: signals.contextWindowUsage,
+          message_count: signals.messageCount,
+          tool_call_count: signals.toolCallCount,
+          tool_calls_since_checkpoint: signals.toolCallsSinceCheckpoint,
+          session_duration_ms: signals.sessionDuration,
+          tool_failure_rate: signals.toolFailureRate,
+        },
         elapsed_ms: elapsed,
       };
     } catch (error) {
       return this.handleError(error, 'signal-monitor');
     }
-  }
-
-  /**
-   * Calculate overall risk level from signals
-   */
-  private calculateRiskLevel(signals: Record<string, any>): number {
-    // Default signal weights
-    const weights = {
-      memoryUsage: 0.3,
-      cpuUsage: 0.2,
-      toolCallRate: 0.2,
-      sessionDuration: 0.15,
-      errorRate: 0.15,
-    };
-
-    let totalRisk = 0;
-    let totalWeight = 0;
-
-    for (const [key, value] of Object.entries(signals)) {
-      const weight = weights[key as keyof typeof weights] || 0.1;
-      const risk = typeof value === 'number' ? value : 0;
-      
-      totalRisk += risk * weight;
-      totalWeight += weight;
-    }
-
-    return totalWeight > 0 ? totalRisk / totalWeight : 0;
   }
 }

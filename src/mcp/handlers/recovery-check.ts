@@ -9,50 +9,68 @@
 
 import { BaseHandler, HandlerResult } from './base-handler.js';
 import { ResumeDetector } from '../../core/ResumeDetector.js';
-import { SessionRestorer } from '../../core/SessionRestorer.js';
+import { CheckpointRepository } from '../../core/CheckpointRepository.js';
 import path from 'path';
+import { v4 as uuidv4 } from 'uuid';
+
+interface RecoveryCheckArgs {
+  session_id?: string;  // Optional: check specific session, otherwise check current
+}
 
 export class RecoveryCheckHandler extends BaseHandler {
   private resumeDetector: ResumeDetector;
-  private sessionRestorer: SessionRestorer;
+  private checkpointRepo: CheckpointRepository;
+  private sessionId: string;
 
   constructor() {
     super();
     
-    const dataDir = path.join(process.cwd(), 'data');
+    const dbPath = path.join(process.cwd(), 'data', 'shim.db');
     
-    // Initialize detectors
-    this.resumeDetector = new ResumeDetector(dataDir);
-    this.sessionRestorer = new SessionRestorer(dataDir);
+    // Initialize repository
+    this.checkpointRepo = new CheckpointRepository(dbPath);
+    this.checkpointRepo.initialize().catch(err => {
+      this.log('Failed to initialize repository', { error: err });
+    });
+    
+    // Initialize resume detector
+    this.resumeDetector = new ResumeDetector(this.checkpointRepo);
+    
+    // Generate session ID
+    this.sessionId = uuidv4();
     
     this.log('Recovery Check Handler initialized');
   }
 
-  async execute(args: any): Promise<HandlerResult> {
+  async execute(args: RecoveryCheckArgs): Promise<HandlerResult> {
     try {
       const startTime = Date.now();
 
-      // Detect incomplete session
-      const incompleteSession = await this.resumeDetector.detectIncompleteSession();
+      const sessionToCheck = args.session_id || this.sessionId;
 
-      if (!incompleteSession) {
+      // Check for resume
+      const resumeDetection = await this.resumeDetector.checkResume(sessionToCheck);
+
+      if (!resumeDetection.shouldResume || !resumeDetection.lastCheckpoint) {
         this.log('No recovery needed');
         return {
           success: true,
           recovery_available: false,
+          session_id: sessionToCheck
         };
       }
 
       // Generate resume prompt
-      const resumePrompt = await this.sessionRestorer.generateResumePrompt(
-        incompleteSession.id
+      const resumePrompt = this.resumeDetector.generateResumePrompt(
+        resumeDetection.lastCheckpoint
       );
 
       const elapsed = Date.now() - startTime;
 
       this.log('Recovery available', {
-        sessionId: incompleteSession.id,
-        timestamp: incompleteSession.timestamp,
+        sessionId: sessionToCheck,
+        checkpointId: resumeDetection.lastCheckpoint.id,
+        confidence: resumeDetection.confidence,
         elapsed: `${elapsed}ms`,
       });
 
@@ -60,10 +78,13 @@ export class RecoveryCheckHandler extends BaseHandler {
       return {
         success: true,
         recovery_available: true,
-        session_id: incompleteSession.id,
-        session_summary: resumePrompt.summary,
-        timestamp: incompleteSession.timestamp,
-        progress: incompleteSession.progress,
+        session_id: sessionToCheck,
+        checkpoint_id: resumeDetection.lastCheckpoint.id,
+        checkpoint_number: resumeDetection.lastCheckpoint.checkpointNumber,
+        interruption_reason: resumeDetection.interruptionReason,
+        time_since_interruption_ms: resumeDetection.timeSinceInterruption,
+        confidence: resumeDetection.confidence,
+        resume_prompt: resumePrompt,
         elapsed_ms: elapsed,
       };
     } catch (error) {
