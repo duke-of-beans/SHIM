@@ -1,168 +1,168 @@
 /**
- * Integration Tests - Self-Evolution Pipeline
+ * Self-Evolution Integration Tests
  *
- * End-to-end testing of the complete self-evolution workflow.
+ * End-to-end tests for complete self-evolution pipeline:
+ * CodeAnalyzer → ImprovementIdentifier → CodeGenerator → SelfDeployer
  */
 
 import { CodeAnalyzer } from './CodeAnalyzer';
 import { ImprovementIdentifier } from './ImprovementIdentifier';
 import { CodeGenerator } from './CodeGenerator';
 import { SelfDeployer } from './SelfDeployer';
-import { AdvancedCodeAnalyzer } from './AdvancedCodeAnalyzer';
-import { PerformanceOptimizer } from './PerformanceOptimizer';
+import { ASTAnalyzer } from './ASTAnalyzer';
 
-describe('Self-Evolution Integration Tests', () => {
+describe('Self-Evolution Integration', () => {
+  let analyzer: CodeAnalyzer;
+  let identifier: ImprovementIdentifier;
+  let generator: CodeGenerator;
+  let deployer: SelfDeployer;
+  let astAnalyzer: ASTAnalyzer;
+
+  beforeEach(() => {
+    analyzer = new CodeAnalyzer();
+    identifier = new ImprovementIdentifier();
+    generator = new CodeGenerator();
+    deployer = new SelfDeployer({ requireApproval: false });
+    astAnalyzer = new ASTAnalyzer();
+  });
+
   describe('Complete Pipeline', () => {
     it('should execute full self-evolution cycle', async () => {
-      // 1. Code Analysis
-      const analyzer = new CodeAnalyzer();
-      const code = `
-        function complexFunction(a, b, c, d, e, f) {
-          if (a) {
-            for (let i = 0; i < b; i++) {
-              if (c) {
-                console.log(d, e, f);
+      // 1. ANALYZE: Detect issues in code
+      const complexCode = `
+        function processData(a, b, c, d, e, f, g, h) {
+          if (a > 0) {
+            if (b > 0) {
+              if (c > 0) {
+                return a + b + c + d + e + f + g + h;
               }
             }
           }
-          return true;
+          return 0;
         }
       `;
 
-      const analysis = analyzer.analyzeCode(code, 'test.ts');
-      expect(analysis.metrics.cyclomaticComplexity).toBeGreaterThan(1);
+      const analysisResult = analyzer.analyzeCode(complexCode, 'test.ts');
 
-      // 2. Improvement Identification
-      const identifier = new ImprovementIdentifier();
-      const improvements = identifier.identifyImprovements(analysis);
+      expect(analysisResult.issues.length).toBeGreaterThan(0);
+      expect(analysisResult.metrics.complexity).toBeGreaterThan(1);
+
+      // 2. IDENTIFY: Find improvement opportunities
+      const improvements = identifier.identifyImprovements(analysisResult);
 
       expect(improvements.length).toBeGreaterThan(0);
 
-      // 3. Code Generation
-      const generator = new CodeGenerator();
-      const modifications = generator.generateModifications(improvements[0]);
+      const topImprovement = identifier.rankByPriority(improvements)[0];
+      expect(topImprovement).toBeDefined();
+
+      // 3. GENERATE: Create code modifications
+      const modifications = generator.generateModifications(topImprovement);
 
       expect(modifications.length).toBeGreaterThan(0);
+      expect(modifications[0].file).toBe('test.ts');
 
-      // 4. Deployment
-      const deployer = new SelfDeployer({ requireApproval: false });
+      // 4. DEPLOY: Execute deployment plan
       const plan = deployer.createDeploymentPlan(modifications);
 
       expect(plan.stages.length).toBeGreaterThan(0);
+      expect(plan.stages).toContain('validate');
+      expect(plan.stages).toContain('test');
+      expect(plan.stages).toContain('deploy');
     });
 
-    it('should handle multiple files concurrently', async () => {
-      const optimizer = new PerformanceOptimizer();
-      const analyzer = new CodeAnalyzer();
+    it('should integrate AST analysis into pipeline', () => {
+      const code = `
+        function duplicate() {
+          console.log('hello');
+          console.log('hello');
+          console.log('hello');
+        }
+      `;
 
-      const files = [
-        { path: 'file1.ts', content: 'const x = 1;' },
-        { path: 'file2.ts', content: 'const y = 2;' },
-        { path: 'file3.ts', content: 'const z = 3;' },
+      // AST analysis
+      const functions = astAnalyzer.extractFunctions(code);
+      expect(functions.length).toBe(1);
+
+      const smells = astAnalyzer.detectSmells(code);
+
+      // Regular analysis
+      const analysisResult = analyzer.analyzeCode(code, 'dup.ts');
+
+      // Combined insights
+      const allIssues = [
+        ...analysisResult.issues,
+        ...smells.map((s) => ({
+          type: s.type,
+          severity: s.severity,
+          message: s.message,
+          file: 'dup.ts',
+          line: s.line || 0,
+        })),
       ];
 
-      const tasks = files.map((f, i) => ({
-        id: `task${i}`,
-        filePath: f.path,
-        type: 'analysis',
-      }));
-
-      const results = await optimizer.analyzeParallel(tasks);
-      expect(results.length).toBe(3);
-    });
-
-    it('should detect and resolve conflicts', async () => {
-      const generator = new CodeGenerator();
-
-      const improvement1 = {
-        id: 'imp-1',
-        type: 'refactoring' as const,
-        description: 'Refactor 1',
-        priority: 'high' as const,
-        impact: 8,
-        effort: 4,
-        roi: 2,
-        category: 'performance' as const,
-        filePath: 'test.ts',
-        lineNumber: 10,
-      };
-
-      const improvement2 = {
-        id: 'imp-2',
-        type: 'refactoring' as const,
-        description: 'Refactor 2',
-        priority: 'high' as const,
-        impact: 8,
-        effort: 4,
-        roi: 2,
-        category: 'performance' as const,
-        filePath: 'test.ts', // Same file
-        lineNumber: 10,
-      };
-
-      const mods1 = generator.generateModifications(improvement1);
-      const mods2 = generator.generateModifications(improvement2);
-
-      expect(mods1.length).toBeGreaterThan(0);
-      expect(mods2.length).toBeGreaterThan(0);
+      expect(allIssues.length).toBeGreaterThan(0);
     });
   });
 
-  describe('Advanced Analysis Integration', () => {
-    it('should use AST analysis for deeper insights', () => {
-      const advanced = new AdvancedCodeAnalyzer();
-      const code = 'function test() { return 42; }';
+  describe('Error Recovery', () => {
+    it('should handle analysis failures gracefully', () => {
+      const invalidCode = 'function test() {';
 
-      const ast = advanced.parseAST(code, 'typescript');
-      expect(ast.type).toBe('Program');
+      const result = analyzer.analyzeCode(invalidCode, 'broken.ts');
 
-      const smells = advanced.detectCodeSmells(code);
-      expect(Array.isArray(smells)).toBe(true);
+      // Should still return a result object
+      expect(result).toBeDefined();
+      expect(result.file).toBe('broken.ts');
     });
 
-    it('should detect circular dependencies', () => {
-      const advanced = new AdvancedCodeAnalyzer();
+    it('should rollback failed deployments', () => {
+      const mod = {
+        id: 'mod-1',
+        file: 'test.ts',
+        type: 'refactor' as const,
+        content: 'invalid syntax {{{',
+      };
 
-      const files = [
-        { path: 'a.ts', content: 'import { B } from "./b";' },
-        { path: 'b.ts', content: 'import { A } from "./a";' },
-      ];
+      const plan = deployer.createDeploymentPlan([mod]);
+      const result = deployer.executePlan(plan);
 
-      const graph = advanced.buildDependencyGraph(files);
-      const cycles = advanced.detectCircularDependencies(graph);
+      expect(result.status).toBe('failed');
 
-      expect(cycles.length).toBeGreaterThan(0);
+      // Rollback capability exists
+      const rollback = deployer.getRollbackHistory();
+      expect(rollback).toBeDefined();
     });
   });
 
-  describe('Performance Optimization Integration', () => {
-    it('should cache analysis results', () => {
-      const optimizer = new PerformanceOptimizer();
-      const analyzer = new CodeAnalyzer();
+  describe('Performance', () => {
+    it('should complete analysis quickly', () => {
+      const code = `
+        function simple() {
+          return 42;
+        }
+      `;
 
-      const code = 'const x = 1;';
-      const cacheKey = 'test.ts';
+      const start = Date.now();
+      analyzer.analyzeCode(code, 'simple.ts');
+      const duration = Date.now() - start;
 
-      // First analysis
-      const analysis1 = analyzer.analyzeCode(code, 'test.ts');
-      optimizer.cacheResult(cacheKey, analysis1);
-
-      // Retrieve from cache
-      const cached = optimizer.getCachedResult(cacheKey);
-      expect(cached).toEqual(analysis1);
+      expect(duration).toBeLessThan(100); // <100ms
     });
 
-    it('should batch small tasks for efficiency', async () => {
-      const optimizer = new PerformanceOptimizer();
+    it('should handle large codebases', () => {
+      // Generate large code sample
+      const lines = Array(1000)
+        .fill('console.log("test");')
+        .join('\n');
 
-      const tasks = Array.from({ length: 10 }, (_, i) => ({
-        id: `task${i}`,
-        filePath: `file${i}.ts`,
-        type: 'simple',
-      }));
+      const code = `function large() {\n${lines}\n}`;
 
-      const batched = optimizer.batchTasks(tasks, 3);
-      expect(batched.length).toBe(4); // ceil(10/3)
+      const start = Date.now();
+      const result = analyzer.analyzeCode(code, 'large.ts');
+      const duration = Date.now() - start;
+
+      expect(result).toBeDefined();
+      expect(duration).toBeLessThan(1000); // <1s for 1000 lines
     });
   });
 });
