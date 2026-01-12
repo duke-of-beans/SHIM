@@ -4,6 +4,9 @@
   "description": "Session Handling & Intelligent Management for Claude Desktop",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "bin": {
+    "shim": "./bin/shim-cli.js"
+  },
   "scripts": {
     "build": "tsc",
     "watch": "tsc --watch",
@@ -14,7 +17,11 @@
     "format": "prettier --write \"src/**/*.ts\"",
     "mcp:start": "node dist/mcp/server.js",
     "db:migrate": "node dist/database/migrate.js",
-    "metrics:start": "node dist/analytics/metrics-server.js"
+    "metrics:start": "node dist/analytics/metrics-server.js",
+    "evolve": "npm run build && node dist/activate.js",
+    "evolve:src": "npm run build && node dist/activate.js ./src",
+    "evolve:safe": "npm run build && node dist/activate.js",
+    "evolve:auto": "npm run build && node dist/activate.js --auto"
   },
   "keywords": [
     "claude",
