@@ -1,0 +1,110 @@
+/**
+ * PerformanceService
+ * 
+ * Handles performance profiling and benchmarking operations:
+ * - Start/stop profiling
+ * - Get profiling results
+ * - Run benchmarks
+ */
+
+import { PerformanceBenchmark } from '../../../src/performance/PerformanceBenchmark.js';
+import { PerformanceProfiler } from '../../../src/performance/PerformanceProfiler.js';
+
+export class PerformanceService {
+  private profiler?: PerformanceProfiler;
+  private benchmark?: PerformanceBenchmark;
+
+  constructor() {}
+
+  async startProfiling(target: string, options?: any): Promise<any> {
+    try {
+      if (!this.profiler) {
+        this.profiler = new PerformanceProfiler();
+      }
+      
+      await this.profiler.start(target, options);
+      
+      return {
+        success: true,
+        target,
+        message: 'Profiling started successfully'
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to start profiling'
+      };
+    }
+  }
+
+  async getProfileResults(): Promise<any> {
+    try {
+      if (!this.profiler) {
+        return {
+          success: true,
+          results: null,
+          message: 'No profiling data available'
+        };
+      }
+      
+      const results = await this.profiler.getResults();
+      
+      return {
+        success: true,
+        results
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to get profile results'
+      };
+    }
+  }
+
+  async benchmarkComponent(componentName: string, iterations: number = 1000): Promise<any> {
+    try {
+      if (!this.benchmark) {
+        this.benchmark = new PerformanceBenchmark();
+      }
+      
+      const results = await this.benchmark.run(componentName, iterations);
+      
+      return {
+        success: true,
+        componentName,
+        iterations,
+        results
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to benchmark component'
+      };
+    }
+  }
+
+  async getBenchmarkResults(): Promise<any> {
+    try {
+      if (!this.benchmark) {
+        return {
+          success: true,
+          results: [],
+          message: 'No benchmark data available'
+        };
+      }
+      
+      const results = await this.benchmark.getHistory();
+      
+      return {
+        success: true,
+        results,
+        count: results.length
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to get benchmark results'
+      };
+    }
+  }
+}

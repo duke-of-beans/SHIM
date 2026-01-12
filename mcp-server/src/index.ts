@@ -26,11 +26,18 @@ import { SignalService } from './services/signal-service.js';
 import { CodeAnalysisService } from './services/code-analysis-service.js';
 import { SessionService } from './services/session-service.js';
 
-// New services (52 additional tools)
+// New services (98 additional tools)
 import { AnalyticsService } from './services/AnalyticsService.js';
 import { EvolutionService } from './services/EvolutionService.js';
 import { AutonomyService } from './services/AutonomyService.js';
 import { CoordinationService } from './services/CoordinationService.js';
+import { InfrastructureService } from './services/InfrastructureService.js';
+import { ModelsService } from './services/ModelsService.js';
+import { MLService } from './services/MLService.js';
+import { MonitoringService } from './services/MonitoringService.js';
+import { PerformanceService } from './services/PerformanceService.js';
+import { ConfigurationService } from './services/ConfigurationService.js';
+import { LoggingService } from './services/LoggingService.js';
 
 /**
  * Initialize SHIM MCP Server
@@ -50,6 +57,13 @@ class ShimMcpServer {
   private evolution: EvolutionService;
   private autonomy: AutonomyService;
   private coordination: CoordinationService;
+  private infrastructure: InfrastructureService;
+  private models: ModelsService;
+  private ml: MLService;
+  private monitoring: MonitoringService;
+  private performance: PerformanceService;
+  private configuration: ConfigurationService;
+  private logging: LoggingService;
 
   constructor() {
     this.server = new Server(
@@ -76,12 +90,19 @@ class ShimMcpServer {
     this.evolution = new EvolutionService();
     this.autonomy = new AutonomyService();
     this.coordination = new CoordinationService();
+    this.infrastructure = new InfrastructureService();
+    this.models = new ModelsService();
+    this.ml = new MLService();
+    this.monitoring = new MonitoringService();
+    this.performance = new PerformanceService();
+    this.configuration = new ConfigurationService();
+    this.logging = new LoggingService();
 
     this.setupHandlers();
   }
 
   private setupHandlers(): void {
-    // List available tools (58 total: 6 core + 52 intelligence)
+    // List available tools (98 total: 6 core + 92 intelligence)
     this.server.setRequestHandler(ListToolsRequestSchema, async () => ({
       tools: [
         // CORE TOOLS (6) - Crash Prevention
@@ -678,6 +699,409 @@ class ShimMcpServer {
             },
             required: ['task_id']
           }
+        },
+        
+        // INFRASTRUCTURE TOOLS (19)
+        {
+          name: 'shim_initialize_redis',
+          description: 'Initialize Redis message bus',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              host: { type: 'string', description: 'Redis host' },
+              port: { type: 'number', description: 'Redis port' }
+            },
+            additionalProperties: false
+          }
+        },
+        {
+          name: 'shim_publish_message',
+          description: 'Publish message to channel',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              channel: { type: 'string', description: 'Channel name' },
+              message: { type: 'object', description: 'Message to publish' }
+            },
+            required: ['channel', 'message']
+          }
+        },
+        {
+          name: 'shim_subscribe_channel',
+          description: 'Subscribe to message channel',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              channel: { type: 'string', description: 'Channel name' }
+            },
+            required: ['channel']
+          }
+        },
+        {
+          name: 'shim_get_bus_status',
+          description: 'Get message bus status',
+          inputSchema: { type: 'object', properties: {}, additionalProperties: false }
+        },
+        {
+          name: 'shim_register_shim_worker',
+          description: 'Register worker in registry',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              worker_id: { type: 'string', description: 'Worker ID' },
+              metadata: { type: 'object', description: 'Worker metadata' }
+            },
+            required: ['worker_id', 'metadata']
+          }
+        },
+        {
+          name: 'shim_list_workers',
+          description: 'List all registered workers',
+          inputSchema: { type: 'object', properties: {}, additionalProperties: false }
+        },
+        {
+          name: 'shim_get_worker_health',
+          description: 'Get worker health status',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              worker_id: { type: 'string', description: 'Worker ID' }
+            },
+            required: ['worker_id']
+          }
+        },
+        {
+          name: 'shim_save_state',
+          description: 'Save state to state manager',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              key: { type: 'string', description: 'State key' },
+              state: { type: 'object', description: 'State data' }
+            },
+            required: ['key', 'state']
+          }
+        },
+        {
+          name: 'shim_load_state',
+          description: 'Load state from state manager',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              key: { type: 'string', description: 'State key' }
+            },
+            required: ['key']
+          }
+        },
+        {
+          name: 'shim_clear_state',
+          description: 'Clear state from state manager',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              key: { type: 'string', description: 'State key' }
+            },
+            required: ['key']
+          }
+        },
+        {
+          name: 'shim_list_checkpoints',
+          description: 'List all checkpoints',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              filters: { type: 'object', description: 'Filter criteria' }
+            },
+            additionalProperties: false
+          }
+        },
+        {
+          name: 'shim_restore_checkpoint',
+          description: 'Restore specific checkpoint',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              checkpoint_id: { type: 'string', description: 'Checkpoint ID' }
+            },
+            required: ['checkpoint_id']
+          }
+        },
+        {
+          name: 'shim_delete_checkpoint',
+          description: 'Delete specific checkpoint',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              checkpoint_id: { type: 'string', description: 'Checkpoint ID' }
+            },
+            required: ['checkpoint_id']
+          }
+        },
+        {
+          name: 'shim_get_signal_history',
+          description: 'Get signal history with filters',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              filters: { type: 'object', description: 'Filter criteria' }
+            },
+            additionalProperties: false
+          }
+        },
+        {
+          name: 'shim_analyze_signal_patterns',
+          description: 'Analyze patterns in signal history',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              options: { type: 'object', description: 'Analysis options' }
+            },
+            additionalProperties: false
+          }
+        },
+        {
+          name: 'shim_clear_signals',
+          description: 'Clear signal history',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              before_date: { type: 'string', description: 'Clear signals before date' }
+            },
+            additionalProperties: false
+          }
+        },
+        {
+          name: 'shim_query_database',
+          description: 'Query database directly',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              query: { type: 'string', description: 'SQL query' },
+              params: { type: 'array', description: 'Query parameters' }
+            },
+            required: ['query']
+          }
+        },
+        {
+          name: 'shim_backup_database',
+          description: 'Backup database to file',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              path: { type: 'string', description: 'Backup file path' }
+            },
+            required: ['path']
+          }
+        },
+        {
+          name: 'shim_optimize_database',
+          description: 'Optimize database performance',
+          inputSchema: { type: 'object', properties: {}, additionalProperties: false }
+        },
+        
+        // MODELS TOOLS (5)
+        {
+          name: 'shim_list_models',
+          description: 'List all available models',
+          inputSchema: { type: 'object', properties: {}, additionalProperties: false }
+        },
+        {
+          name: 'shim_get_model_info',
+          description: 'Get model information',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              model_id: { type: 'string', description: 'Model ID' }
+            },
+            required: ['model_id']
+          }
+        },
+        {
+          name: 'shim_load_model',
+          description: 'Load model into memory',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              model_id: { type: 'string', description: 'Model ID' }
+            },
+            required: ['model_id']
+          }
+        },
+        {
+          name: 'shim_unload_model',
+          description: 'Unload model from memory',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              model_id: { type: 'string', description: 'Model ID' }
+            },
+            required: ['model_id']
+          }
+        },
+        {
+          name: 'shim_get_model_predictions',
+          description: 'Get model predictions',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              model_id: { type: 'string', description: 'Model ID' },
+              input: { type: 'object', description: 'Input data' }
+            },
+            required: ['model_id', 'input']
+          }
+        },
+        
+        // ML TOOLS (3)
+        {
+          name: 'shim_train_predictor',
+          description: 'Train ML predictor',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              training_data: { type: 'object', description: 'Training data' },
+              config: { type: 'object', description: 'Training configuration' }
+            },
+            required: ['training_data']
+          }
+        },
+        {
+          name: 'shim_get_training_status',
+          description: 'Get training status',
+          inputSchema: { type: 'object', properties: {}, additionalProperties: false }
+        },
+        {
+          name: 'shim_evaluate_predictor',
+          description: 'Evaluate predictor performance',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              test_data: { type: 'object', description: 'Test data' }
+            },
+            required: ['test_data']
+          }
+        },
+        
+        // MONITORING TOOLS (2)
+        {
+          name: 'shim_start_monitoring',
+          description: 'Start health monitoring',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              config: { type: 'object', description: 'Monitoring configuration' }
+            },
+            additionalProperties: false
+          }
+        },
+        {
+          name: 'shim_get_monitor_status',
+          description: 'Get monitoring status',
+          inputSchema: { type: 'object', properties: {}, additionalProperties: false }
+        },
+        
+        // PERFORMANCE TOOLS (4)
+        {
+          name: 'shim_start_profiling',
+          description: 'Start performance profiling',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              target: { type: 'string', description: 'Profiling target' },
+              options: { type: 'object', description: 'Profiling options' }
+            },
+            required: ['target']
+          }
+        },
+        {
+          name: 'shim_get_profile_results',
+          description: 'Get profiling results',
+          inputSchema: { type: 'object', properties: {}, additionalProperties: false }
+        },
+        {
+          name: 'shim_benchmark_component',
+          description: 'Benchmark component performance',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              component_name: { type: 'string', description: 'Component name' },
+              iterations: { type: 'number', description: 'Number of iterations' }
+            },
+            required: ['component_name']
+          }
+        },
+        {
+          name: 'shim_get_benchmark_results',
+          description: 'Get benchmark results',
+          inputSchema: { type: 'object', properties: {}, additionalProperties: false }
+        },
+
+        // CONFIGURATION TOOLS (4)
+        {
+          name: 'shim_get_config',
+          description: 'Get SHIM configuration',
+          inputSchema: { type: 'object', properties: {}, additionalProperties: false }
+        },
+        {
+          name: 'shim_update_config',
+          description: 'Update SHIM configuration',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              updates: { type: 'object', description: 'Configuration updates' }
+            },
+            required: ['updates']
+          }
+        },
+        {
+          name: 'shim_validate_config',
+          description: 'Validate configuration',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              config: { type: 'object', description: 'Configuration to validate' }
+            },
+            required: ['config']
+          }
+        },
+        {
+          name: 'shim_reset_config',
+          description: 'Reset configuration to defaults',
+          inputSchema: { type: 'object', properties: {}, additionalProperties: false }
+        },
+
+        // LOGGING TOOLS (3)
+        {
+          name: 'shim_get_logs',
+          description: 'Get log entries',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              filters: { type: 'object', description: 'Optional filters (level, limit, since)' }
+            }
+          }
+        },
+        {
+          name: 'shim_set_log_level',
+          description: 'Set logging level',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              level: { type: 'string', description: 'Log level (debug, info, warn, error)' }
+            },
+            required: ['level']
+          }
+        },
+        {
+          name: 'shim_export_logs',
+          description: 'Export logs to file',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              path: { type: 'string', description: 'Export file path' },
+              filters: { type: 'object', description: 'Optional filters' }
+            },
+            required: ['path']
+          }
         }
       ]
     }));
@@ -774,6 +1198,60 @@ class ShimMcpServer {
       case 'shim_distribute_task': return await this.handleDistributeTask(args);
       case 'shim_get_distribution_status': return await this.handleGetDistributionStatus(args);
       case 'shim_cancel_distribution': return await this.handleCancelDistribution(args);
+
+      // Infrastructure tools (19)
+      case 'shim_initialize_redis': return await this.handleInitializeRedis(args);
+      case 'shim_publish_message': return await this.handlePublishMessage(args);
+      case 'shim_subscribe_channel': return await this.handleSubscribeChannel(args);
+      case 'shim_get_bus_status': return await this.handleGetBusStatus();
+      case 'shim_register_shim_worker': return await this.handleRegisterShimWorker(args);
+      case 'shim_list_workers': return await this.handleListWorkers();
+      case 'shim_get_worker_health': return await this.handleGetWorkerHealth(args);
+      case 'shim_save_state': return await this.handleSaveState(args);
+      case 'shim_load_state': return await this.handleLoadState(args);
+      case 'shim_clear_state': return await this.handleClearState(args);
+      case 'shim_list_checkpoints': return await this.handleListCheckpoints(args);
+      case 'shim_restore_checkpoint': return await this.handleRestoreCheckpoint(args);
+      case 'shim_delete_checkpoint': return await this.handleDeleteCheckpoint(args);
+      case 'shim_get_signal_history': return await this.handleGetSignalHistory(args);
+      case 'shim_analyze_signal_patterns': return await this.handleAnalyzeSignalPatterns(args);
+      case 'shim_clear_signals': return await this.handleClearSignals(args);
+      case 'shim_query_database': return await this.handleQueryDatabase(args);
+      case 'shim_backup_database': return await this.handleBackupDatabase(args);
+      case 'shim_optimize_database': return await this.handleOptimizeDatabase();
+
+      // Models tools (5)
+      case 'shim_list_models': return await this.handleListModels();
+      case 'shim_get_model_info': return await this.handleGetModelInfo(args);
+      case 'shim_load_model': return await this.handleLoadModel(args);
+      case 'shim_unload_model': return await this.handleUnloadModel(args);
+      case 'shim_get_model_predictions': return await this.handleGetModelPredictions(args);
+
+      // ML tools (3)
+      case 'shim_train_predictor': return await this.handleTrainPredictor(args);
+      case 'shim_get_training_status': return await this.handleGetTrainingStatus();
+      case 'shim_evaluate_predictor': return await this.handleEvaluatePredictor(args);
+
+      // Monitoring tools (2)
+      case 'shim_start_monitoring': return await this.handleStartMonitoring(args);
+      case 'shim_get_monitor_status': return await this.handleGetMonitorStatus();
+
+      // Performance tools (4)
+      case 'shim_start_profiling': return await this.handleStartProfiling(args);
+      case 'shim_get_profile_results': return await this.handleGetProfileResults();
+      case 'shim_benchmark_component': return await this.handleBenchmarkComponent(args);
+      case 'shim_get_benchmark_results': return await this.handleGetBenchmarkResults();
+
+      // Configuration tools (4)
+      case 'shim_get_config': return await this.handleGetConfig();
+      case 'shim_update_config': return await this.handleUpdateConfig(args);
+      case 'shim_validate_config': return await this.handleValidateConfig(args);
+      case 'shim_reset_config': return await this.handleResetConfig();
+
+      // Logging tools (3)
+      case 'shim_get_logs': return await this.handleGetLogs(args);
+      case 'shim_set_log_level': return await this.handleSetLogLevel(args);
+      case 'shim_export_logs': return await this.handleExportLogs(args);
 
       default:
         throw new McpError(ErrorCode.MethodNotFound, `Unknown tool: ${toolName}`);
@@ -1193,6 +1671,221 @@ class ShimMcpServer {
     return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
   }
 
+  // ===== INFRASTRUCTURE HANDLERS (19) =====
+
+  private async handleInitializeRedis(args: any) {
+    const result = await this.infrastructure.initializeRedis(args);
+    return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+  }
+
+  private async handlePublishMessage(args: any) {
+    const result = await this.infrastructure.publishMessage(args.channel, args.message);
+    return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+  }
+
+  private async handleSubscribeChannel(args: any) {
+    const result = await this.infrastructure.subscribeChannel(args.channel);
+    return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+  }
+
+  private async handleGetBusStatus() {
+    const result = await this.infrastructure.getBusStatus();
+    return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+  }
+
+  private async handleRegisterShimWorker(args: any) {
+    const result = await this.infrastructure.registerWorker(args.worker_id, args.metadata);
+    return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+  }
+
+  private async handleListWorkers() {
+    const result = await this.infrastructure.listWorkers();
+    return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+  }
+
+  private async handleGetWorkerHealth(args: any) {
+    const result = await this.infrastructure.getWorkerHealth(args.worker_id);
+    return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+  }
+
+  private async handleSaveState(args: any) {
+    const result = await this.infrastructure.saveState(args.key, args.state);
+    return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+  }
+
+  private async handleLoadState(args: any) {
+    const result = await this.infrastructure.loadState(args.key);
+    return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+  }
+
+  private async handleClearState(args: any) {
+    const result = await this.infrastructure.clearState(args.key);
+    return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+  }
+
+  private async handleListCheckpoints(args: any) {
+    const result = await this.infrastructure.listCheckpoints(args.filters);
+    return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+  }
+
+  private async handleRestoreCheckpoint(args: any) {
+    const result = await this.infrastructure.restoreCheckpoint(args.checkpoint_id);
+    return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+  }
+
+  private async handleDeleteCheckpoint(args: any) {
+    const result = await this.infrastructure.deleteCheckpoint(args.checkpoint_id);
+    return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+  }
+
+  private async handleGetSignalHistory(args: any) {
+    const result = await this.infrastructure.getSignalHistory(args.filters);
+    return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+  }
+
+  private async handleAnalyzeSignalPatterns(args: any) {
+    const result = await this.infrastructure.analyzeSignalPatterns(args.options);
+    return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+  }
+
+  private async handleClearSignals(args: any) {
+    const beforeDate = args.before_date ? new Date(args.before_date) : undefined;
+    const result = await this.infrastructure.clearSignals(beforeDate);
+    return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+  }
+
+  private async handleQueryDatabase(args: any) {
+    const result = await this.infrastructure.queryDatabase(args.query, args.params);
+    return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+  }
+
+  private async handleBackupDatabase(args: any) {
+    const result = await this.infrastructure.backupDatabase(args.path);
+    return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+  }
+
+  private async handleOptimizeDatabase() {
+    const result = await this.infrastructure.optimizeDatabase();
+    return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+  }
+
+  // ===== MODELS HANDLERS (5) =====
+
+  private async handleListModels() {
+    const result = await this.models.listModels();
+    return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+  }
+
+  private async handleGetModelInfo(args: any) {
+    const result = await this.models.getModelInfo(args.model_id);
+    return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+  }
+
+  private async handleLoadModel(args: any) {
+    const result = await this.models.loadModel(args.model_id);
+    return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+  }
+
+  private async handleUnloadModel(args: any) {
+    const result = await this.models.unloadModel(args.model_id);
+    return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+  }
+
+  private async handleGetModelPredictions(args: any) {
+    const result = await this.models.getModelPredictions(args.model_id, args.input);
+    return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+  }
+
+  // ===== ML HANDLERS (3) =====
+
+  private async handleTrainPredictor(args: any) {
+    const result = await this.ml.trainPredictor(args.training_data, args.config);
+    return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+  }
+
+  private async handleGetTrainingStatus() {
+    const result = await this.ml.getTrainingStatus();
+    return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+  }
+
+  private async handleEvaluatePredictor(args: any) {
+    const result = await this.ml.evaluatePredictor(args.test_data);
+    return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+  }
+
+  // ===== MONITORING HANDLERS (2) =====
+
+  private async handleStartMonitoring(args: any) {
+    const result = await this.monitoring.startMonitoring(args.config);
+    return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+  }
+
+  private async handleGetMonitorStatus() {
+    const result = await this.monitoring.getMonitorStatus();
+    return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+  }
+
+  // ===== PERFORMANCE HANDLERS (4) =====
+
+  private async handleStartProfiling(args: any) {
+    const result = await this.performance.startProfiling(args.target, args.options);
+    return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+  }
+
+  private async handleGetProfileResults() {
+    const result = await this.performance.getProfileResults();
+    return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+  }
+
+  private async handleBenchmarkComponent(args: any) {
+    const result = await this.performance.benchmarkComponent(args.component_name, args.iterations);
+    return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+  }
+
+  private async handleGetBenchmarkResults() {
+    const result = await this.performance.getBenchmarkResults();
+    return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+  }
+
+  // ===== CONFIGURATION HANDLERS (4) =====
+
+  private async handleGetConfig() {
+    const result = await this.configuration.getConfig();
+    return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+  }
+
+  private async handleUpdateConfig(args: any) {
+    const result = await this.configuration.updateConfig(args.updates);
+    return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+  }
+
+  private async handleValidateConfig(args: any) {
+    const result = await this.configuration.validateConfig(args.config);
+    return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+  }
+
+  private async handleResetConfig() {
+    const result = await this.configuration.resetConfig();
+    return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+  }
+
+  // ===== LOGGING HANDLERS (3) =====
+
+  private async handleGetLogs(args: any) {
+    const result = await this.logging.getLogs(args.filters);
+    return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+  }
+
+  private async handleSetLogLevel(args: any) {
+    const result = await this.logging.setLogLevel(args.level);
+    return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+  }
+
+  private async handleExportLogs(args: any) {
+    const result = await this.logging.exportLogs(args.path, args.filters);
+    return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+  }
+
   async start(): Promise<void> {
     const transport = new StdioServerTransport();
     await this.server.connect(transport);
@@ -1200,7 +1893,7 @@ class ShimMcpServer {
     // Log to stderr (stdout is for MCP protocol)
     console.error('🚀 SHIM MCP Server v2.0 running');
     console.error('📍 Data directory: D:\\SHIM\\data');
-    console.error('✅ Complete API surface: 58 tools');
+    console.error('✅ Complete API surface: 98 tools (100% coverage)');
     console.error('🎯 Crash prevention + Full intelligence suite');
   }
 }
