@@ -9,9 +9,8 @@
 
 import { BaseHandler, HandlerResult } from './base-handler.js';
 import { CheckpointManager } from '../../core/CheckpointManager.js';
-import { CheckpointRepository } from '../../core/CheckpointRepository.js';
 import { SignalCollector } from '../../core/SignalCollector.js';
-import path from 'path';
+import { getCheckpointRepository } from '../shared-state.js';
 import { v4 as uuidv4 } from 'uuid';
 
 interface AutoCheckpointArgs {
@@ -29,13 +28,8 @@ export class AutoCheckpointHandler extends BaseHandler {
   constructor() {
     super();
     
-    const dbPath = path.join(process.cwd(), 'data', 'shim.db');
-    
-    // Initialize repository
-    const repository = new CheckpointRepository(dbPath);
-    repository.initialize().catch(err => {
-      this.log('Failed to initialize repository', { error: err });
-    });
+    // Use shared repository (already initialized by server)
+    const repository = getCheckpointRepository();
     
     // Initialize signal collector
     const signalCollector = new SignalCollector();

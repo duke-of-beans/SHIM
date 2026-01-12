@@ -9,8 +9,7 @@
 
 import { BaseHandler, HandlerResult } from './base-handler.js';
 import { ResumeDetector } from '../../core/ResumeDetector.js';
-import { CheckpointRepository } from '../../core/CheckpointRepository.js';
-import path from 'path';
+import { getCheckpointRepository } from '../shared-state.js';
 import { v4 as uuidv4 } from 'uuid';
 
 interface RecoveryCheckArgs {
@@ -19,22 +18,16 @@ interface RecoveryCheckArgs {
 
 export class RecoveryCheckHandler extends BaseHandler {
   private resumeDetector: ResumeDetector;
-  private checkpointRepo: CheckpointRepository;
   private sessionId: string;
 
   constructor() {
     super();
     
-    const dbPath = path.join(process.cwd(), 'data', 'shim.db');
-    
-    // Initialize repository
-    this.checkpointRepo = new CheckpointRepository(dbPath);
-    this.checkpointRepo.initialize().catch(err => {
-      this.log('Failed to initialize repository', { error: err });
-    });
+    // Use shared repository (already initialized by server)
+    const checkpointRepo = getCheckpointRepository();
     
     // Initialize resume detector
-    this.resumeDetector = new ResumeDetector(this.checkpointRepo);
+    this.resumeDetector = new ResumeDetector(checkpointRepo);
     
     // Generate session ID
     this.sessionId = uuidv4();

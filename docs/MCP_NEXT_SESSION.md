@@ -1,317 +1,320 @@
-# MCP Server - Next Session Action Plan
+# MCP Next Session Plan - Stage 3
 
-**Goal:** Fix API mismatches and complete MCP server Stage 1
-
----
-
-## 🎯 SESSION OBJECTIVES
-
-1. **Read Core Implementations** - Understand actual APIs
-2. **Fix Handler Calls** - Update to use correct methods
-3. **Complete TypeScript Build** - Remove MCP exclusion
-4. **Test MCP Server** - Verify tools work via MCP protocol
-
-**Estimated Time:** 2-4 hours
+**Updated:** January 12, 2026, 9:45 AM  
+**Current Status:** Stage 2 Complete ✅  
+**Next Phase:** Stage 3 - Testing & Integration
 
 ---
 
-## 📚 STEP 1: API DISCOVERY (30 min)
+## ✅ STAGE 2 RECAP - COMPLETED
 
-### Read Core Class Implementations
-Execute in order:
+**Duration:** ~45 minutes  
+**Result:** Clean build, all API mismatches fixed
 
-```bash
-# CheckpointManager - Constructor and methods
-Desktop Commander:read_file({
-  path: "D:\\SHIM\\src\\core\\CheckpointManager.ts"
-})
+**What was completed:**
+- ✅ Discovered actual core class APIs
+- ✅ Fixed all 20+ handler API mismatches
+- ✅ Re-integrated MCP handlers into build
+- ✅ Zero TypeScript errors
+- ✅ MCP server starts successfully
+- ✅ Created comprehensive API documentation
 
-# CheckpointRepository - Query methods
-Desktop Commander:read_file({
-  path: "D:\\SHIM\\src\\core\\CheckpointRepository.ts"
-})
-
-# ResumeDetector - Detection methods
-Desktop Commander:read_file({
-  path: "D:\\SHIM\\src\\core\\ResumeDetector.ts"
-})
-
-# SessionRestorer - Restoration methods
-Desktop Commander:read_file({
-  path: "D:\\SHIM\\src\\core\\SessionRestorer.ts"
-})
-
-# SignalCollector - Collection methods
-Desktop Commander:read_file({
-  path: "D:\\SHIM\\src\\core\\SignalCollector.ts"
-})
-
-# SignalHistoryRepository - Query methods
-Desktop Commander:read_file({
-  path: "D:\\SHIM\\src\\core\\SignalHistoryRepository.ts"
-})
-
-# EvolutionCoordinator - Analysis methods
-Desktop Commander:read_file({
-  path: "D:\\SHIM\\src\\evolution\\EvolutionCoordinator.ts"
-})
-```
-
-### Document Findings
-Create mapping:
-- Handler expectation → Actual API
-- Missing methods → Need to add vs rename
-- Type mismatches → Transformation needed
+**Files modified:** 9 (6 handlers + server + tsconfig + API docs)  
+**Commit:** 3449a5f
 
 ---
 
-## 🔧 STEP 2: FIX HANDLERS (60-90 min)
+## 🎯 STAGE 3 PLAN - TESTING & INTEGRATION
 
-### Fix Order (Dependency-Based)
-1. **base-handler.ts** - Foundation
-2. **force-checkpoint.ts** - Simplest handler
-3. **auto-checkpoint.ts** - Similar to force-checkpoint
-4. **signal-monitor.ts** - Signal-related
-5. **recovery-check.ts** - Resume detection
-6. **session-status.ts** - Combines multiple APIs
-7. **code-analysis.ts** - Evolution API
-
-### Fix Pattern for Each Handler
-```typescript
-// BEFORE (example from auto-checkpoint.ts)
-const manager = new CheckpointManager(projectPath);
-const checkpoint = await manager.createCheckpoint(context);
-
-// AFTER (actual API)
-const manager = new CheckpointManager({
-  repository: new CheckpointRepository(dbPath),
-  maxCheckpoints: 100
-});
-const checkpoint = await manager.createCheckpoint({
-  sessionId: context.sessionId,
-  operation: context.operation,
-  context: { ...context }
-});
-```
-
-### Systematic Approach
-For each handler:
-1. Identify all API calls
-2. Check actual signatures from Step 1
-3. Update constructor calls
-4. Update method calls
-5. Fix type transformations
-6. Build and verify
+**Goal:** Validate MCP server works end-to-end  
+**Estimated Time:** 90 minutes  
+**Priority:** Database setup → Configuration → Tool testing
 
 ---
 
-## 🧪 STEP 3: INTEGRATION (45 min)
+### STEP 1: Database Setup (15 min)
 
-### Remove MCP Exclusion
-```typescript
-// tsconfig.json
-{
-  "exclude": [
-    "node_modules",
-    "dist",
-    "**/*.test.ts",
-    "**/*.spec.ts"
-    // REMOVE: "src/mcp/**/*"
-  ]
-}
-```
+**Objective:** Create SQLite database and verify connections
 
-### Build and Fix Remaining Errors
-```bash
-# Build
-cd D:\SHIM
-npm run build 2>&1 | Select-String "error TS"
+**Tasks:**
+1. Create directory structure
+   ```bash
+   mkdir D:\SHIM\data
+   ```
 
-# If errors:
-# - Read error details
-# - Fix one by one
-# - Rebuild after each fix
-# - Iterate until zero errors
-```
+2. Initialize database (will happen automatically on first handler use)
+   - CheckpointRepository.initialize() creates tables
+   - SignalHistoryRepository.initialize() creates tables
+   - Verify schema creation
 
-### Verify Compilation Success
-```bash
-# Check dist/mcp exists
-Desktop Commander:list_directory({
-  path: "D:\\SHIM\\dist\\mcp",
-  depth: 2
-})
+3. Test database connections
+   ```typescript
+   // Quick verification script
+   const repo = new CheckpointRepository('D:/SHIM/data/shim.db');
+   await repo.initialize();
+   console.log('✅ Database initialized');
+   ```
 
-# Should see:
-# - server.js, server.d.ts
-# - handlers/*.js, handlers/*.d.ts
-```
+**Expected outcome:**
+- `D:\SHIM\data\shim.db` created
+- Tables: checkpoints, signal_history, resume_events
+- All indexes created
+- No connection errors
 
 ---
 
-## 🧪 STEP 4: BASIC TESTING (30 min)
+### STEP 2: MCP Configuration (15 min)
 
-### Test MCP Server Startup
-```bash
-# Start server
-cd D:\SHIM
-node dist/mcp/server.js
+**Objective:** Configure Claude Desktop to load SHIM MCP server
+
+**Tasks:**
+1. Update Claude Desktop config
+   ```json
+   // Location: %APPDATA%\Claude\claude_desktop_config.json
+   {
+     "mcpServers": {
+       "shim": {
+         "command": "node",
+         "args": ["D:/SHIM/dist/mcp/server.js"],
+         "env": {}
+       }
+     }
+   }
+   ```
+
+2. Restart Claude Desktop
+
+3. Verify MCP server shows in Tools menu
+
+**Expected outcome:**
+- SHIM MCP appears in Claude Desktop
+- 6 tools visible: shim_auto_checkpoint, shim_check_recovery, etc.
+- No startup errors in logs
+
+---
+
+### STEP 3: Tool Testing (45 min)
+
+**Objective:** Test each tool via Claude interface
+
+#### Test 1: shim_session_status (5 min)
+**Purpose:** Verify basic server communication
+
+**Test:**
+```
+User: "Use SHIM to check session status"
+Expected:
+- Returns session info
+- Shows checkpoint count (0 initially)
+- Shows session duration
+- No errors
 ```
 
-Expected output:
+#### Test 2: shim_force_checkpoint (10 min)
+**Purpose:** Verify checkpoint creation
+
+**Test:**
 ```
-SHIM MCP Server listening on stdio
-Tools registered: [list of 6 tools]
-Ready for requests
+User: "Create a manual checkpoint with SHIM"
+Expected:
+- Creates checkpoint in database
+- Returns checkpoint ID
+- Checkpoint number = 1
+- Verify with session_status (count = 1)
 ```
 
-### Test Tool Discovery
-Use MCP inspector or direct protocol test:
-```json
-{
-  "jsonrpc": "2.0",
-  "id": 1,
-  "method": "tools/list"
-}
+#### Test 3: shim_auto_checkpoint (10 min)
+**Purpose:** Verify automatic checkpointing
+
+**Test:**
+```
+User: "Simulate auto-checkpoint: working on Phase 3 testing, 50% complete"
+Expected:
+- Evaluates if checkpoint needed
+- Creates checkpoint if criteria met
+- Returns checkpoint_created boolean
+- Minimal output (silent operation)
 ```
 
-Expected response:
-```json
-{
-  "tools": [
-    { "name": "auto_checkpoint", ... },
-    { "name": "force_checkpoint", ... },
-    { "name": "check_resume", ... },
-    { "name": "session_status", ... },
-    { "name": "signal_monitor", ... },
-    { "name": "analyze_code", ... }
-  ]
-}
+#### Test 4: shim_monitor_signals (10 min)
+**Purpose:** Verify signal tracking
+
+**Test:**
+```
+User: "Monitor crash signals"
+Expected:
+- Returns current crash risk (safe/warning/danger)
+- Shows risk factors if any
+- Provides signal metrics
+- Saves snapshot to history
+```
+
+#### Test 5: shim_check_recovery (5 min)
+**Purpose:** Verify resume detection
+
+**Test:**
+```
+User: "Check if there's a session to recover"
+Expected:
+- Returns recovery_available = false (no crashes yet)
+- Shows session ID being checked
+- No errors
+```
+
+#### Test 6: shim_analyze_code (5 min)
+**Purpose:** Verify code analysis
+
+**Test:**
+```
+User: "Analyze code quality in D:/SHIM/src/core"
+Expected:
+- Scans TypeScript files
+- Returns file count, LOC, complexity
+- Lists code smells/issues
+- Provides recommendations
+```
+
+**Testing Matrix:**
+```
+Tool                    | Status | Notes
+------------------------|--------|------------------
+shim_session_status     | [ ]    | Basic communication
+shim_force_checkpoint   | [ ]    | DB write
+shim_auto_checkpoint    | [ ]    | Logic + DB
+shim_monitor_signals    | [ ]    | Signal tracking
+shim_check_recovery     | [ ]    | Resume detection
+shim_analyze_code       | [ ]    | Code analysis
 ```
 
 ---
 
-## 📝 STEP 5: DOCUMENTATION (15 min)
+### STEP 4: Integration Verification (30 min)
 
-### Update Status Documents
-1. Mark MCP_BUILD_STATUS.md as complete
-2. Update CURRENT_STATUS.md
-3. Create MCP_USAGE.md with examples
-4. Add to ROADMAP.md progress
+**Objective:** Verify handler interactions with core classes
 
-### Git Commit
-```bash
-cd D:\SHIM
-git add -A
-git commit -m "feat: complete MCP server Stage 1 - all tools functional
+**Tests:**
+1. **Checkpoint Flow**
+   - Create checkpoint → Verify in DB → Check status → Verify count
 
-COMPLETED:
-- Fixed 20+ API mismatches in MCP handlers
-- Updated all constructors to use proper config objects
-- Transformed SessionContext to CreateCheckpointInput
-- All 6 tools compile successfully
-- MCP server starts and registers tools
+2. **Signal Tracking**
+   - Monitor signals → Save snapshot → Verify in history
 
-HANDLERS FIXED:
-- auto-checkpoint: Checkpoint creation
-- force-checkpoint: Manual checkpoint trigger
-- check-resume: Resume detection
-- session-status: Multi-source status
-- signal-monitor: Signal collection
-- analyze-code: Code analysis
+3. **Resume Detection**
+   - Create checkpoint → Simulate crash → Check recovery
 
-API CORRECTIONS:
-- CheckpointManager: Pass config object, not string
-- ResumeDetector: Pass repository, not path
-- SignalCollector: Proper constructor signature
-- EvolutionCoordinator: Pass config, use correct methods
+4. **Code Analysis**
+   - Analyze directory → Verify metrics → Check recommendations
 
-TESTING:
-✅ TypeScript compilation: ZERO errors
-✅ MCP server startup: Success
-✅ Tool registration: All 6 tools
-✅ Protocol compliance: MCP 1.0 compatible
+**Validation Checklist:**
+- [ ] All tools respond without errors
+- [ ] Database writes succeed
+- [ ] Data retrieval works
+- [ ] Cross-handler data consistency
+- [ ] No TypeScript errors in logs
+- [ ] No runtime exceptions
 
-STAGE STATUS:
-✅ Stage 1 Complete - Foundation solid"
-```
+---
+
+### STEP 5: Documentation (15 min)
+
+**Objective:** Document MCP setup and usage
+
+**Create:**
+1. `docs/MCP_CONFIGURATION.md`
+   - Claude Desktop setup
+   - Tool descriptions
+   - Usage examples
+   - Troubleshooting
+
+2. Update `README.md`
+   - Add MCP integration section
+   - Link to configuration guide
+   - Show example usage
+
+3. `docs/MCP_TROUBLESHOOTING.md`
+   - Common issues
+   - Error messages
+   - Solutions
+   - Debug tips
 
 ---
 
 ## 🚨 POTENTIAL ISSUES & SOLUTIONS
 
-### Issue 1: Missing Methods on Core Classes
-**If:** Core class doesn't have expected method  
-**Solution:** 
-- Check for similar method with different name
-- If truly missing, add method to core class (TDD)
-- Update tests for new method
+### Issue 1: Database Path
+**Symptom:** "SQLITE_CANTOPEN: unable to open database file"  
+**Cause:** data/ directory doesn't exist  
+**Solution:** Create directory manually or update handler constructors
 
-### Issue 2: Incompatible Type Transformations
-**If:** Cannot transform SessionContext → CreateCheckpointInput  
-**Solution:**
-- Create helper function for transformation
-- Document mapping logic
-- Add unit tests for transformer
+### Issue 2: Async Initialization
+**Symptom:** Handlers use repo before initialize() completes  
+**Cause:** Constructor calls initialize() but doesn't await  
+**Solution:** Make handlers wait for initialization or use lazy init
 
-### Issue 3: MCP SDK Type Errors
-**If:** MCP SDK types don't match usage  
-**Solution:**
-- Check MCP SDK version (should be ^1.25.2)
-- Read MCP SDK documentation
-- Update handler signatures to match SDK
-- Consider type assertions if needed
+### Issue 3: Session ID Persistence
+**Symptom:** Different session IDs across tool calls  
+**Cause:** Each handler creates its own session ID  
+**Solution:** Share session ID across handlers (singleton or shared state)
 
-### Issue 4: Runtime Errors After Build
-**If:** Compiles but crashes at runtime  
-**Solution:**
-- Check compiled JavaScript in dist/
-- Verify imports resolve correctly
-- Test each tool individually
-- Add error handling
+### Issue 4: MCP Protocol Errors
+**Symptom:** Tools not appearing in Claude Desktop  
+**Cause:** Incorrect tool definitions or server startup failure  
+**Solution:** Check logs, verify JSON schema, test server standalone
 
 ---
 
-## ✅ SUCCESS CRITERIA
+## 📦 DELIVERABLES - STAGE 3
 
-### Must Have
-- [ ] All handlers compile without errors
-- [ ] MCP server starts successfully
-- [ ] All 6 tools register
-- [ ] No TypeScript errors
-- [ ] Git commit created
-
-### Should Have
-- [ ] Basic tool invocation works
-- [ ] Error handling present
-- [ ] Documentation updated
-- [ ] Examples provided
-
-### Nice to Have
-- [ ] Integration tests pass
-- [ ] Performance benchmarks met
-- [ ] Full MCP protocol compliance verified
+When complete, we should have:
+- ✅ Working database with schema
+- ✅ MCP server configured in Claude Desktop
+- ✅ All 6 tools tested and functional
+- ✅ Integration verified end-to-end
+- ✅ Comprehensive documentation
+- ✅ Known issues documented
+- ✅ Production-ready MCP server
 
 ---
 
-## 📞 IF YOU GET STUCK
+## 🎯 SUCCESS CRITERIA
 
-### Common Blockers
-1. **Can't find method:** Search entire file with grep/search
-2. **Type mismatch:** Check both sides of assignment
-3. **Import errors:** Verify path and file extension
-4. **Runtime crash:** Add console.log for debugging
+**STAGE 3 COMPLETE when:**
+1. All 6 tools execute without errors
+2. Database operations succeed
+3. Data persists correctly
+4. Resume detection works
+5. Signal monitoring tracks metrics
+6. Code analysis produces results
+7. Documentation is comprehensive
+8. No blocking issues remain
 
-### Escalation Path
-1. Read implementation carefully
-2. Check tests for usage examples
-3. Search codebase for similar patterns
-4. Document blocker and move to next handler
-5. Circle back after completing others
+**Time Budget:** 90 minutes  
+**Quality Standard:** Production-ready  
+**Documentation:** Complete
 
 ---
 
-**Prepared:** January 12, 2026  
-**For Session:** MCP API Fixes  
-**Estimated Duration:** 2-4 hours  
-**Current Commit:** f11a7c5
+## 🔄 IF ISSUES FOUND
+
+**Minor Issues (< 30 min fix):**
+- Fix immediately
+- Document in troubleshooting guide
+- Continue testing
+
+**Major Issues (> 30 min fix):**
+- Document clearly
+- Create GitHub issue
+- Schedule for Stage 4
+- Continue testing other tools
+
+**Blocking Issues:**
+- Document root cause
+- Investigate systematically
+- Fix before proceeding
+- Update timeline
+
+---
+
+**Current Status:** Ready for Stage 3  
+**Next Step:** Create data/ directory and start testing  
+**Estimated Completion:** Today (2-3 hours remaining)

@@ -9,10 +9,8 @@
  */
 
 import { BaseHandler, HandlerResult } from './base-handler.js';
-import { CheckpointRepository } from '../../core/CheckpointRepository.js';
 import { ResumeDetector } from '../../core/ResumeDetector.js';
-import { SignalHistoryRepository } from '../../core/SignalHistoryRepository.js';
-import path from 'path';
+import { getCheckpointRepository, getSignalHistoryRepository } from '../shared-state.js';
 import { v4 as uuidv4 } from 'uuid';
 
 interface SessionStatusArgs {
@@ -20,31 +18,18 @@ interface SessionStatusArgs {
 }
 
 export class SessionStatusHandler extends BaseHandler {
-  private checkpointRepo: CheckpointRepository;
   private resumeDetector: ResumeDetector;
-  private signalHistory: SignalHistoryRepository;
   private sessionStartTime: number;
   private sessionId: string;
 
   constructor() {
     super();
     
-    const dbPath = path.join(process.cwd(), 'data', 'shim.db');
-    
-    // Initialize repository
-    this.checkpointRepo = new CheckpointRepository(dbPath);
-    this.checkpointRepo.initialize().catch(err => {
-      this.log('Failed to initialize repository', { error: err });
-    });
+    // Use shared repositories (already initialized by server)
+    const checkpointRepo = getCheckpointRepository();
     
     // Initialize resume detector
-    this.resumeDetector = new ResumeDetector(this.checkpointRepo);
-    
-    // Initialize signal history
-    this.signalHistory = new SignalHistoryRepository(dbPath);
-    this.signalHistory.initialize().catch(err => {
-      this.log('Failed to initialize signal history', { error: err });
-    });
+    this.resumeDetector = new ResumeDetector(checkpointRepo);
     
     this.sessionStartTime = Date.now();
     this.sessionId = uuidv4();
@@ -58,12 +43,16 @@ export class SessionStatusHandler extends BaseHandler {
 
       const sessionToCheck = args.session_id || this.sessionId;
 
+      // Get shared repositories
+      const checkpointRepo = getCheckpointRepository();
+      const signalHistory = getSignalHistoryRepository();
+
       // Get checkpoints for session
-      const checkpoints = await this.checkpointRepo.listBySession(sessionToCheck);
+      const checkpoints = await checkpointRepo.listBySession(sessionToCheck);
       const checkpointCount = checkpoints.length;
       
       // Get last checkpoint
-      const lastCheckpoint = await this.checkpointRepo.getMostRecent(sessionToCheck);
+      const lastCheckpoint = await checkpointRepo.getMostRecent(sessionToCheck);
       
       const lastCheckpointTime = lastCheckpoint
         ? lastCheckpoint.createdAt
@@ -81,8 +70,8 @@ export class SessionStatusHandler extends BaseHandler {
       const sessionDurationMin = Math.floor(sessionDurationMs / 60000);
 
       // Get recent signals for session
-      const recentSnapshots = await this.signalHistory.getSessionSnapshots(sessionToCheck);
-      const latestSnapshot = await this.signalHistory.getLatestSnapshot(sessionToCheck);
+      const recentSnapshots = await signalHistory.getSessionSnapshots(sessionToCheck);
+      const latestSnapshot = await signalHistory.getLatestSnapshot(sessionToCheck);
 
       const elapsed = Date.now() - startTime;
 

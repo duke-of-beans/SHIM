@@ -27,6 +27,7 @@ import { CodeAnalysisHandler } from './handlers/code-analysis.js';
 import { SessionStatusHandler } from './handlers/session-status.js';
 import { ForceCheckpointHandler } from './handlers/force-checkpoint.js';
 import { IHandler } from './handlers/base-handler.js';
+import { initializeRepositories } from './shared-state.js';
 
 /**
  * SHIM MCP Server
@@ -51,7 +52,20 @@ class ShimMCPServer {
       }
     );
 
-    // Initialize all handlers with explicit type
+    // Handlers initialized in async initialize() method
+    this.handlers = new Map<string, IHandler>();
+
+    this.setupHandlers();
+  }
+
+  /**
+   * Async initialization (must be called after constructor)
+   */
+  async initialize(): Promise<void> {
+    // Initialize shared repositories FIRST
+    await initializeRepositories();
+
+    // NOW create handlers (they will use initialized repositories)
     this.handlers = new Map<string, IHandler>([
       ['shim_auto_checkpoint', new AutoCheckpointHandler() as IHandler],
       ['shim_check_recovery', new RecoveryCheckHandler() as IHandler],
@@ -61,7 +75,7 @@ class ShimMCPServer {
       ['shim_force_checkpoint', new ForceCheckpointHandler() as IHandler],
     ]);
 
-    this.setupHandlers();
+    console.error('[SHIM MCP] All handlers initialized');
   }
 
   /**
@@ -238,6 +252,7 @@ class ShimMCPServer {
 async function main() {
   try {
     const server = new ShimMCPServer();
+    await server.initialize(); // Initialize repositories and handlers
     await server.start();
   } catch (error) {
     console.error('[SHIM MCP] Fatal error:', error);

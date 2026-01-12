@@ -9,25 +9,15 @@
 
 import { BaseHandler, HandlerResult} from './base-handler.js';
 import { SignalCollector } from '../../core/SignalCollector.js';
-import { SignalHistoryRepository } from '../../core/SignalHistoryRepository.js';
-import path from 'path';
+import { getSignalHistoryRepository } from '../shared-state.js';
 import { v4 as uuidv4 } from 'uuid';
 
 export class SignalMonitorHandler extends BaseHandler {
   private signalCollector: SignalCollector;
-  private signalHistory: SignalHistoryRepository;
   private sessionId: string;
 
   constructor() {
     super();
-    
-    const dbPath = path.join(process.cwd(), 'data', 'shim.db');
-    
-    // Initialize signal history repository
-    this.signalHistory = new SignalHistoryRepository(dbPath);
-    this.signalHistory.initialize().catch(err => {
-      this.log('Failed to initialize signal history', { error: err });
-    });
     
     // Initialize signal collector with default thresholds
     this.signalCollector = new SignalCollector();
@@ -42,11 +32,14 @@ export class SignalMonitorHandler extends BaseHandler {
     try {
       const startTime = Date.now();
 
+      // Get shared signal history repository
+      const signalHistory = getSignalHistoryRepository();
+
       // Get current signals (synchronous)
       const signals = this.signalCollector.getSignals();
       
       // Save snapshot to history
-      await this.signalHistory.saveSnapshot(this.sessionId, signals);
+      await signalHistory.saveSnapshot(this.sessionId, signals);
 
       const elapsed = Date.now() - startTime;
 
