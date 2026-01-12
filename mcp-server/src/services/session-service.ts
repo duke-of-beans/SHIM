@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Session Service - Provides session status information
  * 
  * Aggregates data from all services to show current SHIM status
@@ -81,3 +81,4 @@ export class SessionService {
     }
   }
 }
+

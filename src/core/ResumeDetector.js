@@ -1,9 +1,12 @@
+"use strict";
 /**
  * Resume Detection System
  *
  * Detects session interruptions and generates resume prompts from checkpoints.
  */
-export class ResumeDetector {
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ResumeDetector = void 0;
+class ResumeDetector {
     checkpointRepo;
     constructor(checkpointRepo) {
         this.checkpointRepo = checkpointRepo;
@@ -212,4 +215,5 @@ export class ResumeDetector {
         return `${hours} hour${hours === 1 ? '' : 's'}, ${remainingMinutes} minute${remainingMinutes === 1 ? '' : 's'}`;
     }
 }
+exports.ResumeDetector = ResumeDetector;
 //# sourceMappingURL=ResumeDetector.js.map

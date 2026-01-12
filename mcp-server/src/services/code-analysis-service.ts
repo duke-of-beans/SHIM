@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Code Analysis Service - Analyzes code quality
  * 
  * Provides code quality metrics and improvement suggestions
@@ -85,3 +85,4 @@ export class CodeAnalysisService {
     return files;
   }
 }
+

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * MLService
  * 
  * Handles machine learning operations:
@@ -7,7 +7,7 @@
  * - Evaluate predictor performance
  */
 
-import { MLPredictor } from '../../../src/ml/MLPredictor.js';
+import { MLPredictor } from '@shim/ml/MLPredictor';
 
 export class MLService {
   private predictor?: MLPredictor;
@@ -79,3 +79,4 @@ export class MLService {
     }
   }
 }
+

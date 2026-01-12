@@ -1,17 +1,17 @@
-/**
+﻿/**
  * Autonomy Service - MCP interface for SHIM autonomous operation components
  * 
  * Exposes all autonomy capabilities via MCP tools
  */
 
-import { AutonomousOrchestrator } from '../../src/autonomy/AutonomousOrchestrator.js';
-import { DecisionEngine } from '../../src/autonomy/DecisionEngine.js';
-import { FailureRecovery } from '../../src/autonomy/FailureRecovery.js';
-import { FeedbackProcessor } from '../../src/autonomy/FeedbackProcessor.js';
-import { GoalDecomposer } from '../../src/autonomy/GoalDecomposer.js';
-import { GoalReporter } from '../../src/autonomy/GoalReporter.js';
-import { ProgressTracker } from '../../src/autonomy/ProgressTracker.js';
-import { WorkReviewer } from '../../src/autonomy/WorkReviewer.js';
+import { AutonomousOrchestrator } from '@shim/autonomy/AutonomousOrchestrator';
+import { DecisionEngine } from '@shim/autonomy/DecisionEngine';
+import { FailureRecovery } from '@shim/autonomy/FailureRecovery';
+import { FeedbackProcessor } from '@shim/autonomy/FeedbackProcessor';
+import { GoalDecomposer } from '@shim/autonomy/GoalDecomposer';
+import { GoalReporter } from '@shim/autonomy/GoalReporter';
+import { ProgressTracker } from '@shim/autonomy/ProgressTracker';
+import { WorkReviewer } from '@shim/autonomy/WorkReviewer';
 
 export class AutonomyService {
   private orchestrator?: AutonomousOrchestrator;
@@ -206,3 +206,4 @@ export class AutonomyService {
     return await this.workReviewer.getCriteria();
   }
 }
+

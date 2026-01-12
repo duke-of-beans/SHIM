@@ -1,4 +1,4 @@
-/**
+﻿/**
  * LoggingService
  * 
  * Handles SHIM logging operations:
@@ -7,7 +7,7 @@
  * - Export logs
  */
 
-import { Logger } from '../../../src/infrastructure/Logger.js';
+import { Logger } from '@shim/infrastructure/Logger';
 
 export class LoggingService {
   private logger?: Logger;
@@ -77,3 +77,4 @@ export class LoggingService {
     }
   }
 }
+

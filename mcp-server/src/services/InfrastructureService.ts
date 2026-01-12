@@ -10,12 +10,12 @@
  * - Database operations
  */
 
-import { MessageBusWrapper } from '../../../src/infrastructure/MessageBusWrapper.js';
-import { WorkerRegistry } from '../../../src/infrastructure/WorkerRegistry.js';
-import { StateManager } from '../../../src/infrastructure/StateManager.js';
-import { CheckpointRepository } from '../../../src/core/CheckpointRepository.js';
-import { SignalHistoryRepository } from '../../../src/core/SignalHistoryRepository.js';
-import { Database } from '../../../src/infrastructure/database/Database.js';
+import { MessageBusWrapper } from '@shim/infrastructure/MessageBusWrapper';
+import { WorkerRegistry } from '@shim/infrastructure/WorkerRegistry';
+import { StateManager } from '@shim/infrastructure/StateManager';
+import { CheckpointRepository } from '@shim/core/CheckpointRepository';
+import { SignalHistoryRepository } from '@shim/core/SignalHistoryRepository';
+import { Database } from '@shim/infrastructure/database/Database';
 
 export class InfrastructureService {
   private messageBus?: MessageBusWrapper;

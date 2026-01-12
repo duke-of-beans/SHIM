@@ -1,4 +1,4 @@
-/**
+﻿/**
  * PerformanceService
  * 
  * Handles performance profiling and benchmarking operations:
@@ -7,8 +7,8 @@
  * - Run benchmarks
  */
 
-import { PerformanceBenchmark } from '../../../src/performance/PerformanceBenchmark.js';
-import { PerformanceProfiler } from '../../../src/performance/PerformanceProfiler.js';
+import { PerformanceBenchmark } from '@shim/performance/PerformanceBenchmark';
+import { PerformanceProfiler } from '@shim/performance/PerformanceProfiler';
 
 export class PerformanceService {
   private profiler?: PerformanceProfiler;
@@ -108,3 +108,4 @@ export class PerformanceService {
     }
   }
 }
+

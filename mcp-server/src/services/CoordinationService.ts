@@ -1,13 +1,13 @@
-/**
+﻿/**
  * Coordination Service - MCP interface for SHIM multi-agent coordination components
  * 
  * Exposes all coordination capabilities via MCP tools
  */
 
-import { ChatRegistry } from '../../src/coordination/ChatRegistry.js';
-import { ConflictResolver } from '../../src/coordination/ConflictResolver.js';
-import { ResultAggregator } from '../../src/coordination/ResultAggregator.js';
-import { WorkDistributor } from '../../src/coordination/WorkDistributor.js';
+import { ChatRegistry } from '@shim/coordination/ChatRegistry';
+import { ConflictResolver } from '@shim/coordination/ConflictResolver';
+import { ResultAggregator } from '@shim/coordination/ResultAggregator';
+import { WorkDistributor } from '@shim/coordination/WorkDistributor';
 
 export class CoordinationService {
   private chatRegistry?: ChatRegistry;
@@ -135,3 +135,4 @@ export class CoordinationService {
     return await this.workDistributor.cancel(taskId);
   }
 }
+

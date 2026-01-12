@@ -1,4 +1,4 @@
-/**
+﻿/**
  * ConfigurationService
  * 
  * Handles SHIM configuration management:
@@ -8,7 +8,7 @@
  * - Reset configuration
  */
 
-import { ConfigManager } from '../../../src/infrastructure/ConfigManager.js';
+import { ConfigManager } from '@shim/infrastructure/ConfigManager';
 
 export class ConfigurationService {
   private configManager?: ConfigManager;
@@ -97,3 +97,4 @@ export class ConfigurationService {
     }
   }
 }
+

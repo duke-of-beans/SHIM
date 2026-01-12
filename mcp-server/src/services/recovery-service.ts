@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Recovery Service - Detects and manages session recovery
  * 
  * Checks for incomplete sessions and provides recovery information
@@ -81,3 +81,4 @@ Last activity: ${new Date(checkpoint.timestamp).toLocaleString()}
     }
   }
 }
+

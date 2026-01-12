@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Signal Service - Monitors crash warning signals
  * 
  * Detects patterns that may indicate an impending crash
@@ -77,3 +77,4 @@ export class SignalService {
     this.lastSignalCheck = Date.now();
   }
 }
+

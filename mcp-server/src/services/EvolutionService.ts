@@ -1,19 +1,19 @@
-/**
+﻿/**
  * Evolution Service - MCP interface for SHIM code evolution components
  * 
  * Exposes all evolution capabilities via MCP tools
  */
 
-import { AdvancedCodeAnalyzer } from '../../src/evolution/AdvancedCodeAnalyzer.js';
-import { ASTAnalyzer } from '../../src/evolution/ASTAnalyzer.js';
-import { CodeGenerator } from '../../src/evolution/CodeGenerator.js';
-import { DeploymentManager } from '../../src/evolution/DeploymentManager.js';
-import { EvolutionCoordinator } from '../../src/evolution/EvolutionCoordinator.js';
-import { ExperimentGenerator } from '../../src/evolution/ExperimentGenerator.js';
-import { ImprovementIdentifier } from '../../src/evolution/ImprovementIdentifier.js';
-import { PerformanceAnalyzer } from '../../src/evolution/PerformanceAnalyzer.js';
-import { PerformanceOptimizer } from '../../src/evolution/PerformanceOptimizer.js';
-import { SelfDeployer } from '../../src/evolution/SelfDeployer.js';
+import { AdvancedCodeAnalyzer } from '@shim/evolution/AdvancedCodeAnalyzer';
+import { ASTAnalyzer } from '@shim/evolution/ASTAnalyzer';
+import { CodeGenerator } from '@shim/evolution/CodeGenerator';
+import { DeploymentManager } from '@shim/evolution/DeploymentManager';
+import { EvolutionCoordinator } from '@shim/evolution/EvolutionCoordinator';
+import { ExperimentGenerator } from '@shim/evolution/ExperimentGenerator';
+import { ImprovementIdentifier } from '@shim/evolution/ImprovementIdentifier';
+import { PerformanceAnalyzer } from '@shim/evolution/PerformanceAnalyzer';
+import { PerformanceOptimizer } from '@shim/evolution/PerformanceOptimizer';
+import { SelfDeployer } from '@shim/evolution/SelfDeployer';
 
 export class EvolutionService {
   private advancedAnalyzer?: AdvancedCodeAnalyzer;
@@ -261,3 +261,4 @@ export class EvolutionService {
     return await this.selfDeployer.getHistory();
   }
 }
+

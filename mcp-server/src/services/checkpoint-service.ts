@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Checkpoint Service - Integrates with SHIM CheckpointManager
  * 
  * Handles automatic and manual checkpoint creation
@@ -87,3 +87,4 @@ export class CheckpointService {
     });
   }
 }
+

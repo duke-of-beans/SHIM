@@ -1,3 +1,4 @@
+"use strict";
 /**
  * Session Context Model
  *
@@ -5,5 +6,5 @@
  * This is a simplified version of the full Checkpoint model,
  * used for creating checkpoints via the MCP API.
  */
-export {};
+Object.defineProperty(exports, "__esModule", { value: true });
 //# sourceMappingURL=SessionContext.js.map

@@ -1,4 +1,7 @@
-import { v4 as uuidv4 } from 'uuid';
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.CheckpointManager = void 0;
+const uuid_1 = require("uuid");
 /**
  * CheckpointManager - Intelligent checkpoint triggering and creation
  *
@@ -9,7 +12,7 @@ import { v4 as uuidv4 } from 'uuid';
  * - Reset counters after checkpoint creation
  * - Provide auto-checkpoint workflow
  */
-export class CheckpointManager {
+class CheckpointManager {
     signalCollector;
     checkpointRepo;
     toolCallInterval;
@@ -75,7 +78,7 @@ export class CheckpointManager {
         const signals = this.signalCollector.getSignals();
         const _risk = this.signalCollector.getCrashRisk();
         const checkpoint = {
-            id: uuidv4(),
+            id: (0, uuid_1.v4)(),
             sessionId: input.sessionId,
             checkpointNumber: 0, // Will be set by repository
             createdAt: new Date().toISOString(),
@@ -157,4 +160,5 @@ export class CheckpointManager {
         };
     }
 }
+exports.CheckpointManager = CheckpointManager;
 //# sourceMappingURL=CheckpointManager.js.map

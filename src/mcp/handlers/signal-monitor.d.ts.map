@@ -1,0 +1,1 @@
+{"version":3,"file":"signal-monitor.d.ts","sourceRoot":"","sources":["signal-monitor.ts"],"names":[],"mappings":"AAAA;;;;;;;GAOG;AAEH,OAAO,EAAE,WAAW,EAAE,aAAa,EAAC,MAAM,mBAAmB,CAAC;AAK9D,qBAAa,oBAAqB,SAAQ,WAAW;IACnD,OAAO,CAAC,eAAe,CAAkB;IACzC,OAAO,CAAC,SAAS,CAAS;;IAcpB,OAAO,CAAC,KAAK,EAAE,OAAO,GAAG,OAAO,CAAC,aAAa,CAAC;CA2CtD"}

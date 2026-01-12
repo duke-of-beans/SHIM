@@ -1,9 +1,12 @@
+"use strict";
 /**
  * Session Restoration System
  *
  * Handles loading checkpoints and reconstructing session state for crash recovery.
  */
-export class SessionRestorer {
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.SessionRestorer = void 0;
+class SessionRestorer {
     checkpointRepo;
     constructor(checkpointRepo) {
         this.checkpointRepo = checkpointRepo;
@@ -88,4 +91,5 @@ export class SessionRestorer {
         return event;
     }
 }
+exports.SessionRestorer = SessionRestorer;
 //# sourceMappingURL=SessionRestorer.js.map

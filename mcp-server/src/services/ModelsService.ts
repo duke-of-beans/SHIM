@@ -1,4 +1,4 @@
-/**
+﻿/**
  * ModelsService
  * 
  * Handles model registry and prediction operations:
@@ -7,8 +7,8 @@
  * - Get model predictions
  */
 
-import { ModelRegistry } from '../../../src/models/ModelRegistry.js';
-import { ModelPredictor } from '../../../src/models/ModelPredictor.js';
+import { ModelRegistry } from '@shim/models/ModelRegistry';
+import { ModelPredictor } from '@shim/models/ModelPredictor';
 
 export class ModelsService {
   private registry?: ModelRegistry;
@@ -121,3 +121,4 @@ export class ModelsService {
     }
   }
 }
+

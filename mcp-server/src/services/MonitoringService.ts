@@ -1,4 +1,4 @@
-/**
+﻿/**
  * MonitoringService
  * 
  * Handles system health monitoring operations:
@@ -6,7 +6,7 @@
  * - Get monitoring status
  */
 
-import { HealthMonitor } from '../../../src/monitoring/HealthMonitor.js';
+import { HealthMonitor } from '@shim/monitoring/HealthMonitor';
 
 export class MonitoringService {
   private monitor?: HealthMonitor;
@@ -58,3 +58,4 @@ export class MonitoringService {
     }
   }
 }
+
