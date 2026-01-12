@@ -70,7 +70,7 @@ export class ASTAnalyzer {
 
         functions.push({
           name: node.name.text,
-          parameters: node.parameters.length,
+          parameters: node.parameters?.length || 0,
           complexity,
           loc,
         });
@@ -99,7 +99,7 @@ export class ASTAnalyzer {
           if (node.importClause.namedBindings) {
             const bindings = node.importClause.namedBindings;
             if (ts.isNamedImports(bindings)) {
-              bindings.elements.forEach((el) => {
+              bindings.elements.forEach((el: any) => {
                 specifiers.push(el.name.text);
               });
             }
@@ -175,7 +175,7 @@ export class ASTAnalyzer {
 
     const visit = (node: ts.Node) => {
       // Long parameter list
-      if (ts.isFunctionDeclaration(node) && node.parameters.length > 5) {
+      if (ts.isFunctionDeclaration(node) && node.parameters && node.parameters.length > 5) {
         issues.push({
           type: 'long-parameter-list',
           severity: 'medium',
@@ -186,7 +186,7 @@ export class ASTAnalyzer {
       // Dead code after return
       if (ts.isReturnStatement(node) && node.parent) {
         const parent = node.parent;
-        if (ts.isBlock(parent)) {
+        if (ts.isBlock(parent) && parent.statements) {
           const statements = parent.statements;
           const returnIndex = statements.indexOf(node as ts.Statement);
           if (returnIndex >= 0 && returnIndex < statements.length - 1) {
