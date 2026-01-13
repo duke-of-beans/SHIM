@@ -55,17 +55,19 @@ phase_6: "🔮 DEFERRED to v6.0 (Kaizen loop)"
 - MessageBusWrapper
   - Redis Pub/Sub
   - Inter-chat messaging
+- WorkerRegistry
+  - ✅ Types exist in src/models/Redis.ts
+  - ✅ Implementation complete in src/core/WorkerRegistry.ts
+  - ⚠️ Has TypeScript compilation errors (need fixing)
 
 ### In Progress 🚧
-- WorkerRegistry
-  - **Blocker:** Missing type definitions
-  - **Need:** WorkerInfo, WorkerStatus, WorkerHealth interfaces in Redis.ts
-  - **ETA:** Today
-
-### Planned ⬜
-- StateSynchronizer
+- StateSynchronizer (next component)
 - LockManager (Redis Redlock)
 - BullMQ Integration
+
+### Planned ⬜
+- Integration testing
+- End-to-end Redis workflow tests
 
 **Custom Code:** ~200 LOC thin wrappers  
 **Existing Tools:** Redis, BullMQ
@@ -111,63 +113,76 @@ phase_6: "🔮 DEFERRED to v6.0 (Kaizen loop)"
 
 ### Test Coverage
 ```yaml
-total_tests: 95
-passing: 95
-failing: 0
-coverage: 98%
+total_test_files: 51
+status: "Infrastructure broken - cannot run"
+jest_installed: false
+compilation: "20+ TypeScript errors"
+note: "Tests exist but have never run in v5.0"
 ```
 
 ### Code Size
 ```yaml
 phase_1: 311 LOC
-phase_2_current: +120 LOC (partial)
+phase_2_current: ~200 LOC (partial)
 phase_2_target: +200 LOC
-total_current: ~431 LOC
+total_current: ~511 LOC
 total_target: 811-1011 LOC
 
 vs_v2_bloat: "8000 LOC → 1011 LOC (87% reduction)"
 ```
 
-### Performance
+### Quality Status
 ```yaml
-checkpoint_latency: "<100ms ✅"
-recovery_time: "<500ms ✅"
-mcp_bundle_size: "14.5kb ✅"
+typescript_compilation: "❌ Failing (20+ errors)"
+eslint: "⚠️ Not verified"
+test_suite: "❌ Cannot run"
+manual_testing: "✅ Available fallback"
 ```
 
 ---
 
 ## 🚨 CURRENT BLOCKERS
 
-### 1. WorkerRegistry Type Definitions
-**Status:** 🚧 Blocking commit  
-**Issue:** Missing interfaces in Redis.ts  
-**Need:**
-```typescript
-interface WorkerInfo { id, status, health, metadata }
-interface WorkerStatus { status, lastSeen, taskCount }
-interface WorkerHealth { cpu, memory, uptime }
-```
-**Action:** Define types today  
-**Owner:** Development  
-**ETA:** Today (Jan 12)
+### 1. Test Infrastructure Broken
+**Status:** 🚧 Needs dedicated repair session  
+**Issue:** Jest not installed properly, node_modules file locks  
+**Impact:** Cannot run test suite to verify changes  
+**Mitigation:** Using TypeScript compiler as quality gate  
+**Action:** Defer to dedicated infrastructure session  
+**Priority:** Medium (doesn't block development)
+
+### 2. TypeScript Compilation Errors
+**Status:** 🚧 Minor issues in existing code  
+**Issue:** ~20 TypeScript errors (any types, missing imports)  
+**Files:** SignalHistoryRepository, WorkerRegistry, TaskQueueWrapper, MCP server  
+**Impact:** Cannot build production bundle  
+**Action:** Fix incrementally as we work on components  
+**Priority:** Medium (fix as we touch files)
+
+### 3. Missing Dependencies
+**Status:** 🚧 Needs investigation  
+**Issue:** bullmq types not found, MCP SDK imports failing  
+**Impact:** Some components may not be functional  
+**Action:** Install missing types as needed  
+**Priority:** High (blocks Phase 2 completion)
 
 ---
 
 ## 📋 IMMEDIATE NEXT ACTIONS
 
 ### Today (January 12, 2026)
-1. ✅ Update all source of truth docs to v5.0
-2. ⬜ Define WorkerRegistry types in Redis.ts
-3. ⬜ Complete WorkerRegistry implementation
-4. ⬜ Test Redis infrastructure end-to-end
-5. ⬜ Begin StateSynchronizer
+1. ✅ Update CURRENT_STATUS.md with accurate state
+2. ⬜ Fix TypeScript errors in WorkerRegistry
+3. ⬜ Implement StateSynchronizer
+4. ⬜ Implement LockManager (Redis Redlock wrapper)
+5. ⬜ Test Redis components manually (without Jest)
 
 ### This Week
 1. Complete Phase 2 (Redis infrastructure)
-2. Write integration tests for Redis components
-3. Document tool composition patterns
-4. Update MCP server with Phase 2 tools
+2. Fix remaining TypeScript compilation errors
+3. Install missing dependencies (bullmq types, MCP SDK)
+4. Document manual testing procedures
+5. Schedule dedicated test infrastructure session
 
 ---
 
@@ -228,9 +243,18 @@ feb_2_target: "811-911 LOC (Phase 4-5 complete)"
 
 ## ⚠️ KNOWN ISSUES
 
-1. **WorkerRegistry types missing** - Blocking commit
-2. **Jest configuration issues** - Tests run but setup fragile
-3. **No integration tests yet** - Phase 2 needs E2E tests
+1. **Test infrastructure broken** - Jest not installed, node_modules corrupted
+2. **TypeScript compilation errors** - ~20 errors across multiple files
+3. **Missing dependencies** - bullmq types, MCP SDK imports
+4. **node_modules file locks** - Prevents clean reinstall
+5. **Documentation inaccurate** - Claims "95/95 tests passing" but tests never ran in v5.0
+6. **No integration tests** - Phase 2 lacks E2E validation
+
+**Reality Check:**  
+- ✅ Source code and test files exist  
+- ❌ Tests have never actually run in v5.0  
+- ❌ Infrastructure needs dedicated repair session  
+- ✅ Development can continue with TypeScript checks
 
 ---
 
@@ -251,7 +275,24 @@ feb_2_target: "811-911 LOC (Phase 4-5 complete)"
 
 ---
 
-**Current Focus:** Complete WorkerRegistry types and Phase 2  
+**Current Focus:** Fix TypeScript errors, continue Phase 2 development  
 **Next Milestone:** Phase 2 complete (Redis infrastructure)  
 **Version:** 5.0 (LEAN-OUT Architecture)  
 **Updated:** January 12, 2026
+
+---
+
+## 📝 SESSION NOTES (Jan 12, 2026)
+
+**Bootstrap Investigation Findings:**
+- Documentation claimed "WorkerRegistry blocked by missing types"
+- Reality: Types exist, WorkerRegistry implemented, but has TS errors
+- Documentation claimed "95/95 tests passing"
+- Reality: Tests never ran in v5.0, Jest not installed
+- Decision: Update docs with truth, continue development, defer test infrastructure
+
+**Pragmatic Path Forward:**
+- Use TypeScript compiler as quality gate
+- Manual testing for verification
+- Fix TS errors as we touch files
+- Dedicated test infrastructure session later
