@@ -1,338 +1,292 @@
 /**
  * TaskQueueWrapper
  * 
- * Wraps BullMQ with SHIM-specific task handling
- * Provides task management, worker pattern, and queue control
+ * Thin wrapper around BullMQ for distributed task queue management.
+ * 
+ * Features:
+ * - Task submission with priority and delay
+ * - Concurrent task processing
+ * - Job progress tracking
+ * - Automatic retry with backoff
+ * - Queue metrics and monitoring
+ * - Event-driven architecture
+ * 
+ * Architecture:
+ * - Uses BullMQ (battle-tested queue library)
+ * - Redis as backing store
+ * - Thin wrapper (~150 LOC)
+ * - LEAN-OUT principle: use existing tools, not custom infrastructure
  */
 
 import { Queue, Worker, Job, QueueEvents } from 'bullmq';
 import { RedisConnectionManager } from './RedisConnectionManager';
+import type { Redis } from 'ioredis';
+import { EventEmitter } from 'events';
 
-/**
- * Task structure
- */
-export interface Task {
-  type: string;
-  data: Record<string, unknown>;
-}
-
-/**
- * Task result from processor
- */
-export interface TaskResult {
-  success: boolean;
-  [key: string]: unknown;
-}
-
-/**
- * Options for adding tasks
- */
-export interface AddOptions {
-  priority?: number;      // 1 (highest) to 10 (lowest)
+export interface TaskOptions {
+  priority?: number;      // Lower number = higher priority (1-10)
   delay?: number;         // Delay in milliseconds
-  attempts?: number;      // Retry attempts
+  attempts?: number;      // Max retry attempts (default: 3)
+  backoff?: {
+    type: 'fixed' | 'exponential';
+    delay: number;
+  };
+  jobId?: string;         // Custom job ID
+  removeOnComplete?: boolean | number; // Remove on completion (default: false)
+  removeOnFail?: boolean | number;     // Remove on failure (default: false)
 }
 
-/**
- * Queue statistics
- */
-export interface QueueStats {
+export interface ProcessOptions {
+  concurrency?: number;   // Number of concurrent workers (default: 1)
+}
+
+export interface JobCounts {
   waiting: number;
   active: number;
   completed: number;
   failed: number;
   delayed: number;
+  paused: number;
 }
 
-/**
- * Task processor function
- */
-export type TaskProcessor = (
-  task: Task,
-  progress?: ProgressCallback
-) => Promise<TaskResult>;
+type ProcessorFunction<T = any, R = any> = (job: Job<T, R>) => Promise<R>;
 
-/**
- * Progress callback
- */
-export type ProgressCallback = (percentage: number, message?: string) => void;
-
-/**
- * TaskQueueWrapper
- * 
- * Wraps BullMQ queue with SHIM-specific functionality
- */
-export class TaskQueueWrapper {
+export class TaskQueueWrapper extends EventEmitter {
   private queue: Queue;
-  private worker: Worker | null = null;
+  private worker?: Worker;
   private queueEvents: QueueEvents;
-  private connection: RedisConnectionManager;
-  private queueName: string;
-
+  private redis: Redis;
+  
   constructor(
-    connection: RedisConnectionManager,
-    queueName: string
+    private queueName: string,
+    private connectionManager: RedisConnectionManager
   ) {
-    if (!connection) {
-      throw new Error('RedisConnectionManager is required');
-    }
-
-    if (!queueName || queueName.trim() === '') {
-      throw new Error('Queue name cannot be empty');
-    }
-
-    this.connection = connection;
-    this.queueName = queueName;
-
-    // Get Redis connection configuration (not client instance)
-    // Only call getClient() if connection is ready
-    const connectionConfig = this.getConnectionConfig();
-
-    // Initialize BullMQ queue
+    super();
+    this.redis = connectionManager.getClient();
+    
+    // Initialize BullMQ Queue
     this.queue = new Queue(queueName, {
-      connection: connectionConfig,
-      defaultJobOptions: {
-        attempts: 3,
-        backoff: {
-          type: 'exponential',
-          delay: 1000
-        },
-        removeOnComplete: false,
-        removeOnFail: false
-      }
+      connection: {
+        host: this.redis.options.host,
+        port: this.redis.options.port,
+        db: this.redis.options.db,
+      },
     });
-
-    // Initialize queue events with error handler to prevent unhandled errors
+    
+    // Initialize QueueEvents for monitoring
     this.queueEvents = new QueueEvents(queueName, {
-      connection: connectionConfig
+      connection: {
+        host: this.redis.options.host,
+        port: this.redis.options.port,
+        db: this.redis.options.db,
+      },
     });
-
-    // Prevent unhandled error events from crashing tests
-    this.queueEvents.on('error', (err) => {
-      // Silently handle connection errors during cleanup
-      if (err.message?.includes('Connection is closed')) {
-        return;
-      }
-      console.error('QueueEvents error:', err);
-    });
-  }
-
-  /**
-   * Get Redis connection configuration
-   */
-  private getConnectionConfig(): {
-    host: string;
-    port: number;
-    db: number;
-    password?: string;
-    keyPrefix?: string;
-  } {
-    try {
-      // Try to get client - this might throw if not connected
-      const redisClient = this.connection.getClient();
-      return {
-        host: redisClient.options.host || 'localhost',
-        port: redisClient.options.port || 6379,
-        db: redisClient.options.db || 0,
-        password: redisClient.options.password,
-        keyPrefix: redisClient.options.keyPrefix
-      };
-    } catch (err) {
-      // Connection not established - return default config
-      // BullMQ will handle connection errors when operations are attempted
-      return {
-        host: 'localhost',
-        port: 6379,
-        db: 0
-      };
-    }
+    
+    // Forward BullMQ events
+    this.setupEventForwarding();
   }
 
   /**
    * Add task to queue
+   * Returns job ID
    */
-  async addTask(task: Task, options?: AddOptions): Promise<string> {
-    if (!task) {
-      throw new Error('Task is required');
+  async addTask<T = any>(
+    data: T,
+    options: TaskOptions = {}
+  ): Promise<string> {
+    if (data === undefined || data === null) {
+      throw new Error('Task data cannot be undefined or null');
     }
-
-    const jobOptions: {
-      priority?: number;
-      delay?: number;
-      attempts?: number;
-    } = {};
-
-    if (options?.priority) {
-      jobOptions.priority = options.priority;
-    }
-
-    if (options?.delay) {
-      jobOptions.delay = options.delay;
-    }
-
-    if (options?.attempts) {
-      jobOptions.attempts = options.attempts;
-    }
-
-    // Pass only task.data to BullMQ (job.name is already task.type)
-    const job = await this.queue.add(task.type, task.data, jobOptions);
+    
+    const job = await this.queue.add(
+      'task',
+      data,
+      {
+        priority: options.priority,
+        delay: options.delay,
+        attempts: options.attempts || 3,
+        backoff: options.backoff,
+        jobId: options.jobId,
+        removeOnComplete: options.removeOnComplete,
+        removeOnFail: options.removeOnFail,
+      }
+    );
+    
     return job.id!;
   }
 
   /**
-   * Get task by ID
+   * Register task processor
    */
-  async getTask(taskId: string): Promise<Task | null> {
-    const job = await this.queue.getJob(taskId);
-    
-    if (!job) {
-      return null;
+  async process<T = any, R = any>(
+    processor: ProcessorFunction<T, R>,
+    options: ProcessOptions = {}
+  ): Promise<void> {
+    if (this.worker) {
+      throw new Error('Processor already registered');
     }
+    
+    this.worker = new Worker(
+      this.queueName,
+      processor,
+      {
+        connection: {
+          host: this.redis.options.host,
+          port: this.redis.options.port,
+          db: this.redis.options.db,
+        },
+        concurrency: options.concurrency || 1,
+      }
+    );
+    
+    // Forward worker events
+    this.worker.on('completed', (job, result) => {
+      this.emit('completed', job, result);
+    });
+    
+    this.worker.on('failed', (job, error) => {
+      this.emit('failed', job, error);
+    });
+  }
 
+  /**
+   * Get job by ID
+   */
+  async getJob(jobId: string): Promise<Job | null> {
+    const job = await this.queue.getJob(jobId);
+    return job || null;
+  }
+
+  /**
+   * Remove job by ID
+   */
+  async removeJob(jobId: string): Promise<boolean> {
+    const job = await this.queue.getJob(jobId);
+    if (!job) {
+      return false;
+    }
+    
+    await job.remove();
+    return true;
+  }
+
+  /**
+   * Clean jobs by status and age
+   */
+  async clean(
+    status: 'completed' | 'failed',
+    grace: number
+  ): Promise<number> {
+    const jobs = await this.queue.clean(grace, 1000, status);
+    return jobs.length;
+  }
+
+  /**
+   * Get job counts by status
+   */
+  async getJobCounts(): Promise<JobCounts> {
+    const counts = await this.queue.getJobCounts();
+    
     return {
-      type: job.name,
-      data: job.data
+      waiting: counts.waiting || 0,
+      active: counts.active || 0,
+      completed: counts.completed || 0,
+      failed: counts.failed || 0,
+      delayed: counts.delayed || 0,
+      paused: counts.paused || 0,
     };
   }
 
   /**
-   * Update task
+   * Get waiting jobs
    */
-  async updateTask(taskId: string, updates: Partial<Task>): Promise<void> {
-    const job = await this.queue.getJob(taskId);
-    
-    if (!job) {
-      throw new Error(`Task ${taskId} not found`);
-    }
-
-    if (updates.data) {
-      // BullMQ doesn't support updating job data directly
-      // Instead, we update the job's data property and save it
-      Object.assign(job.data, updates.data);
-      await job.updateData(job.data);
-    }
+  async getWaiting(): Promise<Job[]> {
+    return await this.queue.getWaiting();
   }
 
   /**
-   * Register worker to process tasks
+   * Get active jobs
    */
-  async registerWorker(
-    processor: TaskProcessor,
-    concurrency: number = 1
-  ): Promise<void> {
-    if (!processor) {
-      throw new Error('Processor is required');
-    }
+  async getActive(): Promise<Job[]> {
+    return await this.queue.getActive();
+  }
 
-    const connectionConfig = this.getConnectionConfig();
+  /**
+   * Get completed jobs
+   */
+  async getCompleted(): Promise<Job[]> {
+    return await this.queue.getCompleted();
+  }
 
-    this.worker = new Worker(
-      this.queueName,
-      async (job: Job) => {
-        const task: Task = {
-          type: job.name,
-          data: job.data
-        };
-
-        // Progress callback
-        const progress: ProgressCallback = (percentage: number, _message?: string) => {
-          void job.updateProgress(percentage);
-        };
-
-        return processor(task, progress);
-      },
-      {
-        connection: connectionConfig,
-        concurrency
-      }
-    );
-
-    // Add error handler to prevent unhandled errors
-    this.worker.on('error', (err) => {
-      // Silently handle connection errors during cleanup
-      if (err.message?.includes('Connection is closed')) {
-        return;
-      }
-      console.error('Worker error:', err);
-    });
-
-    // Wait for worker to be ready before returning
-    await this.worker.waitUntilReady();
+  /**
+   * Get failed jobs
+   */
+  async getFailed(): Promise<Job[]> {
+    return await this.queue.getFailed();
   }
 
   /**
    * Pause queue
    */
   async pause(): Promise<void> {
-    return this.queue.pause();
+    await this.queue.pause();
   }
 
   /**
    * Resume queue
    */
   async resume(): Promise<void> {
-    return this.queue.resume();
+    await this.queue.resume();
   }
 
   /**
-   * Drain queue (remove waiting jobs)
+   * Check if queue is paused
+   */
+  async isPaused(): Promise<boolean> {
+    return await this.queue.isPaused();
+  }
+
+  /**
+   * Drain queue (remove all waiting jobs)
    */
   async drain(): Promise<void> {
     await this.queue.drain();
   }
 
   /**
-   * Clean completed/failed jobs
-   */
-  async clean(grace: number): Promise<void> {
-    await this.queue.clean(grace, 100, 'completed');
-    await this.queue.clean(grace, 100, 'failed');
-  }
-
-  /**
-   * Get queue statistics
-   */
-  async getQueueStats(): Promise<QueueStats> {
-    const counts = await this.queue.getJobCounts(
-      'waiting',
-      'active',
-      'completed',
-      'failed',
-      'delayed'
-    );
-
-    return {
-      waiting: counts.waiting || 0,
-      active: counts.active || 0,
-      completed: counts.completed || 0,
-      failed: counts.failed || 0,
-      delayed: counts.delayed || 0
-    };
-  }
-
-  /**
-   * Get waiting job count
-   */
-  async getWaitingCount(): Promise<number> {
-    return this.queue.getWaitingCount();
-  }
-
-  /**
-   * Get active job count
-   */
-  async getActiveCount(): Promise<number> {
-    return this.queue.getActiveCount();
-  }
-
-  /**
-   * Cleanup resources
+   * Close queue and worker
    */
   async close(): Promise<void> {
+    // Close worker first
     if (this.worker) {
       await this.worker.close();
+      this.worker = undefined;
     }
-
+    
+    // Close queue events
     await this.queueEvents.close();
+    
+    // Close queue
     await this.queue.close();
+  }
+
+  /**
+   * Setup event forwarding from BullMQ to EventEmitter
+   */
+  private setupEventForwarding(): void {
+    // Forward queue events
+    this.queueEvents.on('completed', ({ jobId }) => {
+      this.queue.getJob(jobId).then((job) => {
+        if (job) {
+          this.emit('completed', job, job.returnvalue);
+        }
+      });
+    });
+    
+    this.queueEvents.on('failed', ({ jobId, failedReason }) => {
+      this.queue.getJob(jobId).then((job) => {
+        this.emit('failed', job, new Error(failedReason));
+      });
+    });
   }
 }
