@@ -1,326 +1,419 @@
-# SHIM MCP SERVER - CLAUDE+ INFRASTRUCTURE
+# SHIM MCP ARCHITECTURE - v5.0 (LEAN-OUT)
 
-**Vision**: SHIM runs invisibly in background of ALL Claude chats, providing crash prevention and intelligence augmentation automatically.
-
----
-
-## 🎯 Design Principles
-
-### 1. **Invisible Operation**
-- Auto-starts when Claude Desktop starts
-- No user configuration needed
-- No manual invocation required
-- Silent unless there's value to show
-
-### 2. **Zero-Friction**
-- Auto-checkpointing every 3-5 minutes
-- Auto-recovery on crash
-- Auto-signal detection
-- No "remember to checkpoint" prompts
-
-### 3. **Always Available**
-- Works in project chats (GREGORE, FINEPRINT)
-- Works in non-project chats
-- Works across chat boundaries
-- Persistent across sessions
-
-### 4. **Self-Healing**
-- Detects crashes before they happen
-- Recovers automatically
-- Learns from failures
-- Gets better over time
+**Version:** 5.0  
+**Updated:** January 12, 2026  
+**Server Size:** 14.5kb (was 2MB in v2.0)  
+**Tools:** 6 core (was 98 in v2.0)
 
 ---
 
-## 📦 MCP Server Architecture
+## 🎯 MCP SERVER ROLE
 
-### Server Name: `shim-mcp`
+```yaml
+role: "Thin stdio coordinator"
+responsibility: "Route tool calls to appropriate systems"
+not_responsible:
+  - computation: "❌ No heavy processing"
+  - analysis: "❌ No AST parsing"
+  - transformation: "❌ No code generation"
+  - ml_inference: "❌ No model execution"
 
-### Tools Exposed:
+principle: "Coordinate, don't compute"
+```
+
+---
+
+## 📊 v2.0 vs v5.0 COMPARISON
+
+### v2.0 (Rejected - Violated LEAN-OUT)
+
+```yaml
+approach: "All-in-one server with heavy services"
+tools: 98
+bundle_size: "~2MB"
+dependencies:
+  - typescript: "TypeScript compiler runtime"
+  - babel: "AST transformation"
+  - ml_libs: "ML inference"
+custom_code: "~8000 LOC"
+result: "❌ Crashed (ERR_MODULE_NOT_FOUND: typescript)"
+```
+
+### v5.0 (Approved - LEAN-OUT Compliant)
+
+```yaml
+approach: "Thin coordinator + existing tools"
+tools: 6 core + 2 Phase 2 additions
+bundle_size: "14.5kb"
+dependencies:
+  - "@modelcontextprotocol/sdk": "MCP protocol"
+  - "zod": "Validation"
+  - "ioredis": "Redis client (Phase 2)"
+custom_code: "311-511 LOC"
+result: "✅ Works, maintainable"
+```
+
+---
+
+## 🔧 CORE TOOLS (6)
+
+### 1. shim_auto_checkpoint
+**Purpose:** Auto-save session state  
+**Implementation:** CheckpointService  
+**Code:** Domain logic (~100 LOC)
 
 ```typescript
-// AUTOMATIC TOOLS (Claude uses without user knowing)
+case 'shim_auto_checkpoint': {
+  const context = input.context;
+  const checkpoint = await checkpointService.save(context);
+  return { success: true, checkpointId: checkpoint.id };
+}
+```
 
-1. shim_auto_checkpoint()
-   - Called every 3-5 Claude tool calls
-   - Saves current session state
-   - Returns: { success, checkpoint_id, elapsed_time }
-   - Silent operation (no user-facing output)
+### 2. shim_check_recovery
+**Purpose:** Detect incomplete sessions  
+**Implementation:** RecoveryService  
+**Code:** Domain logic (~80 LOC)
 
-2. shim_check_recovery()
-   - Called at session start
-   - Detects incomplete previous session
-   - Returns: { recovery_available, session_summary, timestamp }
-   - Shows recovery option to user IF detected
+```typescript
+case 'shim_check_recovery': {
+  const incomplete = await recoveryService.detect();
+  if (incomplete) {
+    return { 
+      needsRecovery: true,
+      checkpoint: incomplete.lastCheckpoint 
+    };
+  }
+  return { needsRecovery: false };
+}
+```
 
-3. shim_monitor_signals()
-   - Called automatically during session
-   - Detects crash warning signs
-   - Returns: { risk_level, signals_detected }
-   - Triggers preemptive checkpoint if high risk
+### 3. shim_monitor_signals
+**Purpose:** Collect crash warning signals  
+**Implementation:** SignalCollector  
+**Code:** Domain logic (~80 LOC)
 
-// USER-INVOKED TOOLS (Optional, for power users)
+```typescript
+case 'shim_monitor_signals': {
+  const signals = await signalService.collect();
+  const risk = calculateRisk(signals);
+  return { signals, risk, recommendation: getRecommendation(risk) };
+}
+```
 
-4. shim_analyze_code(directory)
-   - Code quality analysis
-   - Called when user asks "analyze this code"
-   - Returns: { opportunities, metrics, recommendations }
+### 4. shim_session_status
+**Purpose:** Report current session state  
+**Implementation:** SessionService  
+**Code:** Simple query (~30 LOC)
 
-5. shim_session_status()
-   - Shows current SHIM status
-   - Called when user asks "what's active?" or "status"
-   - Returns: { checkpoints, signals, recovery_available }
+```typescript
+case 'shim_session_status': {
+  const status = await sessionService.getStatus();
+  return status;
+}
+```
 
-6. shim_force_checkpoint()
-   - Manual checkpoint
-   - Called when user says "save checkpoint"
-   - Returns: { checkpoint_id, state_saved }
+### 5. shim_force_checkpoint
+**Purpose:** Manual checkpoint trigger  
+**Implementation:** CheckpointService  
+**Code:** Simple wrapper (~20 LOC)
+
+```typescript
+case 'shim_force_checkpoint': {
+  const checkpoint = await checkpointService.save(input.context, true);
+  return { success: true, checkpointId: checkpoint.id };
+}
+```
+
+### 6. shim_clear_state
+**Purpose:** Clear checkpoint data  
+**Implementation:** CheckpointService  
+**Code:** Simple delete (~20 LOC)
+
+```typescript
+case 'shim_clear_state': {
+  await checkpointService.clear();
+  return { success: true };
+}
 ```
 
 ---
 
-## 🔄 Automatic Workflow
+## 🚧 PHASE 2 ADDITIONS (2 tools)
 
-### Session Start
-```
-1. Claude Desktop starts
-2. SHIM MCP loads automatically
-3. shim_check_recovery() called
-4. IF recovery available:
-   → Show user: "⚠️ Resume previous session? [Yes/No]"
-   → User says yes → Restore context
-5. ELSE:
-   → Normal chat starts
-   → SHIM monitoring begins
-```
+### 7. shim_sync_state
+**Purpose:** Sync state across chat instances  
+**Implementation:** StateSynchronizer (Redis wrapper)  
+**Code:** Thin wrapper (~50 LOC)
 
-### During Session
-```
-Every 3-5 tool calls:
-  → shim_auto_checkpoint() (silent)
-  → State saved to D:\SHIM\data\checkpoints\
-
-Every 2 minutes:
-  → shim_monitor_signals() (silent)
-  → IF risk_level > 0.7:
-    → Force immediate checkpoint
-    → Warn user: "Heavy processing detected. Checkpoint saved."
+```typescript
+case 'shim_sync_state': {
+  await stateSynchronizer.sync(input.state);
+  return { success: true };
+}
 ```
 
-### On Crash
-```
-1. Claude crashes
-2. User restarts Claude
-3. New session starts
-4. shim_check_recovery() detects incomplete session
-5. Show recovery option
-6. User accepts → Full context restored
+### 8. shim_coordinate_task
+**Purpose:** Distribute tasks via BullMQ  
+**Implementation:** BullMQ wrapper  
+**Code:** Thin wrapper (~50 LOC)
+
+```typescript
+case 'shim_coordinate_task': {
+  const job = await taskQueue.add(input.task);
+  return { success: true, jobId: job.id };
+}
 ```
 
 ---
 
-## 💾 Data Storage
+## 📅 FUTURE TOOLS (Phases 4-6)
 
-### Directory Structure
-```
-D:\SHIM\data\
-├─ checkpoints\
-│  ├─ session-2026-01-12-15-30.json
-│  ├─ session-2026-01-12-15-35.json
-│  └─ session-2026-01-12-15-40.json (every 5 min)
-│
-├─ signals\
-│  └─ signal-history.db (SQLite)
-│
-└─ recovery\
-   └─ active-sessions.json (currently running)
+### Phase 4: Tool Composition
+
+**shim_analyze_code** - Spawn ESLint, TSC, etc.
+```typescript
+case 'shim_analyze_code': {
+  const results = await Promise.all([
+    exec('eslint --format json'),
+    exec('tsc --noEmit'),
+    exec('complexity-report --format json')
+  ]);
+  return aggregateResults(results);  // Optional ~50 LOC
+}
 ```
 
-### Checkpoint Format
+**shim_refactor_code** - Spawn jscodeshift
+```typescript
+case 'shim_refactor_code': {
+  return exec(`jscodeshift -t ${transform} ${path}`);
+}
+```
+
+**shim_get_metrics** - Query Grafana API
+```typescript
+case 'shim_get_metrics': {
+  return fetch('http://localhost:3000/api/metrics');
+}
+```
+
+### Phase 6: Kaizen (v6.0)
+
+**shim_run_experiment** - BullMQ scheduled job
+```typescript
+case 'shim_run_experiment': {
+  const job = await experimentQueue.add('experiment', data, {
+    repeat: { cron: '0 */4 * * *' }
+  });
+  return { success: true, jobId: job.id };
+}
+```
+
+---
+
+## 🏗️ ARCHITECTURE PATTERN
+
+### Thin Coordinator Pattern
+
+```
+┌─────────────────────────────────────┐
+│         MCP Server (stdio)          │
+│   6-8 tools │ 14.5kb │ 311-511 LOC  │
+└───────────┬─────────────────────────┘
+            │
+    ┌───────┼───────┬──────────┬──────────┐
+    │       │       │          │          │
+    ▼       ▼       ▼          ▼          ▼
+┌────────┐ ┌─────┐ ┌────────┐ ┌────────┐ ┌────────┐
+│Checkpoint│ │Redis│ │ spawn  │ │ fetch  │ │BullMQ  │
+│Service  │ │     │ │ eslint │ │ Grafana│ │        │
+└────────┘ └─────┘ └────────┘ └────────┘ └────────┘
+ Domain     Infra    Existing   Existing   Existing
+ Logic      Wrapper  Tool       Tool       Tool
+```
+
+### What MCP Server Does ✅
+- Routes tool calls
+- Validates inputs (zod)
+- Coordinates services
+- Returns results
+
+### What MCP Server Doesn't Do ❌
+- Heavy computation
+- AST parsing
+- Code transformation
+- ML inference
+- Dashboard rendering
+
+---
+
+## 📦 BUNDLE ANALYSIS
+
+### Dependencies
+
 ```json
 {
-  "checkpoint_id": "session-2026-01-12-15-35",
-  "timestamp": "2026-01-12T15:35:00Z",
-  "project": "GREGORE",
-  "current_task": "Implementing EPIC 42",
-  "progress": 0.65,
-  "decisions": [
-    "Use BullMQ for job queue",
-    "Redis for caching"
-  ],
-  "active_files": [
-    "D:\\GREGORE\\src\\queue\\JobProcessor.ts"
-  ],
-  "tool_calls": 12,
-  "duration_minutes": 25,
-  "next_steps": [
-    "Write tests for JobProcessor",
-    "Deploy queue infrastructure"
-  ],
-  "conversation_summary": "Building job queue system with BullMQ..."
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "Protocol implementation",
+    "zod": "Input validation",
+    "ioredis": "Redis client (Phase 2)"
+  },
+  "devDependencies": {
+    "esbuild": "Bundler",
+    "typescript": "Build only"
+  }
 }
 ```
 
----
+### Build Configuration
 
-## 🎛️ User-Facing Behavior
-
-### Completely Silent Operation (Default)
-
-**User perspective**:
-- Works in Claude normally
-- Doesn't notice checkpointing
-- Doesn't see SHIM at all
-- Just experiences: "Claude doesn't lose context anymore"
-
-### Optional Status Display
-
-**User asks**: "What's active?" or "Status"
-
-**Claude responds**:
-```
-✅ SHIM Active
-Last checkpoint: 2 minutes ago
-Session duration: 47 minutes
-12 checkpoints saved
-Recovery available: Yes (from 3 hours ago)
+```javascript
+// esbuild.config.js
+{
+  entryPoints: ['src/index.ts'],
+  bundle: true,
+  platform: 'node',
+  target: 'node18',
+  external: [], // Bundle everything except node built-ins
+  minify: true,
+  outfile: 'dist/index.js'
+}
 ```
 
-### Crash Recovery
-
-**Only shown when relevant**:
-```
-⚠️ Detected incomplete session from 3 hours ago:
-- Project: GREGORE
-- Task: Implementing EPIC 42
-- Progress: 65%
-- Last activity: Writing JobProcessor tests
-
-Resume? [Yes/No]
-```
+### Result
+- Input: 311-511 LOC TypeScript
+- Output: 14.5kb JavaScript bundle
+- Startup: ~50ms
+- Memory: ~10MB
 
 ---
 
-## 🔧 MCP Server Implementation
+## 🔄 REQUEST/RESPONSE FLOW
 
-### File: `D:\SHIM\mcp-server\src\index.ts`
+### Tool Invocation
+
+```
+1. Claude Desktop
+   ↓ (stdio/MCP protocol)
+2. MCP Server receives tool call
+   ↓ (validate with zod)
+3. Route to appropriate handler
+   ↓
+4. Execute handler
+   ├─ Domain logic (if core)
+   ├─ Redis operation (if Phase 2)
+   ├─ Spawn existing tool (if Phase 4)
+   └─ Fetch API (if Phase 4)
+   ↓
+5. Return result
+   ↓ (stdio/MCP protocol)
+6. Claude Desktop
+```
+
+### Example: shim_auto_checkpoint
 
 ```typescript
-import { Server } from '@modelcontextprotocol/sdk/server/index.js';
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import {
-  CallToolRequestSchema,
-  ListToolsRequestSchema,
-} from '@modelcontextprotocol/sdk/types.js';
-
-import { CheckpointManager } from './checkpoint-manager.js';
-import { SignalMonitor } from './signal-monitor.js';
-import { RecoveryService } from './recovery-service.js';
-
-const server = new Server(
-  {
-    name: 'shim-mcp',
-    version: '1.0.0',
-  },
-  {
-    capabilities: {
-      tools: {},
-    },
+// 1. Receive
+const request = {
+  method: 'tools/call',
+  params: {
+    name: 'shim_auto_checkpoint',
+    arguments: { context: { tokenCount: 145000, ... } }
   }
-);
+};
 
-// Initialize SHIM services
-const checkpoint = new CheckpointManager();
-const signals = new SignalMonitor();
-const recovery = new RecoveryService();
+// 2. Validate
+const input = CheckpointInputSchema.parse(request.params.arguments);
 
-// Tool definitions
-server.setRequestHandler(ListToolsRequestSchema, async () => ({
-  tools: [
-    {
-      name: 'shim_auto_checkpoint',
-      description: 'Automatically save session state (called by Claude)',
-      inputSchema: {
-        type: 'object',
-        properties: {
-          current_task: { type: 'string' },
-          progress: { type: 'number' },
-          decisions: { type: 'array', items: { type: 'string' } },
-          active_files: { type: 'array', items: { type: 'string' } },
-        },
-      },
-    },
-    {
-      name: 'shim_check_recovery',
-      description: 'Check for incomplete previous session',
-      inputSchema: { type: 'object', properties: {} },
-    },
-    {
-      name: 'shim_monitor_signals',
-      description: 'Monitor crash warning signals',
-      inputSchema: { type: 'object', properties: {} },
-    },
-    {
-      name: 'shim_analyze_code',
-      description: 'Analyze code quality',
-      inputSchema: {
-        type: 'object',
-        properties: {
-          directory: { type: 'string' },
-        },
-        required: ['directory'],
-      },
-    },
-    {
-      name: 'shim_session_status',
-      description: 'Show current SHIM status',
-      inputSchema: { type: 'object', properties: {} },
-    },
-  ],
-}));
+// 3. Execute
+const checkpoint = await checkpointService.save(input.context);
 
-// Tool handlers
-server.setRequestHandler(CallToolRequestSchema, async (request) => {
-  switch (request.params.name) {
-    case 'shim_auto_checkpoint':
-      return await checkpoint.save(request.params.arguments);
-    
-    case 'shim_check_recovery':
-      return await recovery.check();
-    
-    case 'shim_monitor_signals':
-      return await signals.monitor();
-    
-    case 'shim_analyze_code':
-      return await analyzeCode(request.params.arguments.directory);
-    
-    case 'shim_session_status':
-      return await getStatus();
-    
-    default:
-      throw new Error(`Unknown tool: ${request.params.name}`);
-  }
-});
-
-// Start server
-async function main() {
-  const transport = new StdioServerTransport();
-  await server.connect(transport);
-  console.error('SHIM MCP server running');
-}
-
-main();
+// 4. Return
+return {
+  content: [{
+    type: 'text',
+    text: JSON.stringify({ success: true, checkpointId: checkpoint.id })
+  }]
+};
 ```
 
 ---
 
-## 📝 Claude Desktop Configuration
+## 🧪 TESTING STRATEGY
 
-### File: `claude_desktop_config.json`
+### Unit Tests
+- Each tool handler
+- Input validation
+- Error handling
+- Edge cases
 
-Add SHIM MCP:
+### Integration Tests
+- MCP protocol compliance
+- stdio communication
+- Service integration
+
+### E2E Tests
+- Claude Desktop integration
+- Full workflow scenarios
+- Crash recovery flows
+
+---
+
+## 🔐 SECURITY
+
+### Input Validation
+```typescript
+// zod schemas for all inputs
+const CheckpointInputSchema = z.object({
+  context: z.object({
+    tokenCount: z.number(),
+    timeSinceCheckpoint: z.number(),
+    memoryUsage: z.number()
+  })
+});
+```
+
+### Error Handling
+```typescript
+try {
+  const result = await handler(input);
+  return success(result);
+} catch (error) {
+  return failure(error.message);
+}
+```
+
+### Rate Limiting
+- Not needed (local process)
+- Claude Desktop controls invocation rate
+
+---
+
+## 📈 PERFORMANCE
+
+### Startup Time
+- v2.0: ~500ms (heavy dependencies)
+- v5.0: ~50ms (minimal dependencies)
+- **Improvement:** 10x faster
+
+### Memory Usage
+- v2.0: ~150MB (TypeScript compiler loaded)
+- v5.0: ~10MB (minimal footprint)
+- **Improvement:** 15x less
+
+### Tool Invocation
+- Target: <2s per tool call
+- Actual: <100ms for core tools
+- **Result:** ✅ Well within target
+
+---
+
+## 🚀 DEPLOYMENT
+
+### Claude Desktop Integration
 
 ```json
+// claude_desktop_config.json
 {
   "mcpServers": {
     "shim": {
@@ -331,108 +424,29 @@ Add SHIM MCP:
 }
 ```
 
-**That's it!** SHIM auto-loads on Claude Desktop start.
+### Health Check
+
+```bash
+# Test server directly
+node D:\SHIM\mcp-server\dist\index.js
+
+# Should output MCP protocol handshake
+# and stay running (stdio mode)
+```
 
 ---
 
-## 🎯 Implementation Plan
+## 📚 RELATED DOCUMENTS
 
-### Phase 1: Core MCP Server (4-6 hours)
-- [x] Create MCP server structure
-- [ ] Implement auto-checkpoint tool
-- [ ] Implement recovery check tool
-- [ ] Implement signal monitor tool
-- [ ] Test with Claude Desktop
-
-### Phase 2: Auto-Invocation (2-3 hours)
-- [ ] Configure Claude to call checkpoint every 3-5 tool calls
-- [ ] Configure Claude to check recovery at session start
-- [ ] Configure silent operation (no user-facing output)
-
-### Phase 3: Intelligence Layer (3-4 hours)
-- [ ] Integrate code analysis from existing SHIM
-- [ ] Add session status tool
-- [ ] Add manual checkpoint tool
-
-### Phase 4: Testing & Polish (2 hours)
-- [ ] Test crash recovery flow
-- [ ] Test cross-project persistence
-- [ ] Test signal detection
-- [ ] Documentation
-
-**Total**: ~12 hours development
+- `ARCHITECTURE.md` - Overall system architecture
+- `ROADMAP.md` - Project phases and timeline
+- `CLAUDE_INSTRUCTIONS_PROJECT.md` - Development guide
+- `MCP_LEAN_OUT_REDESIGN.md` - v2→v5 evolution
 
 ---
 
-## ✅ Success Criteria
-
-### User Experience
-- ✅ User works in Claude (any project, any chat)
-- ✅ Claude never loses context (auto-recovery)
-- ✅ No manual checkpointing needed
-- ✅ No SHIM visibility (unless asked)
-- ✅ "Just works™"
-
-### Technical Validation
-- ✅ MCP server auto-loads on Claude start
-- ✅ Auto-checkpoint every 3-5 tool calls
-- ✅ Recovery option shown after crash
-- ✅ Checkpoints persist across sessions
-- ✅ Works in all projects (GREGORE, FINEPRINT, etc.)
-
-### SHIM Project Status
-- ✅ No further work needed (maintenance only)
-- ✅ Infrastructure "disappears" into background
-- ✅ Updates only when enhancing capabilities
-
----
-
-## 🚀 After Implementation
-
-### What You'll Experience
-
-**Day 1**: 
-- Install MCP server
-- Restart Claude Desktop
-- SHIM loads silently
-
-**Day 2+**:
-- Work normally in Claude
-- Don't think about checkpoints
-- Don't think about crashes
-- Context just persists
-
-**If Claude crashes**:
-- Restart Claude
-- See: "Resume previous session?"
-- Click yes
-- Continue where you left off
-
-**SHIM project**:
-- Sits in D:\SHIM
-- Rarely touched
-- Only update when adding new capabilities
-- Infrastructure layer
-
----
-
-## 🎓 This Is The Vision
-
-**SHIM = Claude+**
-
-Not a tool. Not a feature. **Infrastructure.**
-
-Like how your OS manages memory - you don't think about it, it just works.
-
-**Questions**:
-1. Should I build the MCP server now? (12 hours)
-2. Want me to start with Phase 1 (core)?
-3. Or would you prefer to review the architecture first?
-
-**After this is done**:
-- SHIM project becomes maintenance-only
-- You never manually checkpoint
-- Claude just becomes more reliable
-- Infrastructure "disappears"
-
-**This is Claude+.** Ready to build it?
+**Version:** 5.0 (LEAN-OUT Architecture)  
+**Bundle Size:** 14.5kb  
+**Tools:** 6 core + 2 Phase 2  
+**Principle:** Coordinate, Don't Compute  
+**Updated:** January 12, 2026

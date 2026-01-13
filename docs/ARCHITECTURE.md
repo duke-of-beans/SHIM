@@ -1,800 +1,417 @@
-# 🏗️ SHIM Architecture
+# SHIM ARCHITECTURE - v5.0 (LEAN-OUT)
 
-**Version:** 0.2.0 (Analytics & Model Routing Added)  
-**Last Updated:** January 11, 2026
-
-## Overview
-
-**SHIM** (thin layer that intercepts and enhances AI platform capabilities) is a comprehensive **self-improving** system enabling autonomous AI-assisted development through:
-- Crash Prevention & Recovery
-- Intelligent Model Routing (NEW)
-- Analytics & Auto-Experimentation (NEW - Kaizen Loop)
-- Multi-Chat Coordination  
-- Self-Evolution Engine
-- Zero-Intervention Development
-
-**Target:** Professional developers using Claude Desktop 4+ hours/day
-
-**Name Etymology:** In computing, a shim is a library that transparently intercepts API calls and changes the arguments passed, handles the operation itself, or redirects the operation elsewhere. SHIM intercepts Claude Desktop's capabilities and enhances them with persistence, coordination, and intelligence.
-
-**NEW: Fully Automatic Self-Improvement**
-- Continuous A/B testing without human intervention
-- Statistical validation and gradual rollout
-- Automatic parameter tuning within safety bounds
-- Zero manual improvement application required
+**Version:** 5.0  
+**Updated:** January 12, 2026  
+**Philosophy:** Build Intelligence, Not Plumbing
 
 ---
 
-## LEAN-OUT Principle
+## 🎯 ARCHITECTURAL PRINCIPLE
 
-> "Build intelligence, not plumbing. Use battle-tested tools for generic problems."
+```yaml
+lean_out_rule:
+  build: "Intelligence (domain-specific logic)"
+  use: "Existing tools (battle-tested infrastructure)"
+  avoid: "Plumbing (generic infrastructure)"
 
-**Infrastructure Stack:**
-- **Redis + BullMQ** - Job queues, messaging, locks
-- **Prometheus + Grafana** - Metrics storage, dashboards
-- **Statsig** - A/B testing, experiments
-- **simple-statistics** - Statistical validation
-- **SQLite** - Local persistence
-- **File System** - Large payloads
-
-**Custom Code Focus:**
-- Domain-specific logic only
-- SHIM-specific intelligence
-- Minimal wrappers (<100 LOC)
-
-**Result:** ~2,770 LOC custom code (vs 5,000+ without LEAN-OUT)
-
----
-
-## ARCHITECTURE COMPONENTS
-
-### Component 1: Crash Prevention System ✅ COMPLETE
-
-**Status:** Phase 1 Weeks 1-6 Complete
-
-**Key Features:**
-- Predictive crash detection via observable signals
-- Continuous state serialization every N tool calls
-- Auto-pause before predicted crash
-- Instant resume with full context reconstruction
-
-**Observable Signals:**
-- Response latency (threshold: 500ms baseline × 2.5)
-- Message count (threshold: 50+)
-- Total tokens (threshold: >50% context window)
-- Tool failure rate (threshold: >20%)
-- Session duration (threshold: >90 minutes)
-
-**Checkpoint Schema:**
-- Conversation state (messages, summary, decisions)
-- Task state (operation, phase, progress, blockers)
-- File state (active, modified, staged, uncommitted diff)
-- Tool state (active sessions, pending operations)
-
-**Implemented Components:**
-- SignalCollector (238 LOC, 53 tests) ✅
-- SignalHistoryRepository (314 LOC, 18 tests) ✅
-- CheckpointRepository (600+ LOC, 24 tests) ✅
-- CheckpointManager (218 LOC, 19 tests) ✅
-- ResumeDetector (213 LOC, 18 tests) ✅
-- SessionRestorer (296 LOC, 13 tests) ✅
-- SessionStarter (8 tests) ✅
-
-**Next:** Supervisor Daemon (Week 7-8)
-
----
-
-### Component 1.5: Analytics & Auto-Experimentation (NEW)
-
-**Status:** Designed (Phase 1.5)
-
-**Purpose:** Fully automatic self-improvement via Kaizen loop.
-
-**Architecture (LEAN-OUT):**
-```
-┌─────────────────────────────────────┐
-│    SHIM Core Components             │
-│  (Crash Prevention, Model Routing)  │
-└───────────────┬─────────────────────┘
-                │ Emit metrics
-                ▼
-┌─────────────────────────────────────┐
-│      PROMETHEUS (Battle-Tested)     │
-│    Time-series metrics storage      │
-│    prom-client (Node.js)            │
-└───────────────┬─────────────────────┘
-                │ Query metrics
-                ▼
-┌─────────────────────────────────────┐
-│   OpportunityDetector (CUSTOM)      │
-│   ~150 LOC - SHIM-specific          │
-│   Pattern detection                 │
-└───────────────┬─────────────────────┘
-                │ Opportunities
-                ▼
-┌─────────────────────────────────────┐
-│      STATSIG (Battle-Tested)        │
-│    A/B testing framework            │
-│    Free tier, automatic rollout     │
-└───────────────┬─────────────────────┘
-                │ Experiments
-                ▼
-┌─────────────────────────────────────┐
-│  simple-statistics (Battle-Tested)  │
-│    Statistical validation           │
-│    T-tests, p-values, effect sizes  │
-└───────────────┬─────────────────────┘
-                │ Validated
-                ▼
-┌─────────────────────────────────────┐
-│    SafetyBounds (CUSTOM)            │
-│    ~150 LOC - SHIM-specific         │
-│    Domain safety rules              │
-└───────────────┬─────────────────────┘
-                │ Deploy
-                └──► Auto-apply to SHIM
-                     (Kaizen loop)
+decision_framework:
+  generic_infrastructure: "Use existing tools ✅"
+  domain_logic: "Build custom ✅"
+  custom_infrastructure: "❌ NEVER"
 ```
 
-#### Battle-Tested Tools (Zero Custom LOC)
+---
 
-**Prometheus** - Metrics collection
-- Industry standard (10+ years)
-- Node.js client: `prom-client`
-- Perfect for time-series metrics
-- Free, open-source
+## 📊 SYSTEM OVERVIEW
 
-**Grafana** - Dashboards
-- Built for Prometheus
-- Professional dashboards out-of-box
-- Free, open-source
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     Claude Desktop                           │
+│                  (Multiple Instances)                        │
+└──────────────────┬──────────────────────────────────────────┘
+                   │ stdio (MCP Protocol)
+                   ▼
+┌─────────────────────────────────────────────────────────────┐
+│              MCP Server (Thin Coordinator)                   │
+│  6-8 core tools │ 14.5kb bundle │ 311-511 LOC               │
+└──────────────┬──────────────────────────────────────────────┘
+               │
+    ┌──────────┼──────────┬──────────────┬──────────────┐
+    │          │          │              │              │
+    ▼          ▼          ▼              ▼              ▼
+┌────────┐ ┌────────┐ ┌─────────┐ ┌──────────┐ ┌────────────┐
+│SQLite  │ │ Redis  │ │ BullMQ  │ │ ESLint   │ │  Grafana   │
+│Local   │ │State   │ │ Queues  │ │jscodeshift│ │Prometheus │
+│Persist │ │Pub/Sub │ │Schedule │ │Analysis  │ │Monitoring │
+└────────┘ └────────┘ └─────────┘ └──────────┘ └────────────┘
+   Core      Redis      Redis      Existing    Existing
+   (Phase1)  (Phase2)   (Phase2)   (Phase4)    (Phase5)
+```
 
-**Statsig** - A/B Testing
-- Automatic experiment management
-- Statistical validation included
-- Gradual rollout built-in
-- Free tier available
+---
 
-**simple-statistics (npm)** - Statistical analysis
-- T-tests, p-values, effect sizes
-- 130k+ downloads/week
-- Well-tested, maintained
+## 🏗️ LAYERED ARCHITECTURE
 
-#### Custom Components (~570 LOC)
+### Layer 1: MCP Server (Coordination)
+**Role:** Thin stdio coordinator  
+**Code:** 311-511 LOC  
+**Responsibility:** Route tool calls to appropriate systems
 
-**SHIMMetrics** (~100 LOC)
 ```typescript
-// Prometheus metric definitions
-class SHIMMetrics {
-  // Crash prevention metrics
-  crash_prediction_accuracy: Gauge;
-  checkpoint_creation_time: Histogram;
-  resume_success_rate: Gauge;
-  
-  // Model routing metrics
-  model_routing_accuracy: Gauge;
-  model_override_rate: Gauge;
-  token_savings_total: Counter;
-  
-  // Multi-chat metrics
-  parallel_tasks_active: Gauge;
-  coordination_overhead: Histogram;
+// MCP Server - Thin coordination only
+case 'shim_auto_checkpoint':
+  return checkpointService.save(context);
+
+case 'shim_analyze_code':
+  return spawn('npm', ['run', 'lint:json']);  // Use existing tool
+
+case 'shim_monitor_metrics':
+  return fetch('http://localhost:3000/api/metrics');  // Query Grafana
+```
+
+### Layer 2: Core Services (Domain Logic)
+**Role:** SHIM-specific intelligence  
+**Code:** 311 LOC (Phase 1)  
+**Components:**
+- CheckpointService - Session state management
+- RecoveryService - Incomplete session detection
+- SignalService - Crash warning heuristics
+- SessionService - Session lifecycle
+
+**Key:** This IS domain intelligence - build custom ✅
+
+### Layer 3: Infrastructure (Thin Wrappers)
+**Role:** Minimal wrappers around existing tools  
+**Code:** 200-300 LOC (Phases 2-3)  
+**Components:**
+- RedisConnectionManager (~100 LOC)
+- MessageBusWrapper (~50 LOC)
+- WorkerRegistry (~50 LOC)
+- StateSynchronizer (~50 LOC)
+- LockManager (~50 LOC)
+
+**Key:** Just wrappers, not implementations
+
+### Layer 4: Existing Tools (Battle-Tested)
+**Role:** Heavy lifting  
+**Code:** 0 LOC custom  
+**Tools:**
+- Redis - State, Pub/Sub, Locking
+- BullMQ - Job queues, Scheduling
+- ESLint - Code analysis
+- jscodeshift - Code transformation
+- Grafana - Dashboards
+- Prometheus - Metrics
+
+**Key:** Don't rebuild these ❌
+
+---
+
+## 🔧 COMPONENT BREAKDOWN
+
+### Phase 1: Core (✅ Complete)
+
+#### SignalCollector
+```typescript
+// Domain intelligence - worth building
+class SignalCollector {
+  collectSignals(): CrashRisk {
+    // SHIM-specific heuristics
+    const tokenRisk = this.tokenCount > 150000 ? 0.3 : 0;
+    const timeRisk = this.timeSinceCheckpoint > 480000 ? 0.4 : 0;
+    const memoryRisk = this.memoryUsage > 0.8 ? 0.3 : 0;
+    return { risk: tokenRisk + timeRisk + memoryRisk };
+  }
 }
 ```
 
-**OpportunityDetector** (~150 LOC)
+#### CheckpointRepository
 ```typescript
-// SHIM-specific pattern detection
-class OpportunityDetector {
-  detectPatterns(): Opportunity[] {
-    // "Checkpoint interval=5 causes 12% of crashes"
-    // "Model routing wrong for 'architecture' queries"
-    // "Context pruning saves 2.4M tokens/month"
+// Simple persistence - use SQLite (existing)
+class CheckpointRepository {
+  async save(checkpoint: Checkpoint): Promise<void> {
+    await this.db.run(
+      'INSERT INTO checkpoints...',
+      checkpoint
+    );
+  }
+}
+```
+
+### Phase 2: Redis (🚧 40% Complete)
+
+#### RedisConnectionManager
+```typescript
+// Thin wrapper - minimal custom code
+class RedisConnectionManager {
+  private client: Redis;  // ioredis library
+  
+  async connect(): Promise<void> {
+    this.client = new Redis(config);  // Use existing
+    this.setupHealthChecks();         // ~20 LOC custom
+  }
+}
+```
+
+#### MessageBusWrapper
+```typescript
+// Thin wrapper over Redis Pub/Sub
+class MessageBusWrapper {
+  async publish(channel: string, message: any): Promise<void> {
+    await this.redis.publish(channel, JSON.stringify(message));
   }
   
-  formHypothesis(pattern: Pattern): Hypothesis {
-    // "Reducing interval to 3 prevents 12% of crashes"
+  async subscribe(channel: string, handler: Function): Promise<void> {
+    await this.redis.subscribe(channel);
+    this.redis.on('message', (ch, msg) => handler(JSON.parse(msg)));
   }
+}
+```
+
+### Phase 4: Tool Composition (📅 Planned)
+
+#### Code Analysis - Use Existing ✅
+```typescript
+// Don't build custom analyzer - use existing tools
+async function analyzeCode(path: string) {
+  const results = await Promise.all([
+    exec('eslint --format json'),        // Use ESLint
+    exec('tsc --noEmit'),                 // Use TypeScript
+    exec('complexity-report --format json'),  // Use complexity-report
+    exec('jscpd --format json')          // Use jscpd
+  ]);
   
-  proposeExperiment(hypothesis: Hypothesis): ExperimentProposal {
-    // Design A/B test with variants
-  }
+  // Optional: Aggregate results (~50 LOC)
+  return aggregateResults(results);
 }
 ```
 
-**StatsigIntegration** (~70 LOC)
+#### Code Transformation - Use Existing ✅
 ```typescript
-// Wrapper around Statsig SDK
-class StatsigIntegration {
-  createExperiment(proposal: ExperimentProposal): Experiment;
-  getVariant(experimentId: string): Variant;
-  logOutcome(experimentId: string, outcome: Outcome): void;
-  checkResults(experimentId: string): ExperimentResults;
+// Don't build custom transformer - use jscodeshift
+async function refactorCode(path: string, transform: string) {
+  return exec(`jscodeshift -t ${transform} ${path}`);
 }
 ```
 
-**SafetyBounds** (~150 LOC)
-```typescript
-// SHIM-specific safety enforcement
-class SafetyBounds {
-  validateSafety(improvement: Improvement): boolean {
-    // Cost bounds (max $20/week increase)
-    if (improvement.costIncrease > 20) return false;
-    
-    // Performance bounds (max 100ms latency increase)
-    if (improvement.latencyIncrease > 100) return false;
-    
-    // Quality bounds (never sacrifice accuracy)
-    if (improvement.accuracyDecrease > 0) return false;
-    
-    return true;
-  }
-  
-  monitorDeployment(improvement: Improvement): void {
-    // Automatic rollback if regression detected
-  }
-}
-```
-
-**EventEmitter** (~100 LOC)
-```typescript
-// Domain event emission
-class EventEmitter {
-  trackEvent(event: SHIMEvent): void {
-    // Wrap existing operations with events
-    // Feed into Prometheus metrics
-  }
-}
-```
-
-#### Kaizen Loop (Fully Automatic)
-
-```
-1. SHIM operates normally
-   ↓ Emit metrics (prom-client)
-   
-2. Prometheus stores metrics
-   ↓ OpportunityDetector queries
-   
-3. Detect patterns
-   ↓ Form hypothesis
-   
-4. Design experiment
-   ↓ Statsig creates A/B test
-   
-5. Run experiment (automatic)
-   ↓ 50% control, 50% treatment
-   
-6. Validate results
-   ↓ simple-statistics (t-test, p-value)
-   
-7. Check safety
-   ↓ SafetyBounds enforcement
-   
-8. Gradual rollout (automatic)
-   ↓ 10% → 50% → 100%
-   
-9. Monitor for regression
-   ↓ Auto-rollback if needed
-   
-10. Deploy or rollback
-    ↓ Log improvement
-    
-[LOOP - Zero human intervention]
-```
-
-#### User Control (Override Mechanism)
-
-```typescript
-// User sets bounds (optional)
-shimConfig.autoImprovement = {
-  enabled: true,
-  maxCostIncrease: 20,  // $/week
-  maxLatencyIncrease: 100,  // ms
-  requireApproval: ['model_routing_changes'],
-  autoApprove: ['checkpoint_tuning', 'compression']
-};
-
-// User sees monthly report
-SHIM Auto-Improvements This Month:
-✓ Checkpoint interval optimized (-12% crash rate)
-✓ Model routing improved (+25% accuracy)
-✓ Context pruning enhanced (2.4M tokens saved)
-
-Net benefit: $119 + 8.5 hours saved
-```
-
-**Default:** Automatic within safety bounds. User can override/rollback anytime.
-
----
-
-### Component 2: Intelligent Model Routing (NEW)
-
-**Status:** Designed (Phase 2)
-
-**Purpose:** Automatic model selection with token optimization.
-
-**Problem Solved:**
-- User manually picks Opus vs Sonnet for each chat
-- Wastes expensive tokens on simple tasks
-- Wastes time with cheaper models on complex tasks
-- No learning from user behavior
-
-**Solution:** Automatic routing to cheapest capable model + learning system.
-
-#### Architecture
-
-```
-User Prompt
-     ↓
-┌─────────────────────────────────────┐
-│   PromptAnalyzer (~150 LOC)         │
-│   - Complexity detection            │
-│   - Keyword extraction              │
-│   - Task classification             │
-└───────────────┬─────────────────────┘
-                ↓
-┌─────────────────────────────────────┐
-│   ModelRouter (~200 LOC)            │
-│   - Routing heuristics              │
-│   - Confidence scoring              │
-│   - Cost estimation                 │
-└───────────────┬─────────────────────┘
-                ↓
-┌─────────────────────────────────────┐
-│   Recommended Model                 │
-│   (Haiku / Sonnet / Opus)           │
-└───────────────┬─────────────────────┘
-                ↓
-┌─────────────────────────────────────┐
-│   User Override? (optional)         │
-│   @opus, @sonnet, @haiku            │
-└───────────────┬─────────────────────┘
-                ↓
-┌─────────────────────────────────────┐
-│   OverrideLearningSystem (~100 LOC) │
-│   - Track patterns                  │
-│   - Update heuristics (via Statsig) │
-└─────────────────────────────────────┘
-```
-
-#### Components (~400 LOC custom)
-
-**PromptAnalyzer** (~150 LOC)
-```typescript
-interface PromptAnalysis {
-  complexity: 'simple' | 'medium' | 'complex';
-  requiresReasoning: boolean;
-  requiresCreativity: boolean;
-  hasCodeGeneration: boolean;
-  contextSize: number;
-  keywords: string[];
-}
-
-class PromptAnalyzer {
-  analyze(prompt: string): PromptAnalysis {
-    // Keyword detection
-    // Complexity scoring
-    // Task classification
-  }
-}
-```
-
-**ModelRouter** (~200 LOC)
-```typescript
-interface ModelRoutingDecision {
-  model: 'opus' | 'sonnet' | 'haiku';
-  confidence: number;
-  reasoning: string;
-  estimatedTokens: number;
-  costEstimate: number;
-}
-
-class ModelRouter {
-  route(prompt: string): ModelRoutingDecision {
-    // Initial heuristics:
-    // Haiku: Simple ops, CRUD, formatting
-    // Sonnet: Code, refactoring, tests
-    // Opus: Architecture, complex debugging
-  }
-}
-```
-
-**OverrideLearningSystem** (~100 LOC)
-```typescript
-class OverrideLearningSystem {
-  recordOverride(
-    original: Model,
-    override: Model,
-    prompt: string
-  ): void {
-    // Track user corrections
-  }
-  
-  detectPatterns(): RoutingPattern[] {
-    // "User always forces Opus for 'architecture'"
-  }
-  
-  updateHeuristics(pattern: RoutingPattern): void {
-    // Via Statsig A/B test
-    // Validate improvement
-    // Auto-deploy if proven
-  }
-}
-```
-
-**TokenEstimator** (~50 LOC)
-```typescript
-class TokenEstimator {
-  estimate(prompt: string): number {
-    // Using tiktoken library
-  }
-  
-  calculateCost(tokens: number, model: Model): number {
-    // Opus: $15/$75 per 1M tokens
-    // Sonnet: $3/$15 per 1M tokens
-    // Haiku: $0.25/$1.25 per 1M tokens
-  }
-}
-```
-
-#### Token Optimization Strategies
-
-**From GREGORE lessons:**
-1. Structured data > prose (JSON index vs markdown = 12x faster)
-2. Aggressive checkpointing (every 2-3 tool calls)
-3. Smart context pruning (keep only relevant history)
-
-**New SHIM features:**
-4. Model routing (automatic model selection)
-5. Token budget enforcement (per-task limits)
-6. Learning system (improve routing over time)
-
-#### Integration with Analytics
-
-**Metrics emitted:**
-```typescript
-// Model routing decision
-analytics.track({
-  type: 'model_routing_decision',
-  data: {
-    recommended: 'sonnet',
-    confidence: 0.87,
-    factors: { complexity: 'medium', hasCode: true }
-  }
-});
-
-// User override
-analytics.track({
-  type: 'model_override',
-  data: {
-    original: 'sonnet',
-    override: 'opus',
-    reason: 'needs strategic thinking'
-  }
-});
-```
-
-**Auto-improvement via Statsig:**
-- Detect: "40% override rate for 'architecture' prompts"
-- Hypothesis: "Auto-select Opus for architecture"
-- Test: A/B test for 7 days
-- Validate: Override rate drops to 15%
-- Deploy: Automatically if statistically significant
-
----
-
-### Component 3: Multi-Chat Coordination Protocol
-
-**Status:** Designed (Phase 3)
-
-**Infrastructure:** Redis + BullMQ (LEAN-OUT)
-
-**Key Features:**
-- Shared state via Redis
-- Work delegation with BullMQ job queues
-- Supervisor/Worker coordination pattern
-- Cross-chat communication via Redis Pub/Sub
-
-**Architecture Pattern:**
-```
-┌─────────────────┐
-│  SUPERVISOR     │ (Project-level orchestration)
-│  Claude Chat    │
-└────────┬────────┘
-         │ Task assignment via BullMQ
-         ▼
-┌────────────────────────────────┐
-│  WORKER POOL                   │
-│  ┌──────┐ ┌──────┐ ┌──────┐   │
-│  │Chat 1│ │Chat 2│ │Chat 3│   │
-│  └──────┘ └──────┘ └──────┘   │
-└────────────────────────────────┘
-         │ Progress updates (Redis Pub/Sub)
-         ▼
-┌─────────────────┐
-│  REDIS + BullMQ │ (Shared infrastructure)
-│  - Job queues   │
-│  - Pub/Sub      │
-│  - Locks        │
-└─────────────────┘
-         │
-         ▼
-┌─────────────────┐
-│  SQLite         │ (Local persistence)
-│  - Checkpoints  │
-│  - Analytics    │
-└─────────────────┘
-```
-
-**LEAN-OUT Analysis:**
-```
-PROBLEM: Job queue, message bus, locks
-CUSTOM: Build from scratch (BAD - 1,500 LOC)
-LEAN-OUT: Redis + BullMQ (GOOD - 300 LOC wrappers)
-
-Savings: 1,200 LOC eliminated
-```
-
-**Custom Wrappers (~300 LOC):**
-- ChatRegistry (~100 LOC)
-- TaskQueue wrapper (~100 LOC)
-- MessageBus wrapper (~100 LOC)
-
----
-
-### Component 4: Self-Evolution Engine (Expanded)
-
-**Status:** Designed (Phase 4)
-
-**Purpose:** Expand auto-experimentation to all components.
-
-**Builds on Phase 1.5 Analytics Infrastructure:**
-- Phase 1.5: Basic Kaizen loop (checkpoint tuning, model routing)
-- Phase 4: Advanced experiments (cross-component, user modeling)
-
-#### Advanced Experimentation
-
-**Cross-Component Learning:**
-```typescript
-// Example: Optimize entire workflow
-experiment = {
-  name: 'crash_prevention_workflow',
-  hypothesis: 'Combined improvements across components',
-  variants: {
-    control: {
-      checkpointInterval: 5,
-      modelRouting: 'conservative',
-      contextPruning: 'minimal'
-    },
-    treatment: {
-      checkpointInterval: 3,
-      modelRouting: 'aggressive',
-      contextPruning: 'smart'
-    }
-  },
-  metrics: ['crash_rate', 'cost', 'user_satisfaction']
-};
-```
-
-**User Behavior Modeling:**
-```typescript
-// Learn personal preferences
-userModel = {
-  preferredModels: {
-    'architecture': 'opus',
-    'implementation': 'sonnet',
-    'tests': 'haiku'
-  },
-  workPatterns: {
-    morningFocus: 'strategic',
-    afternoonFocus: 'implementation'
-  },
-  tolerances: {
-    maxLatency: 200,  // ms
-    maxCost: 30  // $/week
-  }
-};
-```
-
-#### Guardrails
-
-```typescript
-interface EvolutionGuardrails {
-  // Safety limits
-  maxAutoChangesPerSession: 3;
-  requireHumanApproval: ['Level 3 changes', 'Breaking changes'];
-  rollbackOnRegression: true;
-  
-  // Validation gates
-  mustImproveMetrics: ['crashRate', 'interventionRate'];
-  mustNotDegrade: ['responseLatency', 'successRate'];
-  
-  // Audit trail
-  logAllChanges: true;
-  enableRevert: true;
-}
+#### Monitoring - Use Existing ✅
+```yaml
+# Don't build custom dashboard - use Grafana
+monitoring:
+  metrics_collection: "Prometheus"
+  dashboards: "Grafana"
+  alerts: "Alertmanager"
+  custom_code: "0 LOC"
 ```
 
 ---
 
-### Component 5: Autonomous Development Engine
+## 🔄 DATA FLOW
 
-**Status:** Designed (Phase 5)
-
-**Purpose:** Execute development workflows without human intervention.
-
-**Dependencies:** Multi-chat + Self-evolution
-
-#### Autonomous Workflow Types
-
-**Type A: Code Implementation (Supervised)**
+### Checkpoint Flow
 ```
-User: "Implement feature X"
-      │
-      ▼
-┌─────────────────────────────────────────────┐
-│  AUTONOMOUS EXECUTION                        │
-│                                              │
-│  1. Parse requirement                        │
-│  2. Design approach (checkpoint)             │
-│  3. Implement code                           │
-│  4. Run TypeScript check                     │
-│  5. Run tests                                │
-│  6. Auto-commit if clean                     │
-│  7. Report completion                        │
-│                                              │
-│  Escalate if: Test failures, ambiguity,     │
-│               architectural decisions        │
-└─────────────────────────────────────────────┘
+Claude Action
+   ↓
+MCP Tool Call (shim_auto_checkpoint)
+   ↓
+CheckpointService (domain logic)
+   ↓
+SQLite (local persist)
+   ↓
+Redis (distributed state) - Phase 2
 ```
 
-**Type B: Background Monitoring (Unsupervised)**
+### Multi-Chat Coordination Flow (Phase 3)
 ```
-┌─────────────────────────────────────────────┐
-│  BACKGROUND PROCESSES                        │
-│                                              │
-│  • Watch file changes → Auto-compile        │
-│  • Monitor build → Alert on failures        │
-│  • Track git status → Suggest commits       │
-│  • Observe patterns → Suggest optimizations │
-│                                              │
-│  Runs continuously. No escalation needed.   │
-└─────────────────────────────────────────────┘
+Chat Instance A
+   ↓
+MCP Tool Call (send_message)
+   ↓
+MessageBusWrapper (thin wrapper)
+   ↓
+Redis Pub/Sub (existing tool)
+   ↓
+MessageBusWrapper (thin wrapper)
+   ↓
+Chat Instance B
 ```
 
-**Type C: Recovery Operations (Automatic)**
+### Code Analysis Flow (Phase 4)
 ```
-┌─────────────────────────────────────────────┐
-│  AUTO-RECOVERY                               │
-│                                              │
-│  Detect crash → Load checkpoint              │
-│             → Restore context                │
-│             → Continue operation             │
-│             → Notify user if desired         │
-│                                              │
-│  Zero intervention. Self-healing.            │
-└─────────────────────────────────────────────┘
+User Request
+   ↓
+MCP Tool Call (shim_analyze_code)
+   ↓
+Process Spawn (exec)
+   ↓
+ESLint, TSC, complexity-report (existing tools)
+   ↓
+Optional Aggregator (~50 LOC)
+   ↓
+Return Results
 ```
 
 ---
 
-## Complete System Architecture
+## 📏 CODE BUDGET
 
+### By Phase
+
+| Phase | Component | Custom LOC | Existing Tools |
+|-------|-----------|------------|----------------|
+| 1 | Core Services | 311 | SQLite |
+| 2 | Redis Wrappers | +200 | Redis, BullMQ |
+| 3 | Coordination | +200 | Redis Pub/Sub, Redlock |
+| 4 | Tool Composition | +0-200 | ESLint, jscodeshift, Grafana |
+| 5 | Production | +100 | Prometheus, Alertmanager |
+| 6 | Kaizen (v6.0) | +300 | BullMQ cron |
+| **Total** | **1011-1311** | **vs 8000 in v2.0** |
+
+### By Category
+
+| Category | Custom Code | Existing Tool | Decision |
+|----------|-------------|---------------|----------|
+| Domain Logic | 611 LOC | N/A | ✅ Build (intelligence) |
+| Thin Wrappers | 400 LOC | Redis, BullMQ | ✅ Build (minimal) |
+| Infrastructure | 0 LOC | Redis, BullMQ | ✅ Use existing |
+| Analysis | 0 LOC | ESLint, TSC | ✅ Use existing |
+| Transformation | 0 LOC | jscodeshift | ✅ Use existing |
+| Monitoring | 0 LOC | Grafana | ✅ Use existing |
+
+---
+
+## 🎯 ARCHITECTURAL DECISIONS
+
+### Decision 1: MCP Server Size
+**Question:** How many tools in MCP server?  
+**Decision:** 6-8 core tools only  
+**Rationale:** Thin coordinator, not computation engine  
+**Result:** 14.5kb bundle (was 2MB in v2.0)
+
+### Decision 2: Redis vs Custom Queue
+**Question:** Build custom job queue?  
+**Decision:** Use BullMQ + Redis  
+**Rationale:** Battle-tested, feature-rich, maintained  
+**Result:** 0 LOC custom queue code
+
+### Decision 3: Code Analysis
+**Question:** Build AST analyzer?  
+**Decision:** Use ESLint, TSC, complexity-report  
+**Rationale:** Existing tools better than custom  
+**Result:** 0 LOC custom analyzer
+
+### Decision 4: Monitoring Dashboard
+**Question:** Build custom dashboard?  
+**Decision:** Use Grafana + Prometheus  
+**Rationale:** Grafana far superior to custom UI  
+**Result:** 0 LOC custom dashboard
+
+### Decision 5: Kaizen Loop Timing
+**Question:** Build Kaizen now?  
+**Decision:** Defer to v6.0  
+**Rationale:** Prove core value first  
+**Result:** Focus on Phases 1-5 stability
+
+---
+
+## 🔐 SECURITY
+
+### Authentication
+- Local SQLite - No auth needed
+- Redis - Optional password
+- MCP - stdio (local process)
+- Grafana - User auth
+
+### Data Privacy
+- Checkpoints stored locally (SQLite)
+- Redis state temporary/ephemeral
+- No sensitive data in logs
+- zod validation on all inputs
+
+---
+
+## 📈 PERFORMANCE
+
+### Targets
+```yaml
+checkpoint_save: "<100ms"
+recovery_detect: "<500ms"
+tool_invocation: "<2s"
+redis_ops: "<10ms"
+mcp_bundle_size: "<50kb"
+memory_usage: "<100MB"
 ```
-┌──────────────────────────────────────────────────────────────┐
-│                     USER INTERFACE                           │
-│              (Claude Desktop + MCP)                          │
-└────────────────────────────┬─────────────────────────────────┘
-                             │
-                             ▼
-┌──────────────────────────────────────────────────────────────┐
-│                  SHIM CORE LAYER                             │
-│  ┌────────────┐  ┌────────────┐  ┌────────────┐            │
-│  │ Crash      │  │ Model      │  │ Multi-Chat │            │
-│  │ Prevention │  │ Routing    │  │ Coord      │            │
-│  └────────────┘  └────────────┘  └────────────┘            │
-└────────────────────────────┬─────────────────────────────────┘
-                             │ Emit events/metrics
-                             ▼
-┌──────────────────────────────────────────────────────────────┐
-│           ANALYTICS & AUTO-EXPERIMENTATION                   │
-│  ┌───────────┐  ┌──────────┐  ┌────────────┐               │
-│  │Prometheus │  │ Statsig  │  │simple-stats│ (Battle-Tested)│
-│  └───────────┘  └──────────┘  └────────────┘               │
-│  ┌──────────────┐  ┌──────────────┐                        │
-│  │ Opportunity  │  │ SafetyBounds │ (Custom ~300 LOC)      │
-│  │ Detector     │  │              │                         │
-│  └──────────────┘  └──────────────┘                        │
-└────────────────────────────┬─────────────────────────────────┘
-                             │ Improvements (validated)
-                             └──► Auto-apply to SHIM Core
-                                  (Kaizen loop)
-                                  
-┌──────────────────────────────────────────────────────────────┐
-│              INFRASTRUCTURE (Battle-Tested)                  │
-│  ┌────────────┐  ┌──────────┐  ┌────────────┐              │
-│  │   Redis    │  │  BullMQ  │  │   SQLite   │              │
-│  └────────────┘  └──────────┘  └────────────┘              │
-└──────────────────────────────────────────────────────────────┘
+
+### Optimizations
+- Redis connection pooling
+- SQLite WAL mode
+- Lazy loading
+- Async operations
+- Minimal dependencies
+
+---
+
+## 🧪 TESTING STRATEGY
+
+### Unit Tests
+- All core services (95 tests)
+- Redis wrappers (20+ tests planned)
+- 95%+ coverage required
+
+### Integration Tests
+- Redis end-to-end (planned)
+- Multi-chat coordination (planned)
+- Tool composition (planned)
+
+### E2E Tests
+- Full workflow (planned)
+- Crash scenarios (planned)
+- Recovery flows (planned)
+
+---
+
+## 📚 TECHNOLOGY STACK
+
+### Core
+- Language: TypeScript (strict)
+- Runtime: Node.js 18+
+- Protocol: MCP (stdio)
+
+### Storage
+- Local: SQLite
+- Distributed: Redis
+- Queues: BullMQ
+
+### External Tools
+- Analysis: ESLint, TSC, complexity-report, jscpd
+- Transformation: jscodeshift, ts-morph, prettier
+- Monitoring: Grafana, Prometheus, Alertmanager
+
+### Libraries
+- Redis: ioredis
+- Validation: zod
+- Testing: Jest
+- Build: esbuild
+
+---
+
+## 🔮 FUTURE (v6.0)
+
+### Kaizen Loop
+```yaml
+components:
+  experiment_engine: "~300 LOC domain logic"
+  scheduling: "BullMQ cron"
+  metrics: "Prometheus + Grafana"
+  learning: "Simple heuristics (not ML)"
+
+rationale: "Domain intelligence - worth building"
+timing: "After Phases 1-5 stable"
 ```
 
 ---
 
-## LOC Breakdown (LEAN-OUT)
-
-### Custom Code (~2,770 LOC)
-
-**Phase 1: Crash Prevention (~1,000 LOC)**
-- SignalCollector: 238 LOC ✅
-- SignalHistoryRepository: 314 LOC ✅
-- CheckpointRepository: 600+ LOC ✅
-- CheckpointManager: 218 LOC ✅
-- ResumeDetector: 213 LOC ✅
-- SessionRestorer: 296 LOC ✅
-- SessionStarter: ~100 LOC ✅
-- SupervisorDaemon: ~300 LOC (next)
-
-**Phase 1.5: Analytics (~570 LOC)**
-- SHIMMetrics: ~100 LOC
-- OpportunityDetector: ~150 LOC
-- StatsigIntegration: ~70 LOC
-- SafetyBounds: ~150 LOC
-- EventEmitter: ~100 LOC
-
-**Phase 2: Model Routing (~400 LOC)**
-- PromptAnalyzer: ~150 LOC
-- ModelRouter: ~200 LOC
-- TokenEstimator: ~50 LOC
-
-**Phase 3: Multi-Chat (~800 LOC)**
-- ChatRegistry: ~100 LOC
-- TaskQueue wrapper: ~100 LOC
-- MessageBus wrapper: ~100 LOC
-- ChatCoordinator: ~200 LOC
-- TaskDistributor: ~200 LOC
-- WorkerAutomation: ~200 LOC
-- StateSync: ~300 LOC
-
-**Total: ~2,770 LOC**
-
-### Eliminated Code (via LEAN-OUT)
-
-**Without LEAN-OUT (estimated):**
-- Custom analytics: ~1,250 LOC
-- Custom A/B testing: ~1,050 LOC
-- Custom job queue: ~1,500 LOC
-- **Total: ~6,570 LOC**
-
-**With LEAN-OUT:**
-- Custom code: ~2,770 LOC
-- **Savings: 3,800 LOC (58% reduction)**
-
-**Maintenance burden eliminated:** ~3,800 LOC × years
-
----
-
-## Technology Stack
-
-**Battle-Tested Infrastructure:**
-- Redis + BullMQ (job queues, messaging, locks)
-- Prometheus + Grafana (metrics, dashboards)
-- Statsig (A/B testing, experiments)
-- simple-statistics (statistical validation)
-- SQLite (local persistence)
-- tiktoken (token estimation)
-
-**Custom Components:**
-- TypeScript (strict mode, ESLint)
-- Jest (testing framework)
-- Domain-specific intelligence (~2,770 LOC)
-
-**Result:** Focus on intelligence, not plumbing
-
----
-
-*This architecture follows LEAN-OUT principles: battle-tested tools for infrastructure, custom code only for domain-specific logic.*
-
-*Total custom code: ~2,770 LOC (vs 6,570 without LEAN-OUT)*  
-*Savings: 3,800 LOC eliminated (58% reduction in maintenance burden)*  
-*Focus: Build intelligence, not plumbing*
+**Architecture:** v5.0 (LEAN-OUT)  
+**Principle:** Build Intelligence, Not Plumbing  
+**Status:** Phase 2 (40% complete)  
+**Updated:** January 12, 2026
