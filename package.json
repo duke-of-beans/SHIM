@@ -1,7 +1,7 @@
 {
   "name": "shim",
   "version": "0.2.0",
-  "description": "Session Handling & Intelligent Management for Claude Desktop",
+  "description": "Autonomous code quality analysis and multi-AI coordination infrastructure using LEAN-OUT principles",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
@@ -11,7 +11,7 @@
     "build": "tsc",
     "build:mcp": "tsc -p src/mcp/tsconfig.json",
     "watch": "tsc --watch",
-    "test": "jest --passWithNoTests",
+    "test": "npx jest --passWithNoTests",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "lint": "eslint src/**/*.ts",
@@ -25,14 +25,18 @@
     "evolve:auto": "npm run build && node dist/activate.js --auto"
   },
   "keywords": [
-    "claude",
-    "ai",
-    "crash-prevention",
-    "checkpoint",
-    "mcp",
-    "development-tools",
-    "analytics",
-    "auto-experimentation"
+    "code-quality",
+    "ai-development",
+    "distributed-systems",
+    "typescript",
+    "redis",
+    "bullmq",
+    "test-driven-development",
+    "ast-analysis",
+    "mcp-server",
+    "code-analysis",
+    "multi-ai-coordination",
+    "lean-out"
   ],
   "author": "",
   "license": "MIT",

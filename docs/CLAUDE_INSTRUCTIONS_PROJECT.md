@@ -1,7 +1,12 @@
 # SHIM PROJECT - COMPREHENSIVE DEVELOPMENT INSTRUCTIONS v5.0.0
 
+> **📋 UNIFIED INSTRUCTIONS**  
+> Primary development instructions now live at: `D:\Dev\CLAUDE_INSTRUCTIONS.md`  
+> This file contains **SHIM-specific additions only**.  
+> **Bootstrap:** Load `D:\Dev\CLAUDE_INSTRUCTIONS.md` FIRST, then this file for project context.
+
 **Version:** 5.0.0 (LEAN-OUT Architecture + Documentation Sync)  
-**Updated:** January 13, 2026  
+**Updated:** January 14, 2026  
 **Phase:** 3 (Complete) → 4 (Ready)  
 **Philosophy:** Build Intelligence, Not Plumbing
 

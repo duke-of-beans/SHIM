@@ -1,0 +1,124 @@
+# PROJECT_DNA.yaml - SHIM
+# Autonomous Code Quality Analysis and Evolution
+# Version: 1.0.0
+
+---
+
+identity:
+  name: "SHIM"
+  purpose: "Autonomous code quality analysis, improvement suggestions, and safe deployment"
+  philosophy: "Build Intelligence, Not Plumbing (LEAN-OUT)"
+  formerly: "Session Handling & Intelligent Management"
+  type: "tool"
+
+current_state:
+  version: "5.0.0"
+  phase: "Phase 3 Complete → Phase 4 Ready"
+  status: "active"
+  health: "⚠️ Test infrastructure needs repair"
+  branch: "master"
+  last_updated: "2026-01-14"
+  
+  active_work:
+    - epic: "Test Infrastructure Repair"
+      progress: 0.0
+      
+  blockers:
+    - "Jest not installed properly, node_modules corrupted"
+    - "~20 TypeScript errors preventing build"
+
+metrics:
+  tools: 6
+  categories: 3
+  loc_production: 2773
+  loc_tests: 4639
+  test_count: 295
+
+boundaries:
+  does:
+    - "AST parsing and complexity analysis"
+    - "Code smell detection and ROI scoring"
+    - "ML pattern recognition for improvements"
+    - "Safe deployment with approval gates"
+    - "Evolution metrics and trend analysis"
+    
+  does_not:
+    - "Replace linters (uses ESLint)"
+    - "Replace formatters (uses Prettier)"
+    - "Build custom infrastructure"
+    
+  constraints:
+    - "LEAN-OUT: Use existing tools, not custom infra"
+    - "Safety first: Approval required by default"
+    - "TDD mandatory: No implementation without tests"
+
+interfaces:
+  - workspace: "kernl"
+    relationship: "Available as global tool"
+    direction: "provides"
+    notes: "SHIM can analyze any KERNL code"
+    
+  - workspace: "gregore"
+    relationship: "Available as global tool"
+    direction: "provides"
+    notes: "SHIM can analyze any GREGORE code"
+    
+  global_tools:
+    - "analyze: Code complexity and maintainability"
+    - "identify: Improvement opportunities with ROI"
+    - "generate: Code modifications and diffs"
+    - "deploy: Safe validation and approval gates"
+    - "learn: ML pattern recognition"
+    - "monitor: Evolution metrics dashboard"
+
+key_decisions:
+  - date: "2026-01-14"
+    decision: "Global tool available from all workspaces"
+    rationale: "Code quality applies everywhere"
+    impact: "Can be invoked from any project context"
+    
+  - date: "2026-01-13"
+    decision: "v5.0 LEAN-OUT architecture"
+    rationale: "v2.0 failed with 98 custom tools (8,000 LOC crash)"
+    impact: "65% code reduction, stable operation"
+    
+  - date: "2026-01-13"
+    decision: "Four-pillar doc sync protocol"
+    rationale: "Documentation drift = system failure"
+    impact: "ROADMAP, STATUS, ARCH, INSTRUCTIONS always synced"
+
+detailed_docs:
+  instructions: "docs/CLAUDE_INSTRUCTIONS_PROJECT.md"
+  architecture: "docs/ARCHITECTURE.md"
+  roadmap: "ROADMAP.md"
+  status: "CURRENT_STATUS.md"
+  backlog: null
+
+quick_commands:
+  build: "npm run build"
+  test: "npm test"
+  typecheck: "npx tsc --noEmit"
+  evolve: "npm run evolve:src -- <target_directory>"
+
+config:
+  mcp_server: "mcp-server/"
+  redis_required: true
+
+# TRIGGER PATTERNS (for Claude to recognize when to invoke SHIM)
+triggers:
+  code_quality:
+    - "analyze this code"
+    - "improve quality"
+    - "what's messy"
+    - "what needs refactoring"
+    - "make this better"
+    - "clean this up"
+  proactive:
+    - "can we improve this codebase"
+    - "show code quality metrics"
+    - "check for issues"
+    - "reduce complexity"
+  learning:
+    - "what patterns work best"
+    - "will this improvement succeed"
+    - "show historical patterns"
