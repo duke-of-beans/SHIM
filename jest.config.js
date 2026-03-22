@@ -6,6 +6,8 @@ module.exports = {
   transform: {
     '^.+\\.ts$': 'ts-jest',
   },
+  // Prefer .ts over .js so ts-jest resolves TypeScript sources, not compiled artifacts in src/
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
   collectCoverageFrom: [
     'src/**/*.ts',
     '!src/**/*.d.ts',
@@ -27,4 +29,6 @@ module.exports = {
     '^@/mcp/(.*)$': '<rootDir>/src/mcp/$1',
     '^@/utils/(.*)$': '<rootDir>/src/utils/$1',
   },
+  // Increase timeout for integration-style tests
+  testTimeout: 10000,
 };

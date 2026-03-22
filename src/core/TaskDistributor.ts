@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// Sprint 1 repair: `any` casts bridge API mismatch documented in BUGS_FOUND.md
+// TODO: remove when WorkerRegistry API reconciliation is complete
+
 /**
  * TaskDistributor - Advanced Task Queue Management
  * 
@@ -92,6 +96,9 @@ export class TaskDistributor extends EventEmitter {
     this.deadlineEscalationThresholdMs = config.deadlineEscalationThresholdMs ?? 30000; // 30 seconds
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private get ss(): any { return this.stateSynchronizer; }
+
   /**
    * Submit a single task
    */
@@ -117,7 +124,7 @@ export class TaskDistributor extends EventEmitter {
     }
 
     // Store task metadata
-    await this.stateSynchronizer.setState(
+    await this.ss.setState(
       `task:${task.id}:meta`,
       task,
       600000 // 10 minute TTL
@@ -184,7 +191,7 @@ export class TaskDistributor extends EventEmitter {
    * Get task by ID
    */
   async getTask(taskId: string): Promise<Task | null> {
-    return await this.stateSynchronizer.getState(`task:${taskId}:meta`);
+    return await this.ss.getState(`task:${taskId}:meta`);
   }
 
   /**
@@ -195,7 +202,7 @@ export class TaskDistributor extends EventEmitter {
     if (!task) return;
 
     task.priority = newPriority;
-    await this.stateSynchronizer.setState(`task:${taskId}:meta`, task, 600000);
+    await this.ss.setState(`task:${taskId}:meta`, task, 600000);
   }
 
   /**
@@ -203,11 +210,11 @@ export class TaskDistributor extends EventEmitter {
    */
   async getOverdueTasks(): Promise<Task[]> {
     const now = Date.now();
-    const keys = await this.stateSynchronizer.listKeys('task:*:meta');
+    const keys = await this.ss.listKeys('task:*:meta');
     const overdueTasks: Task[] = [];
 
     for (const key of keys) {
-      const task = await this.stateSynchronizer.getState(key);
+      const task = await this.ss.getState(key);
       if (task && task.deadline && task.deadline < now && task.status !== 'completed') {
         overdueTasks.push(task);
       }
@@ -222,10 +229,10 @@ export class TaskDistributor extends EventEmitter {
   async escalateApproachingDeadlines(): Promise<void> {
     const now = Date.now();
     const threshold = now + this.deadlineEscalationThresholdMs;
-    const keys = await this.stateSynchronizer.listKeys('task:*:meta');
+    const keys = await this.ss.listKeys('task:*:meta');
 
     for (const key of keys) {
-      const task = await this.stateSynchronizer.getState(key);
+      const task = await this.ss.getState(key);
       if (task && task.deadline && task.deadline < threshold && task.status === 'pending') {
         // Escalate priority (lower number = higher priority)
         const newPriority = Math.max(1, task.priority - 3);
@@ -245,7 +252,7 @@ export class TaskDistributor extends EventEmitter {
         taskId: task.id,
         deadline: task.deadline,
         overdueBy: Date.now() - task.deadline!,
-      });
+      } as any);
     }
   }
 
@@ -266,12 +273,12 @@ export class TaskDistributor extends EventEmitter {
         }
 
         task.status = 'running';
-        await this.stateSynchronizer.setState(`task:${task.id}:meta`, task, 600000);
+        await this.ss.setState(`task:${task.id}:meta`, task, 600000);
 
         const result = await processor(task);
 
         task.status = 'completed';
-        await this.stateSynchronizer.setState(`task:${task.id}:meta`, task, 600000);
+        await this.ss.setState(`task:${task.id}:meta`, task, 600000);
 
         this.completionCount++;
 
@@ -279,7 +286,7 @@ export class TaskDistributor extends EventEmitter {
       } catch (error) {
         task.status = 'failed';
         task.error = error instanceof Error ? error.message : String(error);
-        await this.stateSynchronizer.setState(`task:${task.id}:meta`, task, 600000);
+        await this.ss.setState(`task:${task.id}:meta`, task, 600000);
         throw error;
       }
     });
@@ -312,7 +319,7 @@ export class TaskDistributor extends EventEmitter {
     const task = await this.getTask(taskId);
     if (task) {
       task.status = 'completed';
-      await this.stateSynchronizer.setState(`task:${taskId}:meta`, task, 600000);
+      await this.ss.setState(`task:${taskId}:meta`, task, 600000);
       this.completionCount++;
     }
   }
@@ -332,7 +339,7 @@ export class TaskDistributor extends EventEmitter {
       await this.taskQueue.process(async (j) => {
         const task = j.data as Task;
         task.status = 'completed';
-        await this.stateSynchronizer.setState(`task:${task.id}:meta`, task, 600000);
+        await this.ss.setState(`task:${task.id}:meta`, task, 600000);
         this.completionCount++;
         processed++;
         return { done: true };
@@ -364,13 +371,13 @@ export class TaskDistributor extends EventEmitter {
 
       assignments.push({
         taskId: task.id,
-        workerId: worker.id,
+        workerId: (worker as any).workerId,
         status: 'assigned',
       });
 
       // Store assignment
-      await this.stateSynchronizer.updateFields(
-        `worker:${worker.id}:tasks`,
+      await this.ss.updateFields(
+        `worker:${(worker as any).workerId}:tasks`,
         { [task.id]: 'assigned' }
       );
     }
@@ -400,7 +407,7 @@ export class TaskDistributor extends EventEmitter {
       let bestWorker = workers[0];
 
       for (const worker of workers) {
-        const load = await this.getWorkerLoad(worker.id);
+        const load = await this.getWorkerLoad((worker as any).workerId);
         if (load < lowestLoad) {
           lowestLoad = load;
           bestWorker = worker;
@@ -409,13 +416,13 @@ export class TaskDistributor extends EventEmitter {
 
       assignments.push({
         taskId: task.id,
-        workerId: bestWorker.id,
+        workerId: (bestWorker as any).workerId,
         status: 'assigned',
       });
 
       // Store assignment
-      await this.stateSynchronizer.updateFields(
-        `worker:${bestWorker.id}:tasks`,
+      await this.ss.updateFields(
+        `worker:${(bestWorker as any).workerId}:tasks`,
         { [task.id]: 'assigned' }
       );
     }
@@ -427,7 +434,7 @@ export class TaskDistributor extends EventEmitter {
    * Get worker load (number of assigned tasks)
    */
   private async getWorkerLoad(workerId: string): Promise<number> {
-    const tasks = await this.stateSynchronizer.getState(`worker:${workerId}:tasks`);
+    const tasks = await this.ss.getState(`worker:${workerId}:tasks`);
     return tasks ? Object.keys(tasks).length : 0;
   }
 
@@ -442,7 +449,7 @@ export class TaskDistributor extends EventEmitter {
       // Find workers with required capabilities
       const capableWorkers = workers.filter(w => 
         !task.requirements || 
-        task.requirements.every(req => w.capabilities?.includes(req))
+        task.requirements.every(req => (w as any).capabilities?.includes(req))
       );
 
       if (capableWorkers.length === 0) {
@@ -460,7 +467,7 @@ export class TaskDistributor extends EventEmitter {
       let bestWorker = capableWorkers[0];
 
       for (const worker of capableWorkers) {
-        const load = await this.getWorkerLoad(worker.id);
+        const load = await this.getWorkerLoad((worker as any).workerId);
         if (load < lowestLoad) {
           lowestLoad = load;
           bestWorker = worker;
@@ -469,13 +476,13 @@ export class TaskDistributor extends EventEmitter {
 
       assignments.push({
         taskId: task.id,
-        workerId: bestWorker.id,
+        workerId: (bestWorker as any).workerId,
         status: 'assigned',
       });
 
       // Store assignment
-      await this.stateSynchronizer.updateFields(
-        `worker:${bestWorker.id}:tasks`,
+      await this.ss.updateFields(
+        `worker:${(bestWorker as any).workerId}:tasks`,
         { [task.id]: 'assigned' }
       );
     }
@@ -488,7 +495,7 @@ export class TaskDistributor extends EventEmitter {
    */
   async setStrategy(strategy: RoutingStrategy): Promise<void> {
     this.currentStrategy = strategy;
-    await this.stateSynchronizer.setState(
+    await this.ss.setState(
       'distributor:strategy',
       strategy,
       3600000 // 1 hour TTL
@@ -499,7 +506,7 @@ export class TaskDistributor extends EventEmitter {
    * Get current routing strategy
    */
   async getStrategy(): Promise<RoutingStrategy> {
-    const stored = await this.stateSynchronizer.getState('distributor:strategy');
+    const stored = await this.ss.getState('distributor:strategy');
     return stored || this.currentStrategy;
   }
 
@@ -558,7 +565,7 @@ export class TaskDistributor extends EventEmitter {
     const isStarving = metrics.depth > 0 && workers.length === 0;
 
     // Calculate total capacity
-    const totalCapacity = workers.reduce((sum, w) => sum + w.capacity, 0);
+    const totalCapacity = workers.reduce((sum, w) => sum + (w as any).capacity, 0);
 
     // Check saturation (tasks >> capacity)
     const saturationRatio = totalCapacity > 0 ? metrics.depth / totalCapacity : 0;
@@ -587,7 +594,7 @@ export class TaskDistributor extends EventEmitter {
       this.emit('queue-warning', {
         health,
         timestamp: Date.now(),
-      });
+      } as any);
     }
   }
 
@@ -609,6 +616,6 @@ export class TaskDistributor extends EventEmitter {
     }
 
     // Cleanup
-    this.removeAllListeners();
+    (this as any).removeAllListeners();
   }
 }

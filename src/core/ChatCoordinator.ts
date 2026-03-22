@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// Sprint 1 repair: `any` casts bridge API mismatch documented in BUGS_FOUND.md
+// TODO: remove when WorkerRegistry API reconciliation is complete
+
 /**
  * ChatCoordinator - Supervisor Pattern for Multi-Chat Coordination
  * 
@@ -89,6 +93,9 @@ export class ChatCoordinator extends EventEmitter {
     this.retryBackoffMs = config.retryBackoffMs ?? 1000;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private get ss(): any { return this.stateSynchronizer; }
+
   /**
    * Decompose large task into subtasks
    */
@@ -111,9 +118,9 @@ export class ChatCoordinator extends EventEmitter {
     }
 
     // Store parent-child relationship
-    await this.stateSynchronizer.setState(
+    await this.ss.setState(
       `task:${task.id}:subtasks`,
-      subtasks.map(t => t.id),
+      subtasks.map((t: Task) => t.id),
       60000 // 1 minute TTL
     );
 
@@ -175,14 +182,14 @@ export class ChatCoordinator extends EventEmitter {
       };
 
       // Store assignment
-      await this.stateSynchronizer.setState(
+      await this.ss.setState(
         `assignment:${task.id}`,
         assignment,
         600000 // 10 minute TTL
       );
 
       // Add to worker's task list
-      await this.stateSynchronizer.updateFields(
+      await this.ss.updateFields(
         `worker:${workerId}:tasks`,
         { [task.id]: 'pending' }
       );
@@ -194,7 +201,7 @@ export class ChatCoordinator extends EventEmitter {
         taskId: task.id,
         workerId,
         assignedAt: assignment.assignedAt,
-      });
+      } as any);
     }
 
     return assignments;
@@ -204,44 +211,46 @@ export class ChatCoordinator extends EventEmitter {
    * Find best worker for task using load balancing
    */
   private async findBestWorker(task: Task): Promise<string | null> {
-    const workers = await this.workerRegistry.listWorkers();
+    const workers = await this.workerRegistry.listWorkers() as any[];
     if (workers.length === 0) return null;
 
     // Filter by capabilities if task has requirements
     let candidates = workers;
     if (task.requirements && task.requirements.length > 0) {
-      candidates = workers.filter(w => 
-        task.requirements!.every(req => w.capabilities?.includes(req))
+      candidates = workers.filter((w: any) =>
+        task.requirements!.every((req: string) => w.capabilities?.includes(req))
       );
     }
 
     if (candidates.length === 0) return null;
 
     // Load balancing: find worker with lowest current load
+    // WorkerInfo uses workerId; fall back to workerId if id not present
     let bestWorker = candidates[0];
-    let lowestLoad = await this.getWorkerLoad(bestWorker.id);
+    let lowestLoad = await this.getWorkerLoad(bestWorker.workerId ?? bestWorker.id);
 
     for (const worker of candidates.slice(1)) {
-      const load = await this.getWorkerLoad(worker.id);
+      const load = await this.getWorkerLoad(worker.workerId ?? (worker as any).workerId);
       if (load < lowestLoad) {
         lowestLoad = load;
         bestWorker = worker;
       }
     }
 
-    // Check capacity
-    if (lowestLoad >= bestWorker.capacity) {
+    // Check capacity (default unlimited if not set)
+    const capacity = bestWorker.capacity ?? Infinity;
+    if (lowestLoad >= capacity) {
       return null; // Over capacity
     }
 
-    return bestWorker.id;
+    return bestWorker.workerId ?? bestWorker.id;
   }
 
   /**
    * Get current load for worker (number of assigned tasks)
    */
   private async getWorkerLoad(workerId: string): Promise<number> {
-    const tasks = await this.stateSynchronizer.getState(`worker:${workerId}:tasks`);
+    const tasks = await this.ss.getState(`worker:${workerId}:tasks`);
     if (!tasks) return 0;
     return Object.keys(tasks).length;
   }
@@ -250,14 +259,14 @@ export class ChatCoordinator extends EventEmitter {
    * Get task assignment
    */
   async getTaskAssignment(taskId: string): Promise<TaskAssignment | null> {
-    return await this.stateSynchronizer.getState(`assignment:${taskId}`);
+    return await this.ss.getState(`assignment:${taskId}`);
   }
 
   /**
    * Update task progress (0.0 to 1.0)
    */
   async updateTaskProgress(taskId: string, progress: number): Promise<void> {
-    await this.stateSynchronizer.setState(
+    await this.ss.setState(
       `task:${taskId}:progress`,
       progress,
       300000 // 5 minute TTL
@@ -268,7 +277,7 @@ export class ChatCoordinator extends EventEmitter {
    * Get task progress
    */
   async getTaskProgress(taskId: string): Promise<number> {
-    const progress = await this.stateSynchronizer.getState(`task:${taskId}:progress`);
+    const progress = await this.ss.getState(`task:${taskId}:progress`);
     return progress ?? 0;
   }
 
@@ -276,7 +285,7 @@ export class ChatCoordinator extends EventEmitter {
    * Get aggregate progress across all subtasks
    */
   async getAggregateProgress(parentTaskId: string): Promise<number> {
-    const subtaskIds = await this.stateSynchronizer.getState(
+    const subtaskIds = await this.ss.getState(
       `task:${parentTaskId}:subtasks`
     );
 
@@ -300,7 +309,7 @@ export class ChatCoordinator extends EventEmitter {
     taskId: string, 
     state: 'pending' | 'running' | 'completed' | 'failed'
   ): Promise<void> {
-    await this.stateSynchronizer.setState(
+    await this.ss.setState(
       `task:${taskId}:state`,
       state,
       300000 // 5 minute TTL
@@ -311,7 +320,7 @@ export class ChatCoordinator extends EventEmitter {
    * Get task state
    */
   async getTaskState(taskId: string): Promise<string> {
-    const state = await this.stateSynchronizer.getState(`task:${taskId}:state`);
+    const state = await this.ss.getState(`task:${taskId}:state`);
     return state ?? 'unknown';
   }
 
@@ -329,7 +338,7 @@ export class ChatCoordinator extends EventEmitter {
     }
 
     // Store result
-    await this.stateSynchronizer.setState(
+    await this.ss.setState(
       `task:${taskId}:result`,
       result,
       600000 // 10 minute TTL
@@ -341,12 +350,12 @@ export class ChatCoordinator extends EventEmitter {
 
     // Remove from worker's task list
     if (assignment.workerId) {
-      const tasks = await this.stateSynchronizer.getState(
+      const tasks = await this.ss.getState(
         `worker:${assignment.workerId}:tasks`
       );
       if (tasks && tasks[taskId]) {
         delete tasks[taskId];
-        await this.stateSynchronizer.setState(
+        await this.ss.setState(
           `worker:${assignment.workerId}:tasks`,
           tasks,
           600000
@@ -359,7 +368,7 @@ export class ChatCoordinator extends EventEmitter {
       taskId,
       result,
       completedAt: Date.now(),
-    });
+    } as any);
 
     // Check if parent task complete
     await this.checkParentCompletion(taskId);
@@ -373,7 +382,7 @@ export class ChatCoordinator extends EventEmitter {
     const parentId = subtaskId.split('-sub-')[0];
     if (parentId === subtaskId) return; // No parent
 
-    const subtaskIds = await this.stateSynchronizer.getState(
+    const subtaskIds = await this.ss.getState(
       `task:${parentId}:subtasks`
     );
 
@@ -389,14 +398,14 @@ export class ChatCoordinator extends EventEmitter {
     this.emit('parent-task-completed', {
       taskId: parentId,
       completedAt: Date.now(),
-    });
+    } as any);
   }
 
   /**
    * Aggregate results from all subtasks
    */
   async aggregateResults(parentTaskId: string): Promise<AggregatedResult> {
-    const subtaskIds = await this.stateSynchronizer.getState(
+    const subtaskIds = await this.ss.getState(
       `task:${parentTaskId}:subtasks`
     );
 
@@ -416,7 +425,7 @@ export class ChatCoordinator extends EventEmitter {
       const state = await this.getTaskState(subtaskId);
       if (state === 'completed') {
         completedCount++;
-        const result = await this.stateSynchronizer.getState(
+        const result = await this.ss.getState(
           `task:${subtaskId}:result`
         );
         if (result) results.push(result);
@@ -427,7 +436,7 @@ export class ChatCoordinator extends EventEmitter {
 
     // Apply merge strategy if all complete
     if (allCompleted) {
-      const parentTask = await this.stateSynchronizer.getState(`task:${parentTaskId}`);
+      const parentTask = await this.ss.getState(`task:${parentTaskId}`);
       const strategy = parentTask?.mergeStrategy ?? 'concatenate';
       
       return this.mergeResults(results, strategy, {
@@ -517,7 +526,7 @@ export class ChatCoordinator extends EventEmitter {
     // Check retry limit
     if (assignment.attempt >= this.maxRetries) {
       assignment.status = 'failed';
-      await this.stateSynchronizer.setState(`assignment:${taskId}`, assignment, 600000);
+      await this.ss.setState(`assignment:${taskId}`, assignment, 600000);
       return;
     }
 
@@ -526,7 +535,7 @@ export class ChatCoordinator extends EventEmitter {
     await new Promise(resolve => setTimeout(resolve, backoffMs));
 
     // Reassign to different worker
-    const task = await this.stateSynchronizer.getState(`task:${taskId}`);
+    const task = await this.ss.getState(`task:${taskId}`);
     if (task) {
       await this.assignTasks([task]);
     }
@@ -537,7 +546,7 @@ export class ChatCoordinator extends EventEmitter {
    */
   async handleWorkerFailure(workerId: string): Promise<void> {
     // Get all tasks assigned to this worker
-    const tasks = await this.stateSynchronizer.getState(`worker:${workerId}:tasks`);
+    const tasks = await this.ss.getState(`worker:${workerId}:tasks`);
     
     if (!tasks) return;
 
@@ -548,14 +557,14 @@ export class ChatCoordinator extends EventEmitter {
     }
 
     // Clear worker's task list
-    await this.stateSynchronizer.setState(`worker:${workerId}:tasks`, {}, 600000);
+    await this.ss.setState(`worker:${workerId}:tasks`, {}, 600000);
 
     // Emit event
     this.emit('worker-failed', {
       workerId,
       taskCount: taskIds.length,
       failedAt: Date.now(),
-    });
+    } as any);
   }
 
   /**
@@ -590,15 +599,16 @@ export class ChatCoordinator extends EventEmitter {
    * Check if there are any pending tasks
    */
   private async hasPendingTasks(): Promise<boolean> {
-    const workers = await this.workerRegistry.listWorkers();
-    
+    const workers = await this.workerRegistry.listWorkers() as any[];
+
     for (const worker of workers) {
-      const tasks = await this.stateSynchronizer.getState(`worker:${worker.id}:tasks`);
+      const wid = worker.workerId ?? (worker as any).workerId;
+      const tasks = await this.ss.getState(`worker:${wid}:tasks`);
       if (tasks && Object.keys(tasks).length > 0) {
         return true;
       }
     }
-    
+
     return false;
   }
 
@@ -607,7 +617,7 @@ export class ChatCoordinator extends EventEmitter {
    */
   private async cleanup(): Promise<void> {
     // Remove all event listeners
-    this.removeAllListeners();
+    (this as any).removeAllListeners();
   }
 
   /**

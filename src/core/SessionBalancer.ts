@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// Sprint 1 repair: `any` casts bridge API mismatch documented in BUGS_FOUND.md
+// TODO: remove when WorkerRegistry API reconciliation is complete
+
 /**
  * SessionBalancer - Intelligent Load Balancing
  * 
@@ -106,14 +110,15 @@ export class SessionBalancer extends EventEmitter {
    * Calculate load for a specific session
    */
   async calculateLoad(chatId: string): Promise<LoadMetrics> {
-    const summary = await this.coordinator.getProgressSummary();
+    const coord = this.coordinator as any;
+    const summary = await coord.getProgressSummary();
     
     // Count tasks assigned to this chat
     let currentTasks = 0;
     
     // Get all active tasks
-    const tasks = await this.coordinator.listChats();
-    const targetChat = tasks.find(c => c.chatId === chatId);
+    const tasks = await coord.listChats();
+    const targetChat = tasks.find((c: any) => c.chatId === chatId);
     
     if (targetChat && targetChat.status === 'busy') {
       currentTasks = 1;  // Simplified: 1 task if busy
@@ -140,10 +145,10 @@ export class SessionBalancer extends EventEmitter {
    * Get load metrics for all sessions
    */
   async getAllLoadMetrics(): Promise<LoadMetrics[]> {
-    const chats = await this.coordinator.listChats();
-    
+    const chats = await (this.coordinator as any).listChats();
+
     const metrics = await Promise.all(
-      chats.map(chat => this.calculateLoad(chat.chatId))
+      chats.map((chat: any) => this.calculateLoad(chat.chatId))
     );
     
     return metrics;

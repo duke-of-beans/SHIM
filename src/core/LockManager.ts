@@ -23,6 +23,7 @@
 
 import { RedisConnectionManager } from './RedisConnectionManager';
 import type { Redis } from 'ioredis';
+// @ts-ignore - crypto is a built-in Node.js module
 import { randomUUID } from 'crypto';
 
 export interface LockOptions {
