@@ -7,7 +7,7 @@
  * 
  * Philosophy: Thin coordination layer, not analysis engine.
  * 
- * Version: 3.0 - Minimal Core (6 tools)
+ * Version: 1.0.0 - Minimal Core (6 tools)
  */
 
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
@@ -41,7 +41,7 @@ class ShimMcpServer {
     this.server = new Server(
       {
         name: 'shim-mcp',
-        version: '3.0.0',
+        version: '1.0.0',
       },
       {
         capabilities: {
@@ -202,7 +202,7 @@ class ShimMcpServer {
   }
 
   private async handleCheckRecovery() {
-    const result = await this.recovery.checkForIncomplete();
+    const result = await this.recovery.checkRecovery();
     
     return {
       content: [{
@@ -213,7 +213,7 @@ class ShimMcpServer {
   }
 
   private async handleMonitorSignals() {
-    const signals = await this.signals.collectSignals();
+    const signals = await this.signals.monitor();
     
     return {
       content: [{
