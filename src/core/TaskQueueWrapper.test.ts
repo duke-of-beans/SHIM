@@ -12,6 +12,22 @@
  * - Queue metrics and monitoring
  */
 
+// Mock ioredis with ioredis-mock so tests run without a live Redis instance
+jest.mock('ioredis', () => {
+  const RedisMock = require('ioredis-mock');
+  return class extends RedisMock {
+    constructor(...args: any[]) {
+      super(...args);
+      this.status = 'ready';
+    }
+    connect() {
+      this.status = 'ready';
+      this.emit('ready');
+      return Promise.resolve();
+    }
+  };
+});
+
 import { TaskQueueWrapper } from './TaskQueueWrapper';
 import { RedisConnectionManager } from './RedisConnectionManager';
 
@@ -73,7 +89,7 @@ describe('TaskQueueWrapper', () => {
       // Job should not be immediately available
       const job = await queue.getJob(jobId);
       expect(job).toBeDefined();
-      expect(job?.state).not.toBe('active');
+      expect(await job?.getState()).not.toBe('active');
     });
 
     it('should add task with custom job ID', async () => {
@@ -210,7 +226,7 @@ describe('TaskQueueWrapper', () => {
       
       const job = await queue.getJob(jobId);
       expect(job).toBeDefined();
-      expect(job?.state).toMatch(/waiting|active|completed/);
+      expect(await job?.getState()).toMatch(/waiting|active|completed/);
     });
   });
 
@@ -251,7 +267,7 @@ describe('TaskQueueWrapper', () => {
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       const job = await queue.getJob(jobId);
-      expect(job?.state).toBe('failed');
+      expect(await job?.getState()).toBe('failed');
     });
   });
 
@@ -267,7 +283,7 @@ describe('TaskQueueWrapper', () => {
       await new Promise(resolve => setTimeout(resolve, 500));
       
       const job = await queue.getJob(jobId);
-      expect(job?.state).toBe('completed');
+      expect(await job?.getState()).toBe('completed');
       expect(job?.returnvalue).toEqual({ result: 'success', data: { value: 123 } });
     });
 
@@ -426,8 +442,8 @@ describe('TaskQueueWrapper', () => {
       const successJob = await queue.getJob(successId);
       const failJob = await queue.getJob(failId);
       
-      expect(successJob?.state).toBe('completed');
-      expect(failJob?.state).toBe('failed');
+      expect(await successJob?.getState()).toBe('completed');
+      expect(await failJob?.getState()).toBe('failed');
     });
 
     it('should handle connection errors', async () => {

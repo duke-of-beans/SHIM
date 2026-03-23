@@ -1,4 +1,4 @@
-/**
+﻿/**
  * TaskDistributor Test Suite
  * 
  * Tests advanced task queue management and distribution.
@@ -111,7 +111,7 @@ describe('TaskDistributor', () => {
       await distributor.adjustPriority(taskId, 1);
       
       const task = await distributor.getTask(taskId);
-      expect(task.priority).toBe(1);
+      expect(task!.priority).toBe(1);
     });
   });
 
@@ -125,7 +125,7 @@ describe('TaskDistributor', () => {
       });
       
       const task = await distributor.getTask(taskId);
-      expect(task.deadline).toBe(deadline);
+      expect(task!.deadline).toBe(deadline);
     });
 
     it('should identify overdue tasks', async () => {
@@ -155,7 +155,7 @@ describe('TaskDistributor', () => {
       await distributor.escalateApproachingDeadlines();
       
       const task = await distributor.getTask(taskId);
-      expect(task.priority).toBeLessThan(10); // Escalated
+      expect(task!.priority).toBeLessThan(10); // Escalated
     });
 
     it('should emit event when task becomes overdue', async () => {
@@ -178,9 +178,9 @@ describe('TaskDistributor', () => {
 
   describe('Task Routing Strategies', () => {
     it('should distribute tasks round-robin', async () => {
-      await workerRegistry.register('worker-1', { capacity: 10 });
-      await workerRegistry.register('worker-2', { capacity: 10 });
-      await workerRegistry.register('worker-3', { capacity: 10 });
+      await workerRegistry.registerWorker('worker-1', 'chat-worker-1');
+      await workerRegistry.registerWorker('worker-2', 'chat-worker-2');
+      await workerRegistry.registerWorker('worker-3', 'chat-worker-3');
       
       const tasks = Array(9).fill(null).map((_, i) => ({
         id: `task-${i}`,
@@ -200,8 +200,8 @@ describe('TaskDistributor', () => {
     });
 
     it('should distribute tasks to least-loaded workers', async () => {
-      await workerRegistry.register('worker-1', { capacity: 10 });
-      await workerRegistry.register('worker-2', { capacity: 10 });
+      await workerRegistry.registerWorker('worker-1', 'chat-worker-1');
+      await workerRegistry.registerWorker('worker-2', 'chat-worker-2');
       
       // Pre-load worker-1 with tasks
       await distributor.submitTask({ id: 'existing-1', workerId: 'worker-1' });
@@ -217,14 +217,8 @@ describe('TaskDistributor', () => {
     });
 
     it('should route tasks based on capabilities', async () => {
-      await workerRegistry.register('worker-cpu', { 
-        capacity: 10,
-        capabilities: ['cpu-intensive'],
-      });
-      await workerRegistry.register('worker-io', {
-        capacity: 10,
-        capabilities: ['io-intensive'],
-      });
+      await workerRegistry.registerWorker('worker-cpu', 'chat-worker-cpu');
+      await workerRegistry.registerWorker('worker-io', 'chat-worker-io');
       
       const cpuTask = {
         id: 'compute',
@@ -413,7 +407,7 @@ describe('TaskDistributor', () => {
 
     it('should detect queue saturation', async () => {
       // Many tasks, limited capacity
-      await workerRegistry.register('worker-1', { capacity: 2 });
+      await workerRegistry.registerWorker('worker-1', 'chat-worker-1');
       
       for (let i = 0; i < 100; i++) {
         await distributor.submitTask({ id: `task-${i}` });
@@ -476,9 +470,8 @@ describe('TaskDistributor', () => {
       });
       
       const task = await distributor.getTask('failing');
-      
-      expect(task.status).toBe('failed');
-      expect(task.error).toContain('Processing failed');
+      expect(task!.status).toBe('failed');
+      expect(task!.error).toContain('Processing failed');
     });
 
     it('should handle Redis connection loss gracefully', async () => {
@@ -541,14 +534,14 @@ describe('TaskDistributor', () => {
       await distributor.submitTask({ id: 'zero', priority: 0 });
       
       const task = await distributor.getTask('zero');
-      expect(task.priority).toBe(0);
+      expect(task!.priority).toBe(0);
     });
 
     it('should handle negative priority (if allowed)', async () => {
       await distributor.submitTask({ id: 'negative', priority: -1 });
       
       const task = await distributor.getTask('negative');
-      expect(task.priority).toBe(-1); // Or error if not allowed
+      expect(task!.priority).toBe(-1); // Or error if not allowed
     });
 
     it('should handle empty batch submission', async () => {
@@ -582,3 +575,6 @@ describe('TaskDistributor', () => {
     });
   });
 });
+
+
+

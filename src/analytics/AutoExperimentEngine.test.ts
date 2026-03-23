@@ -118,10 +118,12 @@ describe('AutoExperimentEngine', () => {
   });
   
   describe('Opportunity Detection', () => {
-    it('should detect opportunities automatically', async (done) => {
-      engine.on('opportunities_detected', (opportunities) => {
-        expect(Array.isArray(opportunities)).toBe(true);
-        done();
+    it('should detect opportunities automatically', async () => {
+      const detected = new Promise<void>(resolve => {
+        engine.on('opportunities_detected', (opportunities) => {
+          expect(Array.isArray(opportunities)).toBe(true);
+          resolve();
+        });
       });
       
       // Simulate bad metrics
@@ -129,6 +131,7 @@ describe('AutoExperimentEngine', () => {
       
       await engine.start();
       await engine.runDetectionCycle();
+      await detected;
     });
     
     it('should respect detection interval', async () => {
@@ -281,11 +284,9 @@ describe('AutoExperimentEngine', () => {
     });
     
     it('should detect experiment completion', async () => {
-      const completed: any[] = [];
-      engine.on('experiment_completed', (exp) => completed.push(exp));
-      
-      // Would trigger when experiment has sufficient samples
-      // and statistical significance achieved
+      // 'experiment_completed' event not in AutoExperimentEngineEvents type —
+      // engine signals completion via progress_update + auto_deployed instead.
+      // Placeholder test: no assertions yet until event is added to the interface.
     });
   });
   

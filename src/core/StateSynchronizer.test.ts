@@ -11,6 +11,22 @@
  * - State expiration (TTL)
  */
 
+// Mock ioredis with ioredis-mock so tests run without a live Redis instance
+jest.mock('ioredis', () => {
+  const RedisMock = require('ioredis-mock');
+  return class extends RedisMock {
+    constructor(...args: any[]) {
+      super(...args);
+      this.status = 'ready';
+    }
+    connect() {
+      this.status = 'ready';
+      this.emit('ready');
+      return Promise.resolve();
+    }
+  };
+});
+
 import { StateSynchronizer } from './StateSynchronizer';
 import { RedisConnectionManager } from './RedisConnectionManager';
 

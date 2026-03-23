@@ -1,4 +1,4 @@
-/**
+﻿/**
  * LockManager Test Suite
  * 
  * Tests distributed locking for coordinating operations across multiple chat instances.
@@ -51,7 +51,7 @@ describe('LockManager', () => {
       expect(lockId).toBeDefined();
       expect(typeof lockId).toBe('string');
       
-      const released = await lockManager.release(testResource, lockId);
+      const released = await lockManager.release(testResource, lockId!);
       expect(released).toBe(true);
     });
 
@@ -61,8 +61,8 @@ describe('LockManager', () => {
       
       expect(lock1).not.toBe(lock2);
       
-      await lockManager.release('resource-1', lock1);
-      await lockManager.release('resource-2', lock2);
+      await lockManager.release('resource-1', lock1!);
+      await lockManager.release('resource-2', lock2!);
     });
 
     it('should prevent acquiring already-locked resource', async () => {
@@ -72,18 +72,18 @@ describe('LockManager', () => {
       expect(lock1).toBeDefined();
       expect(lock2).toBeNull(); // Failed to acquire
       
-      await lockManager.release(testResource, lock1);
+      await lockManager.release(testResource, lock1!);
     });
 
     it('should allow reacquiring after release', async () => {
       const lock1 = await lockManager.acquire(testResource);
-      await lockManager.release(testResource, lock1);
+      await lockManager.release(testResource, lock1!);
       
       const lock2 = await lockManager.acquire(testResource);
       expect(lock2).toBeDefined();
       expect(lock2).not.toBe(lock1);
       
-      await lockManager.release(testResource, lock2);
+      await lockManager.release(testResource, lock2!);
     });
   });
 
@@ -104,7 +104,7 @@ describe('LockManager', () => {
       const lock3 = await lockManager.acquire(testResource);
       expect(lock3).toBeDefined();
       
-      await lockManager.release(testResource, lock3);
+      await lockManager.release(testResource, lock3!);
     });
 
     it('should use default TTL if not specified', async () => {
@@ -117,7 +117,7 @@ describe('LockManager', () => {
       const lock2 = await lockManager.acquire(testResource, { timeout: 100 });
       expect(lock2).toBeNull(); // Still locked
       
-      await lockManager.release(testResource, lock);
+      await lockManager.release(testResource, lock!);
     });
   });
 
@@ -129,7 +129,7 @@ describe('LockManager', () => {
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       // Extend by 2 more seconds
-      const extended = await lockManager.extend(testResource, lock, 2);
+      const extended = await lockManager.extend(testResource, lock!, 2);
       expect(extended).toBe(true);
       
       // Wait another 1.5 seconds (total 2.5s from original)
@@ -139,7 +139,7 @@ describe('LockManager', () => {
       const lock2 = await lockManager.acquire(testResource, { timeout: 100 });
       expect(lock2).toBeNull();
       
-      await lockManager.release(testResource, lock);
+      await lockManager.release(testResource, lock!);
     });
 
     it('should fail to extend with wrong lock ID', async () => {
@@ -148,7 +148,7 @@ describe('LockManager', () => {
       const extended = await lockManager.extend(testResource, 'wrong-id', 10);
       expect(extended).toBe(false);
       
-      await lockManager.release(testResource, lock);
+      await lockManager.release(testResource, lock!);
     });
 
     it('should fail to extend expired lock', async () => {
@@ -157,7 +157,7 @@ describe('LockManager', () => {
       // Wait for expiration
       await new Promise(resolve => setTimeout(resolve, 1100));
       
-      const extended = await lockManager.extend(testResource, lock, 10);
+      const extended = await lockManager.extend(testResource, lock!, 10);
       expect(extended).toBe(false);
     });
   });
@@ -174,7 +174,7 @@ describe('LockManager', () => {
       expect(lock2).toBeNull();
       
       // Release with correct ID
-      await lockManager.release(testResource, lock);
+      await lockManager.release(testResource, lock!);
     });
 
     it('should prevent concurrent lock acquisition', async () => {
@@ -186,7 +186,7 @@ describe('LockManager', () => {
       expect(lock1).toBeDefined();
       expect(lock2).toBeNull();
       
-      await lockManager.release(testResource, lock1);
+      await lockManager.release(testResource, lock1!);
     });
   });
 
@@ -203,7 +203,7 @@ describe('LockManager', () => {
       
       expect(lock2).toBeDefined();
       
-      await lockManager.release(testResource, lock2);
+      await lockManager.release(testResource, lock2!);
     });
 
     it('should fail after timeout expires', async () => {
@@ -220,7 +220,7 @@ describe('LockManager', () => {
       expect(elapsed).toBeGreaterThanOrEqual(500);
       expect(elapsed).toBeLessThan(700); // Some tolerance
       
-      await lockManager.release(testResource, lock1);
+      await lockManager.release(testResource, lock1!);
     });
   });
 
@@ -234,7 +234,7 @@ describe('LockManager', () => {
       const isHeld2 = await lockManager.isHeld(testResource);
       expect(isHeld2).toBe(true);
       
-      await lockManager.release(testResource, lock);
+      await lockManager.release(testResource, lock!);
       
       const isHeld3 = await lockManager.isHeld(testResource);
       expect(isHeld3).toBe(false);
@@ -249,7 +249,7 @@ describe('LockManager', () => {
       const owner2 = await lockManager.getOwner(testResource);
       expect(owner2).toBe(lock);
       
-      await lockManager.release(testResource, lock);
+      await lockManager.release(testResource, lock!);
     });
 
     it('should release all locks for cleanup', async () => {
@@ -279,7 +279,7 @@ describe('LockManager', () => {
       
       expect(elapsed).toBeLessThan(10);
       
-      await lockManager.release(testResource, lock);
+      await lockManager.release(testResource, lock!);
     });
 
     it('should handle high concurrency', async () => {
@@ -328,7 +328,7 @@ describe('LockManager', () => {
         const lock = await lockManager.acquire(testResource);
         expect(lock).toBeDefined();
         
-        const released = await lockManager.release(testResource, lock);
+        const released = await lockManager.release(testResource, lock!);
         expect(released).toBe(true);
       }
     });
@@ -341,13 +341,14 @@ describe('LockManager', () => {
       expect(lock2).toBeNull();
       
       // Release first lock
-      await lockManager.release(testResource, lock1);
+      await lockManager.release(testResource, lock1!);
       
       // Now should succeed
       const lock3 = await lockManager.acquire(testResource);
       expect(lock3).toBeDefined();
       
-      await lockManager.release(testResource, lock3);
+      await lockManager.release(testResource, lock3!);
     });
   });
 });
+

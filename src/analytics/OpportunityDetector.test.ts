@@ -1,4 +1,4 @@
-/**
+﻿/**
  * OpportunityDetector Tests
  * 
  * Tests for pattern detection and improvement opportunity identification.
@@ -93,8 +93,8 @@ describe('OpportunityDetector', () => {
       );
       
       if (resumeOpp) {
-        expect(resumeOpp.currentValue).toBeLessThan(0.90);
-        expect(resumeOpp.proposedValue).toBeGreaterThan(resumeOpp.currentValue);
+        expect(resumeOpp.currentValue as number).toBeLessThan(0.90);
+        expect(resumeOpp.proposedValue as number).toBeGreaterThan(resumeOpp.currentValue as number);
       }
     });
   });
@@ -165,7 +165,7 @@ describe('OpportunityDetector', () => {
       );
       
       if (restartOpp) {
-        expect(restartOpp.currentValue).toBeGreaterThan(5000);
+        expect(restartOpp.currentValue as number).toBeGreaterThan(5000);
       }
     });
     
@@ -464,3 +464,4 @@ function createMockOpportunity(overrides: Partial<Opportunity> = {}): Opportunit
 function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
+

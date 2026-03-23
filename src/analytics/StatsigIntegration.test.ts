@@ -407,7 +407,7 @@ describe('StatsigIntegration', () => {
     it('should validate experiment name', async () => {
       await expect(statsig.createExperiment({
         ...createMockOpportunity(),
-        type: '' as OpportunityType
+        type: '' as unknown as OpportunityType
       })).rejects.toThrow();
     });
     
