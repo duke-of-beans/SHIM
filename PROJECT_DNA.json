@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "slug": "shim",
   "name": "SHIM",
-  "brain_entity_id": "NEEDS_BRAIN_ENTITY_SEED",
+  "brain_entity_id": "projF0A0E81946F5F18E",
   "type": "infrastructure",
   "owner": "open_source",
   "environment": "dev",
