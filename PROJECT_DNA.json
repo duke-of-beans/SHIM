@@ -1,0 +1,37 @@
+{
+  "schema_version": "1.0",
+  "slug": "shim",
+  "name": "SHIM",
+  "brain_entity_id": "NEEDS_BRAIN_ENTITY_SEED",
+  "type": "infrastructure",
+  "owner": "open_source",
+  "environment": "dev",
+  "display_register": "project",
+  "tier": 0,
+  "description": "SHIM is a code quality and consistency analysis tool that scans codebases for quality signals, anti-patterns, and consistency violations.",
+  "purpose": "Provide automated quality sensing and consistency enforcement across all portfolio codebases.",
+  "success_criteria": [
+    "Integrated into every active codebase sprint workflow"
+  ],
+  "upstream": [],
+  "downstream": [
+    "gregore"
+  ],
+  "peers": [
+    "kernl"
+  ],
+  "repo": null,
+  "local_url": null,
+  "vercel_url": null,
+  "tech_stack": [
+    "TypeScript"
+  ],
+  "language": "TypeScript",
+  "tagline": "Code quality and consistency analysis.",
+  "philosophy": [],
+  "notes": null,
+  "key_decisions": [],
+  "created_date": "2026-03-31",
+  "last_updated": "2026-03-31",
+  "author": "dk-001"
+}
